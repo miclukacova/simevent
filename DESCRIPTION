@@ -2,7 +2,7 @@ Package: simevent
 Title: Simulation and Analysis of Event History Data
 Version: 0.0.0.9000
 Authors@R: person("Michaela", "Lukacova", , "michaela.lukacova@sund.ku.dk", role = c("aut", "cre"))
-Description: Simulate event history data with treatment decisions, disease progression
+Description: Simulate event history data with treatment decisions and disease progression
              represented as counting process. 
 License: MIT + file LICENSE
 Encoding: UTF-8

@@ -1,0 +1,73 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# simevent
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of simevent is to provide functions for the generation and analysis of complex continuous time health care data. 
+
+## Installation
+
+You can install the development version of simevent from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("miclukacova/simevent")
+```
+
+## Example 1: simEventData
+
+The underlying function is called `simEventData`. One can specify various arguments
+
+```{r example}
+library(simevent)
+# Number of individuals
+N <- 100
+# Effect on event 0 
+beta0 <- c(0, 0, 0, 0)
+# Effect on event 1
+beta1 <- c(1, -1, 1, -1)
+# Effect on event 2 (A)
+beta2 <- c(0, -1, 0, 0.5)
+# Effect on event 3 (L)
+beta3 <- c(0, 0, 1, 0)
+beta <- cbind(beta0, beta1, beta2, beta3)
+```
+
+And then call the function
+
+```{r}
+data <- simEventData(N = N, beta = beta)
+```
+
+The simulated data looks like
+
+```{r}
+head(data)
+```
+
+One can visualize the data by
+
+```{r}
+plotEventData(data)
+```
+
+
+## Example 2: Survival Data
+
+## Example 3: Competing Risk Data
+
