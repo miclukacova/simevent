@@ -6,7 +6,7 @@
 \alias{simevent-package}
 \title{simevent: Simulation and Analysis of Event History Data}
 \description{
-Simulate event history data with treatment decisions, disease progression represented as counting process.
+Simulate event history data with treatment decisions and disease progression represented as counting process.
 }
 \seealso{
 Useful links:

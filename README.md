@@ -50,14 +50,14 @@ The simulated data looks like
 ``` r
 head(data)
 #> Key: <ID>
-#>       ID       Time Delta       L0     L    A0     A
-#>    <int>      <num> <num>    <num> <num> <int> <num>
-#> 1:     1 0.09302029     3 69.34624     0     1     0
-#> 2:     1 1.15310728     1 69.34624     1     1     0
-#> 3:     2 0.68901160     2 69.89826     0     0     0
-#> 4:     2 2.72769569     0 69.89826     0     0     1
-#> 5:     3 1.78458962     1 37.39783     0     1     0
-#> 6:     4 0.22118200     2 32.73879     0     0     0
+#>       ID      Time Delta       L0     L    A0     A
+#>    <int>     <num> <num>    <num> <num> <int> <num>
+#> 1:     1 1.0487683     3 69.90414     0     0     0
+#> 2:     1 1.0995389     1 69.90414     1     0     0
+#> 3:     2 0.3579570     3 61.37030     0     0     0
+#> 4:     2 1.1411689     1 61.37030     1     0     0
+#> 5:     3 0.5415522     1 62.38574     0     0     0
+#> 6:     4 1.1220836     0 32.82778     0     1     0
 ```
 
 One can visualize the data by
@@ -70,4 +70,24 @@ plotEventData(data)
 
 ## Example 2: Survival Data
 
+You can simulate data from a survival setting with the function
+`simSurvData`.
+
+``` r
+data <- simSurvData(100)
+plotEventData(data, title = "Survival Data")
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
 ## Example 3: Competing Risk Data
+
+You can simulate data from a competing risk setting with the function
+`simCRdata`.
+
+``` r
+data <- simCRdata(100)
+plotEventData(data, title = "Competing Risk Data")
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />

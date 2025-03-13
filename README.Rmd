@@ -69,5 +69,18 @@ plotEventData(data)
 
 ## Example 2: Survival Data
 
+You can simulate data from a survival setting with the function `simSurvData`. 
+
+```{r}
+data <- simSurvData(100)
+plotEventData(data, title = "Survival Data")
+```
+
 ## Example 3: Competing Risk Data
 
+You can simulate data from a competing risk setting with the function `simCRdata`. 
+
+```{r}
+data <- simCRdata(100)
+plotEventData(data, title = "Competing Risk Data")
+```
