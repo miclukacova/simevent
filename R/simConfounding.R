@@ -25,6 +25,7 @@
 #' @param beta_L_D The effect of covariate L = 1 on the probability of D = 1
 #' @param beta_A_D The effect of operation A = 1 on the probability of D = 1
 #' @param beta_L0_A The effect of operation L0 on the probability of A = 1
+#' @param beta_A_L The effect of operation A = 1 on the probability of L = 1
 #' @param cens Specifies whether you are at risk of being censored
 #' @param op Specifies whether you are at risk of being operated
 #'
@@ -35,7 +36,7 @@
 #' @examples
 #' simConfounding(10)
 #'
-simConfounding <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1,
+simConfounding <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1, beta_A_L = -0.5,
                               beta_L0_A = 1, eta = rep(0.1,4), nu = rep(1.1,4),
                               followup = Inf, cens = 1, op = 1){
 
@@ -64,13 +65,15 @@ simConfounding <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1,
 
   # A0 is 0
   beta[2,] <- 0
-  # The effect of L0 on the probability of L = 1 and A = 1
-  beta[1,c(3,4)] <- c(1, beta_L0_A)
-  # The effect of L=1 on the probability of A = 1
+  # The effect of L0 on the probability of A = 1 and L = 1
+  beta[1,c(3,4)] <- c(beta_L0_A, 1)
+  # The effect of L = 1 on the probability of A = 1
   beta[3,3] <- beta_L_A
+  # The effect of A = 1 on the probability of L = 1
+  beta[4,4] <- beta_A_L
   # The effect of A = 1 on the risk of Death
   beta[4,2] <- beta_A_D
-  # The effect of L0,L=1 on the risk of Death
+  # The effect of L0, L = 1 on the risk of Death
   beta[c(1,3),2] <- c(1, beta_L_D)
   # Censorering does not depend on anything
   beta[,1] <- 0
@@ -79,9 +82,6 @@ simConfounding <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1,
   beta[4,3] <- 0
   # L = 1 does not affect the intensity of L (the event occurs only once)
   beta[3,4] <- 0
-
-  # My assumption: A = 1 decreases the risk of L = 1
-  beta[4,4] <- -0.5
 
   data <- simEventData(N, beta = beta, eta = eta, nu = nu, max_cens = followup,
                          at_risk = at_risk)

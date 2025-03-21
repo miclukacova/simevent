@@ -9,6 +9,7 @@ simConfounding(
   beta_L_A = 1,
   beta_L_D = 1,
   beta_A_D = -1,
+  beta_A_L = -0.5,
   beta_L0_A = 1,
   eta = rep(0.1, 4),
   nu = rep(1.1, 4),
@@ -25,6 +26,8 @@ simConfounding(
 \item{beta_L_D}{The effect of covariate L = 1 on the probability of D = 1}
 
 \item{beta_A_D}{The effect of operation A = 1 on the probability of D = 1}
+
+\item{beta_A_L}{The effect of operation A = 1 on the probability of L = 1}
 
 \item{beta_L0_A}{The effect of operation L0 on the probability of A = 1}
 
