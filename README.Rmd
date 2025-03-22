@@ -73,7 +73,7 @@ plotEventData(data)
 
 ### Classical Estimation
 
-We simulate for $N = 10^4$ individuals
+We simulate for $N = 10^4$ individuals. Additional covariates
 
 ```{r}
 data <- simEventData(N = 10^4, beta = beta)
