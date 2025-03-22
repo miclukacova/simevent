@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of simevent is to provide functions for the generation and analysis of complex continuous time health care data. 
+The goal of `simevent` is to provide functions for the generation and analysis of complex continuous time health care data. 
 
 ## Installation
 
@@ -31,10 +31,15 @@ pak::pak("miclukacova/simevent")
 
 ## Example 1: simEventData
 
-The underlying function is called `simEventData`. One can specify various arguments, as for example the `N` and `beta` argument. The `N`argument lets the user specify number of individuals in the simulation. The `beta` argument lets the user specify the effects of processes and covariates on the intensities of the processes. 
+We load the package
+
+```{r library}
+library(simevent)
+```
+
+The underlying function is called `simEventData`. One can specify various arguments, as for example the `N` and `beta` argument. The `N`argument lets the user specify number of individuals in the simulation. The `beta` argument lets the user specify the effects of processes and covariates on the intensities of the processes. We define the various arguments 
 
 ```{r example}
-library(simevent)
 # Number of individuals
 N <- 100
 # Effect on event 0 
@@ -66,6 +71,45 @@ One can visualize the data by
 plotEventData(data)
 ```
 
+### Classical Estimation
+
+We simulate for $N = 10^4$ individuals
+
+```{r}
+data <- simEventData(N = 10^4, beta = beta)
+```
+
+In order to fit a Cox proportional hazards model with the `survival` package, the data needs to be transformed into the so called \textit{tstart} \textit{tstop} format, this can be done by the function `IntFormatData.``` Furthermore two at risk indicators need to be created, one that indicates when the individual is at risk for event $A$ and one that indicates that the individual is at risk for event $L$. 
+
+```{r}
+data_int <- IntFormatData(data)
+data_int[, at_risk_2 := as.numeric(A == 0)]
+data_int[, at_risk_3 := as.numeric(L == 0)]
+```
+
+Data in the \textit{tstart tstop} format looks like
+
+```{r}
+head(data_int)
+```
+
+Cox proportional hazards models for the death process and operation process can be fitted by the following code
+
+```{r}
+library(survival)
+# Death process
+survfit_death <- coxph(Surv(tstart, tstop, Delta == 1) ~ I(L0/50) + A0 + L + A, 
+                       data = data_int)
+# Operation process
+survfit_oper <- coxph(Surv(tstart, tstop, Delta == 2) ~ I(L0/50) + A0 + L, 
+                      data = data_int[at_risk_2 == 1])
+```
+
+The regression results can be seen by the summary call
+
+```{r}
+survfit_death |> summary()
+```
 
 ## Example 2: Survival Data
 

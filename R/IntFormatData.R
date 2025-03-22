@@ -10,9 +10,9 @@
 #'
 #' @examples
 #' data <- simEventData(10)
-#' IntFormatData(data)
+#' intFormatData(data)
 
-IntFormatData <- function(data) {
+intFormatData <- function(data) {
 
   k <- ID <- tstart <- tstop <- Time <- NULL
 
