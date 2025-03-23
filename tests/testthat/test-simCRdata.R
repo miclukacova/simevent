@@ -2,7 +2,7 @@ library(survival)
 library(testthat)
 
 test_that("simCRdata simulates data in the right way",{
-  set.seed(856)
+  set.seed(857)
   beta <- matrix(rnorm(6,0,3), ncol = 3, nrow = 2)
   data <- simCRdata(N = 5000, beta = beta)
 

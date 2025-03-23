@@ -21,9 +21,6 @@
 #' @param beta_A0_L Specifies how baseline treatment affects risk of T2D. Is by default set to 0.
 #' @param beta_L0_D Specifies how baseline covariate affects risk of Death. Is by default set to 1.
 #' @param cens Specifies whether you are at risk of being censored
-#' @param sex A TRUE/FALSE indicating whether there should be an additional binary covariate L1, representing e.g. sex.
-#' If this the case, sex = TRUE, an additional row in the beta matrix specifies what effect the covariate has on the
-#' intensities of the varies events. If this row is not specified the deafualt effect is 0.
 #'
 #' @return  Data frame containing the simulated data. There is a column for ID, time of event (Time),
 #' event type (Delta), baseline covariate (L0) and additional covariate (L).
@@ -31,10 +28,9 @@
 #'
 #' @examples
 #' simT2D(10)
-simT2D <- function(N, eta = rep(0.1,4), nu = rep(1.1,4), sex = TRUE,
+simT2D <- function(N, eta = rep(0.1,4), nu = rep(1.1,4),  cens = 1,
                               beta_L0_D = 1,beta_L0_L = 1, beta_L_D = 1,
-                              beta_A0_D = 0,beta_A0_L = 0, cens = 1,
-                              followup = Inf){
+                              beta_A0_D = 0,beta_A0_L = 0, followup = Inf){
 
   at_risk <- function(i, L, A) {
     return(c(
@@ -66,11 +62,9 @@ simT2D <- function(N, eta = rep(0.1,4), nu = rep(1.1,4), sex = TRUE,
   beta[,1] <- 0
   # Effect of L = 1 on risk of death
   beta[3,2] <- beta_L_D
-  # Sex has no effect
-  beta[5,] <- 0
 
   data <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
-                         max_cens = followup, sex = TRUE)
+                         max_cens = followup)
   data[, A := NULL]
 
   return(data)

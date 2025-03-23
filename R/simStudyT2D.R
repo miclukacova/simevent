@@ -42,7 +42,7 @@ simStudyT2D <- function(N, B, beta_L0_D, beta_L0_L, beta_A0_L, beta_L_D, beta_A0
 
   for(b in 1:B){
     # Generate data
-    data_boot <- simT2D(N = N, eta = eta, nu = nu, sex = FALSE, beta_L0_D = beta_L0_D, beta_L0_L = beta_L0_L,
+    data_boot <- simT2D(N = N, eta = eta, nu = nu, beta_L0_D = beta_L0_D, beta_L0_L = beta_L0_L,
                         beta_A0_L = beta_A0_L, beta_L_D = beta_L_D, beta_A0_D = beta_A0_D, cens = 1)
 
     # T2D events

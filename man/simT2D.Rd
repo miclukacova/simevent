@@ -8,13 +8,12 @@ simT2D(
   N,
   eta = rep(0.1, 4),
   nu = rep(1.1, 4),
-  sex = TRUE,
+  cens = 1,
   beta_L0_D = 1,
   beta_L0_L = 1,
   beta_L_D = 1,
   beta_A0_D = 0,
   beta_A0_L = 0,
-  cens = 1,
   followup = Inf
 )
 }
@@ -26,9 +25,7 @@ simT2D(
 
 \item{nu}{Vector of scale parameters for the Weibull hazard. Default is set to 1.1 for all events.}
 
-\item{sex}{A TRUE/FALSE indicating whether there should be an additional binary covariate L1, representing e.g. sex.
-If this the case, sex = TRUE, an additional row in the beta matrix specifies what effect the covariate has on the
-intensities of the varies events. If this row is not specified the deafualt effect is 0.}
+\item{cens}{Specifies whether you are at risk of being censored}
 
 \item{beta_L0_D}{Specifies how baseline covariate affects risk of Death. Is by default set to 1.}
 
@@ -39,8 +36,6 @@ intensities of the varies events. If this row is not specified the deafualt effe
 \item{beta_A0_D}{Specifies how baseline treatment affects risk of death. Is by default set to 0.}
 
 \item{beta_A0_L}{Specifies how baseline treatment affects risk of T2D. Is by default set to 0.}
-
-\item{cens}{Specifies whether you are at risk of being censored}
 
 \item{followup}{A maximal censoring time. By default set to infinity.}
 }

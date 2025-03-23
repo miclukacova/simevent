@@ -12,49 +12,59 @@ simEventData(
   at_risk = NULL,
   term_deltas = c(0, 1),
   max_cens = Inf,
-  sex = FALSE
+  add_cov = NULL
 )
 }
 \arguments{
 \item{N}{A double for the number of simulated individuals}
 
-\item{beta}{A matrix of doubles for the effects on the intensities. The columns represent the events. In the
-default case Censoring, Death, Operation, and Covariate Change. The rows represent the baseline covariate \eqn{L0}
-(which can be interpreted as age of participant), baseline treatment \eqn{A0}, the indicator for change
-in the covariate process  \eqn{L}, and the indicator for operation \eqn{A}.The \eqn{\beta} matrix is by default set to 0.
-If sex = TRUE, the specified matrix can be of size 5 by 4, with the effects of the additional covariate L1 on the various
-events in the 5th row.}
+\item{beta}{A matrix of doubles for the effects on the intensities. The columns
+represent the events. In the default case Censoring, Death, Operation, and Covariate Change.
+The rows represent covariates and processes. By default the rows represent: the baseline covariate
+\eqn{L0} (which can be interpreted as age of participant), baseline treatment \eqn{A0},
+the indicator for change in the covariate process  \eqn{L}, and the indicator
+for operation \eqn{A}. If additional covariates are specified, each of these
+corresponds to an additional row in the beta matrix. The \eqn{\beta} matrix is
+by default set to 0.}
 
 \item{eta}{Vector of shape parameters for the Weibull intensity with parameterization
 \deqn{\eta \nu t^{\nu - 1}} Default is set to 0.1 for all events.}
 
-\item{nu}{Vector of scale parameters for the Weibull intensity. Default is set to 1.1 for all events.}
+\item{nu}{Vector of scale parameters for the Weibull intensity. Default is set
+to 1.1 for all events.}
 
-\item{at_risk}{At risk function. Default is set to the operation setting. A survival or competing risk
-setting can be specified as well. The \code{at_risk} function is an indicator of whether an individual is at risk
-for a specific event. The function takes as input i (the index belonging to a particular individual) L (indicator
-for a change in covariate) and A (indicator for change in treatment process).The function returns a vector of 0's
-and 1's corresponding to whether individual i is at risk for a particular event.}
+\item{at_risk}{At risk function. Default is set to the operation setting. That is
+a setting where operation and covariate change can occur once, and censoring and
+death are terminal events that the individual is always at risk for. The \code{at_risk}
+function is an indicator of whether an individual is at risk for a specific event.
+The function takes as input i (the index belonging to a particular individual),
+L (indicator for a change in covariate) and A (indicator for change in treatment process).
+The function returns a vector of 0's  and 1's corresponding to whether individual
+i is at risk for a particular event.}
 
 \item{term_deltas}{Terminal events. Default is set so that event 1 and 2 are terminal events.}
 
 \item{max_cens}{A maximum censoring time. By default set to infinity.}
 
-\item{sex}{A TRUE/FALSE indicating whether there should be an additional binary covariate L1, representing e.g. sex.
-If this the case, sex = TRUE, an additional row in the beta matrix specifies what effect the covariate has on the
-intensities of the varies events. If this row is not specified the deafualt effect is 0.}
+\item{add_cov}{List of random generator functions for the distributions of
+additional baseline covariates. The functions should take the number of observations
+as input. By default set to NULL.}
 }
 \value{
-data.table containing the simulated data. There is a column for ID, time of event (Time),
-event type (Delta), baseline covariate (L0), indicator for change in covariate process (L), Baseline Treatment (A0),
-indicator for Operation (A), and potentially an additional baseline covariate (L1) representing sex.
+data.table containing the simulated data. There is a column for ID, time
+of event (Time), event type (Delta), baseline covariate (L0), indicator for change
+in covariate process (L), Baseline Treatment (A0), indicator for Operation (A).
+In case of additional covariates these are included in the data as well,
+named L1, L2, ....
 }
 \description{
-\code{simEventData} is a function to simulate event data, e.g. observational healthcare data. The number of events
-simulated corresponds to the length of the \eqn{\eta} and \eqn{\nu} vector, and the number of columns in the
-\eqn{\beta} matrix. By default 4 different types of events are simulated, which can be chosen to represent Censoring (0),
-Death (1), Operation(2) and Change in Covariate Process(3). Death and Censoring are terminal events and Operation
-and Change in Covariate Process can occur once. The intensities of the various events depend upon previous events,
+\code{simEventData} is a function to simulate event data, e.g. observational healthcare
+data. The number of events simulated corresponds to the length of the \eqn{\eta}
+and \eqn{\nu} vector, and the number of columns in the \eqn{\beta} matrix. By
+default 4 different types of events are simulated, which can be chosen to represent
+Censoring (0), Death (1), Operation(2) and Change in Covariate Process(3).
+Death and Censoring are terminal events and Operation and Change in Covariate
+Process can occur once. The intensities of the various events depend upon previous events,
 baseline covariates and the pre specified \eqn{\beta}, \eqn{\nu} and \eqn{\eta} parameters.
 }
 \details{
