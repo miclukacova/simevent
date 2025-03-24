@@ -1,4 +1,4 @@
-#' `simEventData` is a function to simulate event data, e.g. observational healthcare
+#' `simEventData2` is a function to simulate event data, e.g. observational healthcare
 #' data. The number of events simulated corresponds to the length of the \eqn{\eta}
 #' and \eqn{\nu} vector, and the number of columns in the \eqn{\beta} matrix. By
 #' default 4 different types of events are simulated, which can be chosen to represent
@@ -47,16 +47,16 @@
 #' @export
 #'
 #' @examples
-#' simEventData(N = 10)
+#' simEventData2(N = 10)
 
-simEventData <- function(N,                       # Number of individuals
-                          beta = NULL,            # Effects
-                          eta = rep(0.1,4),       # Shape parameters
-                          nu = rep(1.1,4),        # Scale parameters
-                          at_risk = NULL,         # Function defining the setting
-                          term_deltas = c(0,1),   # Terminal events
-                          max_cens = Inf,         # Followup time
-                          add_cov = NULL          # Additional baseline covariates
+simEventData <- function(N,                      # Number of individuals
+                         beta = NULL,            # Effects
+                         eta = rep(0.1,4),       # Shape parameters
+                         nu = rep(1.1,4),        # Scale parameters
+                         at_risk = NULL,         # Function defining the setting
+                         term_deltas = c(0,1),   # Terminal events
+                         max_cens = Inf,         # Followup time
+                         add_cov = NULL          # Additional baseline covariates
 ){
   ID <- NULL
   # Number of additional baseline covariates
@@ -70,47 +70,48 @@ simEventData <- function(N,                       # Number of individuals
   }
 
   if(is.null(beta)){
-    beta <- matrix(0, nrow = 4 + num_add_cov, ncol = length(eta))
+    beta <- matrix(0, nrow = num_events + num_add_cov, ncol = num_events)
   }
 
-
   if(is.null(at_risk)){
-    at_risk <- function(i, L, A) {
+    at_risk <- function(i, event_counts) {
       return(c(
         1,1, # If you have not died or been censored yet, you are at risk for dying or being censored
-        as.numeric(A[i] == 0), # You are only at risk for an operation if you have not had an operation yet
-        as.numeric(L[i] == 0))) # You are only at risk for a change in the covariate process if you have not had a change yet
+        as.numeric(event_counts[i, 3] == 0), # You are only at risk for an operation if you have not had an operation yet
+        as.numeric(event_counts[i, 4] == 0))) # You are only at risk for a change in the covariate process if you have not had a change yet
     }}
 
   # Intensities
   phi <- function(i) {
-    exp(L0[i] / 50 * beta[1,] +
-          A0[i] * beta[2,] +
-          L[i] * beta[3,] +
-          A[i] * beta[4,] +
-          if(num_add_cov > 0) L1[i,] %*% beta[5:(4 + num_add_cov),] else 0)
+    exp(
+        L0[i] / 50 * beta[1,] +
+        A0[i] * beta[2,] +
+        event_counts[i,] * beta[2 : (1 + num_events),] +
+        if(num_add_cov > 0) L1[i,] %*% beta[(2 + num_events):(1 + num_events + num_add_cov),] else 0)
   }
 
   lambda <- function(t, i) {
-    at_risk(i, L, A) * eta * nu * t ^ (nu - 1) * phi(i)
+    at_risk(i, event_counts) * eta * nu * t ^ (nu - 1) * phi(i)
   }
 
   # If all events have same parameter, the inverse simplifies
   if(all(nu[1] == nu)){
     inverse_sc_haz <- function(p, t, i) {
-      denom <- sum(at_risk(i, L, A) * eta * phi(i))
+      denom <- sum(at_risk(i, event_counts) * eta * phi(i))
       (p / denom + t^nu[1])^(1 / nu[1]) - t
-      }}
-  else{
+    }
+  } else{
     # Summed cumulative hazard
     sum_cum_haz <- function(u, t, i) {
-      sum(at_risk(i, L, A) * eta * phi(i) * ((t + u) ^ nu - t ^ nu))
-      }
+      sum(at_risk(i, event_counts) * eta * phi(i) * ((t + u) ^ nu - t ^ nu))
+    }
+
     # Inverse summed cumulative hazard function
     inverse_sc_haz <- function(p, t, i) {
       root_function <- function(u) sum_cum_haz(u, t, i) - p
       stats::uniroot(root_function, lower = 10^-15, upper = 200)$root
-    }}
+    }
+  }
 
   # Event probabilities
   probs <- function(t, i){
@@ -121,7 +122,8 @@ simEventData <- function(N,                       # Number of individuals
       probs <- lambda(t, i)
       summ <- sum(probs)
       probs / summ
-    }}
+    }
+  }
 
   # Draw baseline covariates
   L0 <- stats::runif(N, 30, 70)
@@ -130,16 +132,15 @@ simEventData <- function(N,                       # Number of individuals
   # Generate additional covariates if distributions are specified
   if (num_add_cov != 0) {
     L1 <- sapply(add_cov, function(f) f(N))
-    colnames(L1) <- paste0("L", seq_len(num_add_cov))
-  }
-  else{
+    colnames(L1) <- paste0("L", seq_len(ncol(L1)))
+  } else {
     L1 <- NULL
   }
 
   # Initialize
   T_k <- rep(0,N)
-  L <- rep(0, N)
-  A <- rep(0, N)
+  event_counts <- matrix(0, nrow = N, ncol = num_events)
+  colnames(L1) <- paste0("O", seq_len(num_events))
   alive <- 1:N
 
   res <- data.table()
@@ -151,7 +152,7 @@ simEventData <- function(N,                       # Number of individuals
     T_k[alive] <- T_k[alive] + W
 
     # Simulate event
-    Deltas <- sapply(alive, function(i) sample(seq_len(num_events), size = 1, prob = probs(T_k[i], i)) - 1)
+    Deltas <- sapply(alive, function(i) sample(x, size = 1, prob = probs(T_k[i], i)) - 1)
 
     kth_event <- data.table(ID = alive,
                             Time = T_k[alive],
@@ -159,15 +160,14 @@ simEventData <- function(N,                       # Number of individuals
                             L0 = L0[alive],
                             L = L[alive],
                             A0 = A0[alive],
-                            A = A[alive]
-                            )
-    kth_event <- cbind(kth_event, L1[alive,])
-
+                            A = A[alive])
+    kth_event <- cbind(kth_event, L1[alive,], event_counts[alive,])
     res <- rbind(res, kth_event)
 
-    # Update treatment process and covariate change indicators
-    A[alive][Deltas == 2] <- A[alive][Deltas == 2] + 1
-    L[alive][Deltas == 3] <- L[alive][Deltas == 3] + 1
+    # Update event counts
+    for (j in seq_len(num_events)) {
+      event_counts[alive, j] <- event_counts[alive, j] + (Deltas == (j - 1))
+    }
 
     # Who is still alive and uncensored?
     alive <- alive[! Deltas %in% term_deltas]

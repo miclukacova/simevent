@@ -27,31 +27,14 @@ We load the package
 library(simevent)
 ```
 
-The underlying function is called `simEventData`. One can specify
-various arguments, as for example the `N` and `beta` argument. The
-`N`argument lets the user specify number of individuals in the
-simulation. The `beta` argument lets the user specify the effects of
-processes and covariates on the intensities of the processes. We define
-the various arguments
+The underlying function is called `simEventData`. The `N` argument lets
+the user specify number of individuals in the simulation. We can
+simulate observational health care data for 100 individuals with the
+function call
 
 ``` r
-# Number of individuals
-N <- 100
-# Effect on event 0 
-beta0 <- c(0, 0, 0, 0)
-# Effect on event 1
-beta1 <- c(1, -1, 1, -1)
-# Effect on event 2 (A)
-beta2 <- c(0, -1, 0, 0.5)
-# Effect on event 3 (L)
-beta3 <- c(0, 0, 1, 0)
-beta <- cbind(beta0, beta1, beta2, beta3)
-```
-
-And then call the function
-
-``` r
-data <- simEventData(N = N, beta = beta)
+set.seed(2112)
+data <- simEventData(N = 100)
 ```
 
 The simulated data looks like
@@ -61,15 +44,18 @@ head(data)
 #> Key: <ID>
 #>       ID      Time Delta       L0     L    A0     A
 #>    <int>     <num> <num>    <num> <num> <int> <num>
-#> 1:     1 1.6487768     2 63.22484     0     1     0
-#> 2:     1 9.2003661     1 63.22484     0     1     1
-#> 3:     2 6.8472139     1 37.46308     0     1     0
-#> 4:     3 0.3997357     1 62.58468     0     0     0
-#> 5:     4 1.1660279     2 47.87919     0     1     0
-#> 6:     4 2.5904808     1 47.87919     0     1     1
+#> 1:     1 2.9037787     1 62.89378     0     0     0
+#> 2:     2 0.7063947     0 49.09138     0     1     0
+#> 3:     3 7.6447085     0 45.16921     0     1     0
+#> 4:     4 2.6600085     1 40.66332     0     1     0
+#> 5:     5 0.9501756     2 40.62088     0     0     0
+#> 6:     5 1.4929627     0 40.62088     0     0     1
 ```
 
-One can visualize the data by
+From data we can for example see that Individual $1$ has a baseline
+covariate $L_0$ of $62.89$, does not get treatment ($A_0 = 0$) and
+experienced the terminal event $1$ at Time $2.9$. One can visualize the
+data with use of the function `plotEventData`
 
 ``` r
 plotEventData(data)
@@ -77,9 +63,91 @@ plotEventData(data)
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
-### Classical Estimation
+The plot shows the event history of the $N = 100$ individuals, the
+different colors of the dots illustrate the different events. The
+$x$-axis is the timeline.
 
-We simulate for $N = 10^4$ individuals. Additional covariates
+### Arguments of simEventData
+
+`simEventData` is quite flexible, and does therefore take many
+arguments. You can read about the different arguments on the help page
+
+``` r
+?simEventData
+```
+
+To include additional baseline covariates, the user can specify random
+generator functions to generate the covariates. We will in the following
+include to additional baseline covariates, one with a bernoulli
+distribution with succes parameter 0.2, and one with a normal
+distribution. The functions should take as input the number of draws to
+make.
+
+``` r
+func1 <- function(N) rbinom(N, 1, 0.2)
+func2 <- function(N) rnorm(N)
+add_cov <- list(func1, func2)
+```
+
+The `beta` argument lets the user specify the effects of processes and
+covariates on the intensities of the processes. We define a new beta
+matrix, it should have dimensions 6x4 since we have two additional
+baseline covariates.
+
+``` r
+# Effect on event 0 
+beta0 <- c(0, 0, 0, 0, 0, 0)
+# Effect on event 1
+beta1 <- c(1, -1, 1, -1, -1, -1)
+# Effect on event 2 (A)
+beta2 <- c(0, -1, 0, 0.5, 0.5, 0)
+# Effect on event 3 (L)
+beta3 <- c(0, 0, 1, 0, 0, 0)
+beta <- cbind(beta0, beta1, beta2, beta3)
+```
+
+We can specify a user defined `at_risk` function by
+
+``` r
+at_risk <- function(i, L, A) {
+  return(c(
+    1,1,                      # You are always at risk for death and censoring
+    as.numeric(A[i] == 0),    # You can experience A once
+    as.numeric(L[i] < 2)))    # You can experience L twice
+  }
+```
+
+This `at_risk` function for example, allows for recurrent events,
+letting the individual experience the $L$ event twice. We simulate data
+from this setting, and use the default values of $\eta$, $\nu$ and have
+no maximal censoring time.
+
+``` r
+data <- simEventData(N = 100, add_cov = add_cov, beta = beta, at_risk = at_risk)
+```
+
+The additional covariates are called $L_1$ and $L_2$, and data now looks
+like
+
+``` r
+head(data)
+#> Key: <ID>
+#>       ID      Time Delta       L0     L    A0     A    L1         L2
+#>    <int>     <num> <num>    <num> <num> <int> <num> <num>      <num>
+#> 1:     1 1.5590413     1 49.79150     0     1     0     0 -0.1052511
+#> 2:     2 3.5675446     1 35.22123     0     1     0     0 -1.2947378
+#> 3:     3 2.0755969     0 61.12498     0     1     0     0  1.3408939
+#> 4:     4 0.4407033     1 54.78982     0     0     0     0 -1.3608400
+#> 5:     5 0.8704168     0 46.70442     0     1     0     1  0.2032149
+#> 6:     6 0.0871322     0 59.68767     0     1     0     1  0.1238069
+```
+
+### Cox Regression
+
+It could be of interest to estimate the effects of covariates on the
+intensities of the different counting processes. A tool for this is the
+Cox proportional hazards model. We start by simulating data for
+$N = 10^4$ individuals.
 
 ``` r
 data <- simEventData(N = 10^4, beta = beta)
@@ -87,15 +155,10 @@ data <- simEventData(N = 10^4, beta = beta)
 
 In order to fit a Cox proportional hazards model with the `survival`
 package, the data needs to be transformed into the so called format,
-this can be done by the function \`IntFormatData.\`\`\` Furthermore two
-at risk indicators need to be created, one that indicates when the
-individual is at risk for event $A$ and one that indicates that the
-individual is at risk for event $L$.
+this can be done by the function `IntFormatData`.
 
 ``` r
 data_int <- IntFormatData(data)
-data_int[, at_risk_2 := as.numeric(A == 0)]
-data_int[, at_risk_3 := as.numeric(L == 0)]
 ```
 
 Data in the format looks like
@@ -105,24 +168,22 @@ head(data_int)
 #> Key: <ID>
 #>       ID      Time Delta       L0     L    A0     A     k   tstart     tstop
 #>    <int>     <num> <num>    <num> <num> <int> <num> <int>    <num>     <num>
-#> 1:     1 2.0373085     3 50.92628     0     0     0     1 0.000000 2.0373085
-#> 2:     1 3.6342119     1 50.92628     1     0     0     2 2.037309 3.6342119
-#> 3:     2 1.6753524     0 42.96036     0     1     0     1 0.000000 1.6753524
-#> 4:     3 1.1853940     1 30.72762     0     1     0     1 0.000000 1.1853940
-#> 5:     4 3.1342088     0 57.44008     0     1     0     1 0.000000 3.1342088
-#> 6:     5 0.7731562     1 46.84456     0     1     0     1 0.000000 0.7731562
-#>    at_risk_2 at_risk_3
-#>        <num>     <num>
-#> 1:         1         1
-#> 2:         1         0
-#> 3:         1         1
-#> 4:         1         1
-#> 5:         1         1
-#> 6:         1         1
+#> 1:     1 0.2803617     1 56.28101     0     0     0     1 0.000000 0.2803617
+#> 2:     2 2.1744307     0 42.91979     0     1     0     1 0.000000 2.1744307
+#> 3:     3 1.5787315     3 65.45872     0     0     0     1 0.000000 1.5787315
+#> 4:     3 1.8758636     1 65.45872     1     0     0     2 1.578732 1.8758636
+#> 5:     4 1.0141196     1 32.28017     0     1     0     1 0.000000 1.0141196
+#> 6:     5 2.5035652     1 54.97065     0     1     0     1 0.000000 2.5035652
 ```
 
-Cox proportional hazards models for the death process and operation
-process can be fitted by the following code
+The data contains the same information as the original data, only now
+three additional columns have been added. The column *k*, indicates the
+number of the event, the column *tstart* indicates the start of a time
+interval, and the column *tstop* indicates the end of a time interval.
+In each time interval the covariates (and processes) influencing the
+intensities of the processes remain constant. Cox proportional hazards
+models for the death process and operation process can be fitted by the
+following code
 
 ``` r
 library(survival)
@@ -131,10 +192,12 @@ survfit_death <- coxph(Surv(tstart, tstop, Delta == 1) ~ I(L0/50) + A0 + L + A,
                        data = data_int)
 # Operation process
 survfit_oper <- coxph(Surv(tstart, tstop, Delta == 2) ~ I(L0/50) + A0 + L, 
-                      data = data_int[at_risk_2 == 1])
+                      data = data_int[A == 0])
 ```
 
-The regression results can be seen by the summary call
+In order to conduct correct inference, only data where the individual is
+at risk for the event in question is included in the regression. The
+regression results can be seen by the summary call
 
 ``` r
 survfit_death |> summary()
@@ -142,39 +205,39 @@ survfit_death |> summary()
 #> coxph(formula = Surv(tstart, tstop, Delta == 1) ~ I(L0/50) + 
 #>     A0 + L + A, data = data_int)
 #> 
-#>   n= 14461, number of events= 6352 
+#>   n= 14481, number of events= 6367 
 #> 
 #>              coef exp(coef) se(coef)      z Pr(>|z|)    
-#> I(L0/50)  0.98586   2.68011  0.05546  17.78   <2e-16 ***
-#> A0       -1.00430   0.36630  0.02715 -36.99   <2e-16 ***
-#> L         0.97273   2.64517  0.02946  33.02   <2e-16 ***
-#> A        -1.02780   0.35779  0.04316 -23.81   <2e-16 ***
+#> I(L0/50)  0.90118   2.46250  0.05499  16.39   <2e-16 ***
+#> A0       -0.97200   0.37832  0.02708 -35.89   <2e-16 ***
+#> L         0.96847   2.63392  0.02921  33.16   <2e-16 ***
+#> A        -0.96298   0.38175  0.04133 -23.30   <2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #>          exp(coef) exp(-coef) lower .95 upper .95
-#> I(L0/50)    2.6801     0.3731    2.4041    2.9878
-#> A0          0.3663     2.7300    0.3473    0.3863
-#> L           2.6452     0.3780    2.4968    2.8024
-#> A           0.3578     2.7949    0.3288    0.3894
+#> I(L0/50)    2.4625     0.4061    2.2109    2.7428
+#> A0          0.3783     2.6432    0.3588    0.3989
+#> L           2.6339     0.3797    2.4874    2.7891
+#> A           0.3818     2.6195    0.3521    0.4140
 #> 
-#> Concordance= 0.676  (se = 0.004 )
-#> Likelihood ratio test= 2719  on 4 df,   p=<2e-16
-#> Wald test            = 2698  on 4 df,   p=<2e-16
-#> Score (logrank) test = 2799  on 4 df,   p=<2e-16
+#> Concordance= 0.669  (se = 0.004 )
+#> Likelihood ratio test= 2593  on 4 df,   p=<2e-16
+#> Wald test            = 2589  on 4 df,   p=<2e-16
+#> Score (logrank) test = 2680  on 4 df,   p=<2e-16
 ```
 
 ## Example 2: Survival Data
 
-You can simulate data from a survival setting with the function
-`simSurvData`.
+A special case of the general setting is the survival setting, one can
+simulate data from a survival setting with the function `simSurvData`.
 
 ``` r
 data <- simSurvData(100)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
 
 One can again specify the effects of $A_0$ and $L_0$ on the risk of
 death and censoring by the `beta` argument.
@@ -203,7 +266,7 @@ data <- simSurvData(100, beta = beta, eta = eta, nu = nu)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
 ## Example 3: Competing Risk Data
 
@@ -216,7 +279,7 @@ data <- simCRdata(100)
 plotEventData(data, title = "Competing Risk Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
 
 ## Example 4: Type 2 Diabetes
 
@@ -233,7 +296,6 @@ Below is a function call to `simT2D`
 
 ``` r
 data <- simT2D(N = 100,
-               sex = FALSE, 
                cens = 1,
                eta = c(0.1,0.3,0.1,0.1), 
                nu = c(1.1,1.3,1.1,1.1),
@@ -245,7 +307,7 @@ data <- simT2D(N = 100,
 plotEventData(data, title = "T2D data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
 ## Example 5: Unobserved Covariate Setting
 
@@ -289,4 +351,4 @@ operation/treatment event (op = 1), where there is a censoring process
 plotEventData(data, title = "Confounding setting")
 ```
 
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />

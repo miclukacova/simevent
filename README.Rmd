@@ -37,26 +37,11 @@ We load the package
 library(simevent)
 ```
 
-The underlying function is called `simEventData`. One can specify various arguments, as for example the `N` and `beta` argument. The `N`argument lets the user specify number of individuals in the simulation. The `beta` argument lets the user specify the effects of processes and covariates on the intensities of the processes. We define the various arguments 
-
-```{r example}
-# Number of individuals
-N <- 100
-# Effect on event 0 
-beta0 <- c(0, 0, 0, 0)
-# Effect on event 1
-beta1 <- c(1, -1, 1, -1)
-# Effect on event 2 (A)
-beta2 <- c(0, -1, 0, 0.5)
-# Effect on event 3 (L)
-beta3 <- c(0, 0, 1, 0)
-beta <- cbind(beta0, beta1, beta2, beta3)
-```
-
-And then call the function
+The underlying function is called `simEventData`. The `N` argument lets the user specify number of individuals in the simulation. We can simulate observational health care data for 100 individuals with the function call
 
 ```{r}
-data <- simEventData(N = N, beta = beta)
+set.seed(2112)
+data <- simEventData(N = 100)
 ```
 
 The simulated data looks like
@@ -65,26 +50,80 @@ The simulated data looks like
 head(data)
 ```
 
-One can visualize the data by
+From data we can for example see that Individual $1$ has a baseline covariate $L_0$ of $62.89$, does not get treatment ($A_0 = 0$) and experienced the terminal event $1$ at Time $2.9$. One can visualize the data with use of the function `plotEventData`
 
 ```{r}
 plotEventData(data)
 ```
 
-### Classical Estimation
+The plot shows the event history of the $N = 100$ individuals, the different colors of the dots illustrate the different events. The $x$-axis is the timeline. 
 
-We simulate for $N = 10^4$ individuals. Additional covariates
+### Arguments of simEventData
+
+`simEventData` is quite flexible, and does therefore take many arguments. You can read about the different arguments on the help page
+
+```{r}
+?simEventData
+```
+
+To include additional baseline covariates, the user can specify random generator functions to generate the covariates. We will in the following include to additional baseline covariates, one with a bernoulli distribution with succes parameter 0.2, and one with a normal distribution. The functions should take as input the number of draws to make. 
+
+```{r}
+func1 <- function(N) rbinom(N, 1, 0.2)
+func2 <- function(N) rnorm(N)
+add_cov <- list(func1, func2)
+```
+
+The `beta` argument lets the user specify the effects of processes and covariates on the intensities of the processes. We define a new beta matrix, it should have dimensions 6x4 since we have two additional baseline covariates. 
+
+```{r example}
+# Effect on event 0 
+beta0 <- c(0, 0, 0, 0, 0, 0)
+# Effect on event 1
+beta1 <- c(1, -1, 1, -1, -1, -1)
+# Effect on event 2 (A)
+beta2 <- c(0, -1, 0, 0.5, 0.5, 0)
+# Effect on event 3 (L)
+beta3 <- c(0, 0, 1, 0, 0, 0)
+beta <- cbind(beta0, beta1, beta2, beta3)
+```
+
+We can specify a user defined `at_risk` function by
+
+```{r}
+at_risk <- function(i, L, A) {
+  return(c(
+    1,1,                      # You are always at risk for death and censoring
+    as.numeric(A[i] == 0),    # You can experience A once
+    as.numeric(L[i] < 2)))    # You can experience L twice
+  }
+```
+
+This `at_risk` function for example, allows for recurrent events, letting the individual experience the $L$ event twice. We simulate data from this setting, and use the default values of $\eta$, $\nu$ and have no maximal censoring time.  
+
+```{r}
+data <- simEventData(N = 100, add_cov = add_cov, beta = beta, at_risk = at_risk)
+```
+
+The additional covariates are called $L_1$ and $L_2$, and data now looks like
+
+```{r}
+head(data)
+```
+
+
+### Cox Regression
+
+It could be of interest to estimate the effects of covariates on the intensities of the different counting processes. A tool for this is the Cox proportional hazards model. We start by simulating data for $N = 10^4$ individuals.
 
 ```{r}
 data <- simEventData(N = 10^4, beta = beta)
 ```
 
-In order to fit a Cox proportional hazards model with the `survival` package, the data needs to be transformed into the so called \textit{tstart} \textit{tstop} format, this can be done by the function `IntFormatData.``` Furthermore two at risk indicators need to be created, one that indicates when the individual is at risk for event $A$ and one that indicates that the individual is at risk for event $L$. 
+In order to fit a Cox proportional hazards model with the `survival` package, the data needs to be transformed into the so called \textit{tstart} \textit{tstop} format, this can be done by the function `IntFormatData`. 
 
 ```{r}
 data_int <- IntFormatData(data)
-data_int[, at_risk_2 := as.numeric(A == 0)]
-data_int[, at_risk_3 := as.numeric(L == 0)]
 ```
 
 Data in the \textit{tstart tstop} format looks like
@@ -93,7 +132,7 @@ Data in the \textit{tstart tstop} format looks like
 head(data_int)
 ```
 
-Cox proportional hazards models for the death process and operation process can be fitted by the following code
+The data contains the same information as the original data, only now three additional columns have been added. The column *k*, indicates the number of the event, the column *tstart* indicates the start of a time interval, and the column *tstop* indicates the end of a time interval. In each time interval the covariates (and processes) influencing the intensities of the processes remain constant. Cox proportional hazards models for the death process and operation process can be fitted by the following code
 
 ```{r}
 library(survival)
@@ -102,10 +141,10 @@ survfit_death <- coxph(Surv(tstart, tstop, Delta == 1) ~ I(L0/50) + A0 + L + A,
                        data = data_int)
 # Operation process
 survfit_oper <- coxph(Surv(tstart, tstop, Delta == 2) ~ I(L0/50) + A0 + L, 
-                      data = data_int[at_risk_2 == 1])
+                      data = data_int[A == 0])
 ```
 
-The regression results can be seen by the summary call
+In order to conduct correct inference, only data where the individual is at risk for the event in question is included in the regression. The regression results can be seen by the summary call
 
 ```{r}
 survfit_death |> summary()
@@ -113,7 +152,7 @@ survfit_death |> summary()
 
 ## Example 2: Survival Data
 
-You can simulate data from a survival setting with the function `simSurvData`. 
+A special case of the general setting is the survival setting, one can simulate data from a survival setting with the function `simSurvData`. 
 
 ```{r}
 data <- simSurvData(100)
@@ -168,7 +207,6 @@ Below is a function call to `simT2D`
 
 ```{r}
 data <- simT2D(N = 100,
-               sex = FALSE, 
                cens = 1,
                eta = c(0.1,0.3,0.1,0.1), 
                nu = c(1.1,1.3,1.1,1.1),
