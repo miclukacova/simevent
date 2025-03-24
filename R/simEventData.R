@@ -169,8 +169,8 @@ simEventData <- function(N,                       # Number of individuals
     res <- rbind(res, kth_event)
 
     # Update treatment process and covariate change indicators
-    A[alive][Deltas == 2] <- 1
-    L[alive][Deltas == 3] <- 1
+    A[alive][Deltas == 2] <- A[alive][Deltas == 2] + 1
+    L[alive][Deltas == 3] <- L[alive][Deltas == 3] + 1
 
     # Who is still alive and uncensored?
     alive <- alive[! Deltas %in% term_deltas]
