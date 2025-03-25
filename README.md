@@ -352,3 +352,44 @@ plotEventData(data, title = "Confounding setting")
 ```
 
 <img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />
+
+## Example 0: simEventData2
+
+Specifying various arguments
+
+``` r
+# beta
+beta <- matrix(rnorm(8*5), ncol = 5, nrow = 8)
+
+# additional covariates
+func1 <- function(N) rbinom(N, 1, 0.2)
+func2 <- function(N) rnorm(N)
+add_cov <- list(func1, func2)
+
+# at risk function
+at_risk <- function(i, event_counts) {
+  return(c(
+    1,1,                                  # Always at risk for event 0 and 1
+    as.numeric(event_counts[i, 3] < 2),   # Can experience event 2 twice
+    as.numeric(event_counts[i, 4] < 1),   # Can experience event 3 once
+    as.numeric(event_counts[i, 5] < 2)))  # Can experience event 4 twice
+  }
+```
+
+``` r
+set.seed(973)
+data <- simEventData2(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk)
+```
+
+``` r
+data_int <- IntFormatData(data)
+library(survival)
+# Process 0
+#survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N1 + N2 + N3 + N4, 
+#                       data = data_int)
+#summary(survfit0)
+#beta[,1]
+# Process 4
+#survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + N0 + N1 + N2 + N3, 
+#                      data = data_int[N4 < 2])
+```
