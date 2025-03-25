@@ -19,16 +19,17 @@ simEventData(
 \item{N}{A double for the number of simulated individuals}
 
 \item{beta}{A matrix of doubles for the effects on the intensities. The columns
-represent the events. In the default case Censoring, Death, Operation, and Covariate Change.
-The rows represent covariates and processes. By default the rows represent: the baseline covariate
-\eqn{L0} (which can be interpreted as age of participant), baseline treatment \eqn{A0},
-the indicator for change in the covariate process  \eqn{L}, and the indicator
-for operation \eqn{A}. If additional covariates are specified, each of these
-corresponds to an additional row in the beta matrix. The \eqn{\beta} matrix is
-by default set to 0.}
+represent the events. The rows represent covariates and processes. By default
+the rows represent: the baseline covariate \eqn{L0} (which can be interpreted
+as age of participant), baseline treatment \eqn{A0}, the indicator for change
+in the covariate process  \eqn{L}, and the indicator  for operation \eqn{A}.
+If additional covariates are specified, each of these corresponds to an additional
+row in the beta matrix. The \eqn{\beta} matrix is by default set to 0.}
 
-\item{eta}{Vector of shape parameters for the Weibull intensity with parameterization
-\deqn{\eta \nu t^{\nu - 1}} Default is set to 0.1 for all events.}
+\item{eta}{Vector of shape parameters for the baseline Weibull intensity with
+parameterization
+\deqn{\eta \nu t^{\nu - 1}}
+Default is set to 0.1 for all events.}
 
 \item{nu}{Vector of scale parameters for the Weibull intensity. Default is set
 to 1.1 for all events.}
@@ -58,18 +59,26 @@ In case of additional covariates these are included in the data as well,
 named L1, L2, ....
 }
 \description{
-\code{simEventData} is a function to simulate event data, e.g. observational healthcare
+\code{simEventData} is a function to simulate observational healthcare
 data. The number of events simulated corresponds to the length of the \eqn{\eta}
 and \eqn{\nu} vector, and the number of columns in the \eqn{\beta} matrix. By
-default 4 different types of events are simulated, which can be chosen to represent
+default 4 different types of events are simulated, which can be interpreted as
 Censoring (0), Death (1), Operation(2) and Change in Covariate Process(3).
-Death and Censoring are terminal events and Operation and Change in Covariate
-Process can occur once. The intensities of the various events depend upon previous events,
-baseline covariates and the pre specified \eqn{\beta}, \eqn{\nu} and \eqn{\eta} parameters.
+Event 0 and Event 1 are terminal events by default and Event 2 and Event 3
+Process can occur once.  The simulations build upon a counting processes framework,
+where the events have intensities given by
+\deqn{\lambda^x(t) = \lambda_0^x \exp(\beta^T_x L}
+L here represents covariates and event counts. The baseline intensity \eqn{\lambda_0^x}
+is given by
+\deqn{\lambda_0^x(t)=\eta^x \nu^x t^{\nu^x - 1}}
+The intensities of the various events depend upon previous events and
+baseline covariates through the \eqn{\beta} matrix. The pre specified \eqn{\nu}
+and \eqn{\eta} parameters also influence the intensities of the various events
+through the baseline intensity.
 }
 \details{
-Different settings can be specified: Survival setting, competing risk setting and operation setting.
-The different settings can be specified by the at_risk function. Default is the operation setting.
+Different settings can be specified: Survival setting, competing risk setting
+and operation setting. The different settings can be specified by the at_risk function.
 }
 \examples{
 simEventData(N = 10)
