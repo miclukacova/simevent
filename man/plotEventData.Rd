@@ -15,7 +15,7 @@ plotEventData(data, title = "Event Data")
 A plot of the event data
 }
 \description{
-Function to plot simulated event data.
+Function to visualize simulated event data.
 }
 \examples{
 data <- simEventData(10)

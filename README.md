@@ -27,8 +27,8 @@ We load the package
 library(simevent)
 ```
 
-The underlying function is called `simEventData`. The `N` argument lets
-the user specify number of individuals in the simulation. We can
+This is an example of simulating using `simEventData`. The `N` argument
+lets the user specify number of individuals in the simulation. We can
 simulate observational health care data for 100 individuals with the
 function call
 
@@ -355,17 +355,28 @@ plotEventData(data, title = "Confounding setting")
 
 ## Example 0: simEventData2
 
-Specifying various arguments
+`simEventData2` is a function for more generel event history
+simulations. The structure and the arguments of the function resemble
+`simEventData`. The number of events simulated is determined by the
+length of the `eta` vector, `nu` vector or the number of columns in the
+`beta` matrix. We specify the beta matrix as
 
 ``` r
-# beta
 beta <- matrix(rnorm(8*5), ncol = 5, nrow = 8)
+```
 
+We choose to specify to additional covariates by
+
+``` r
 # additional covariates
 func1 <- function(N) rbinom(N, 1, 0.2)
 func2 <- function(N) rnorm(N)
 add_cov <- list(func1, func2)
+```
 
+And choose the following at risk function
+
+``` r
 # at risk function
 at_risk <- function(i, event_counts) {
   return(c(
@@ -376,20 +387,43 @@ at_risk <- function(i, event_counts) {
   }
 ```
 
+We simulate data by the function call
+
 ``` r
 set.seed(973)
 data <- simEventData2(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk)
 ```
 
+Transform data
+
 ``` r
 data_int <- IntFormatData(data)
+```
+
+Fitting models
+
+``` r
 library(survival)
 # Process 0
-#survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N1 + N2 + N3 + N4, 
-#                       data = data_int)
-#summary(survfit0)
-#beta[,1]
+survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N2 + N3 + N4 + L1 + L2, 
+                       data = data_int)
+beta[,1]
+#> [1] -1.22372961 -1.20478832 -0.52291798 -0.47604546 -0.04600557 -0.03706302
+#> [7] -1.37328309 -0.23148483
 # Process 4
-#survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + N0 + N1 + N2 + N3, 
-#                      data = data_int[N4 < 2])
+survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + N2 + N3 + N4 + L1 + L2,
+                      data = data_int[N4 < 2])
+#> Warning in agreg.fit(X, Y, istrat, offset, init, control, weights = weights, :
+#> Loglik converged before variable 5 ; beta may be infinite.
+beta[,4]
+#> [1] -0.45118452  0.53396282 -0.58447914 -1.45004733  0.79063918  0.31987884
+#> [7] -0.44942142 -0.07501029
 ```
+
+Plotting data
+
+``` r
+plotEventData(data[1:100,])
+```
+
+<img src="man/figures/README-unnamed-chunk-32-1.png" width="100%" />

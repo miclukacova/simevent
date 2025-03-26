@@ -1,4 +1,4 @@
-#' Function to plot simulated event data.
+#' Function to visualize simulated event data.
 #'
 #' @title Plot Event Data
 #'
@@ -30,7 +30,7 @@ plotEventData <- function(data, title = "Event Data") {
 
   # Shapes and color for the plot
   diff_events <- length(unique(plotdata$Delta))
-  cols <- c("green4", "blue1", "orange", "red2", "lightgreen")
+  cols <- c("green4", "blue1", "orange", "red2", "lightgreen", "purple1", "yellow")
   shapess <- rep(20, diff_events)
 
   ggplot2::ggplot(plotdata) +
