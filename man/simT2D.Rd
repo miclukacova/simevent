@@ -44,14 +44,17 @@ Data frame containing the simulated data. There is a column for ID, time of even
 event type (Delta), baseline covariate (L0) and additional covariate (L).
 }
 \description{
-Function to simulate data from a T2D diabetes setting. 3 different types of events are simulated, chosen to represent
-Censoring(0), Death (1) and Change in Covariate Process(3). Death and Censoring are terminal events and Change in
-Covariate Process can occur once.
-The intensities of the various events depend upon previous events and the pre specified \eqn{\nu} and \eqn{\eta}
-parameters. The dependence on previous events is controlled by parameters chosen so that a large baseline covariate
-(L0) increases the probability of covariate change (L = 1). Initial treatment (A0 = 1) reduces the risk of a change
-in the covariate process (L= 1) and the risk of death. A large baseline covariate (L0) increase the risk of death.
-Censoring does not depend on anything. The risk of death depends on change in the covariate process (L = 1) through beta_L_D.
+Function to simulate data from a T2D diabetes setting. 3 different types of
+events are simulated. They can be interpreted as Censoring(0), Death (1) and
+Change in Covariate Process (3). Death and Censoring are terminal events and Change in
+Covariate Process can occur once. The intensities of the various events depend
+upon previous events and the pre specified \eqn{\nu} and \eqn{\eta} parameters.
+The dependence on previous events is controlled by parameters chosen so that a
+large baseline covariate (L0) increases the probability of covariate change (L = 1).
+Initial treatment (A0 = 1) reduces the risk of a change in the covariate process
+(L= 1) and the risk of death. A large baseline covariate (L0) increase the risk of death.
+Censoring does not depend on anything. The risk of death depends on change in
+the covariate process (L = 1) through beta_L_D.
 }
 \examples{
 simT2D(10)

@@ -166,14 +166,14 @@ Data in the format looks like
 ``` r
 head(data_int)
 #> Key: <ID>
-#>       ID      Time Delta       L0     L    A0     A     k   tstart     tstop
-#>    <int>     <num> <num>    <num> <num> <int> <num> <int>    <num>     <num>
-#> 1:     1 0.2803617     1 56.28101     0     0     0     1 0.000000 0.2803617
-#> 2:     2 2.1744307     0 42.91979     0     1     0     1 0.000000 2.1744307
-#> 3:     3 1.5787315     3 65.45872     0     0     0     1 0.000000 1.5787315
-#> 4:     3 1.8758636     1 65.45872     1     0     0     2 1.578732 1.8758636
-#> 5:     4 1.0141196     1 32.28017     0     1     0     1 0.000000 1.0141196
-#> 6:     5 2.5035652     1 54.97065     0     1     0     1 0.000000 2.5035652
+#>       ID     Time Delta       L0     L    A0     A     k   tstart    tstop
+#>    <int>    <num> <num>    <num> <num> <int> <num> <int>    <num>    <num>
+#> 1:     1 2.174431     0 42.91979     0     1     0     1 0.000000 2.174431
+#> 2:     2 1.578732     3 65.45872     0     0     0     1 0.000000 1.578732
+#> 3:     2 1.875864     1 65.45872     1     0     0     2 1.578732 1.875864
+#> 4:     3 1.014120     1 32.28017     0     1     0     1 0.000000 1.014120
+#> 5:     4 2.503565     1 54.97065     0     1     0     1 0.000000 2.503565
+#> 6:     5 4.677115     1 40.03415     0     1     0     1 0.000000 4.677115
 ```
 
 The data contains the same information as the original data, only now
@@ -205,25 +205,25 @@ survfit_death |> summary()
 #> coxph(formula = Surv(tstart, tstop, Delta == 1) ~ I(L0/50) + 
 #>     A0 + L + A, data = data_int)
 #> 
-#>   n= 14481, number of events= 6367 
+#>   n= 14503, number of events= 6347 
 #> 
 #>              coef exp(coef) se(coef)      z Pr(>|z|)    
-#> I(L0/50)  0.90118   2.46250  0.05499  16.39   <2e-16 ***
-#> A0       -0.97200   0.37832  0.02708 -35.89   <2e-16 ***
-#> L         0.96847   2.63392  0.02921  33.16   <2e-16 ***
-#> A        -0.96298   0.38175  0.04133 -23.30   <2e-16 ***
+#> I(L0/50)  0.98818   2.68634  0.05518  17.91   <2e-16 ***
+#> A0       -0.97959   0.37547  0.02708 -36.17   <2e-16 ***
+#> L         0.95263   2.59252  0.02942  32.38   <2e-16 ***
+#> A        -0.95570   0.38454  0.04162 -22.96   <2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #>          exp(coef) exp(-coef) lower .95 upper .95
-#> I(L0/50)    2.4625     0.4061    2.2109    2.7428
-#> A0          0.3783     2.6432    0.3588    0.3989
-#> L           2.6339     0.3797    2.4874    2.7891
-#> A           0.3818     2.6195    0.3521    0.4140
+#> I(L0/50)    2.6863     0.3723    2.4109    2.9932
+#> A0          0.3755     2.6634    0.3561    0.3959
+#> L           2.5925     0.3857    2.4473    2.7464
+#> A           0.3845     2.6005    0.3544    0.4172
 #> 
-#> Concordance= 0.669  (se = 0.004 )
-#> Likelihood ratio test= 2593  on 4 df,   p=<2e-16
-#> Wald test            = 2589  on 4 df,   p=<2e-16
+#> Concordance= 0.668  (se = 0.004 )
+#> Likelihood ratio test= 2600  on 4 df,   p=<2e-16
+#> Wald test            = 2593  on 4 df,   p=<2e-16
 #> Score (logrank) test = 2680  on 4 df,   p=<2e-16
 ```
 
@@ -362,7 +362,7 @@ length of the `eta` vector, `nu` vector or the number of columns in the
 `beta` matrix. We specify the beta matrix as
 
 ``` r
-beta <- matrix(rnorm(8*5), ncol = 5, nrow = 8)
+beta <- matrix(rnorm(9*5), ncol = 5, nrow = 9)
 ```
 
 We choose to specify to additional covariates by
@@ -391,7 +391,7 @@ We simulate data by the function call
 
 ``` r
 set.seed(973)
-data <- simEventData2(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk)
+data <- simEventData2(N = 20000, beta = beta, add_cov = add_cov, at_risk = at_risk)
 ```
 
 Transform data
@@ -405,19 +405,36 @@ Fitting models
 ``` r
 library(survival)
 # Process 0
-survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N2 + N3 + N4 + L1 + L2, 
-                       data = data_int)
+survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ 
+                    L0 + A0 + 
+                    as.numeric(N2 > 0) +
+                    as.numeric(N3 > 0) + 
+                    as.numeric(N4 > 0) +
+                    L1 + L2, 
+                  data = data_int)
 beta[,1]
-#> [1] -1.22372961 -1.20478832 -0.52291798 -0.47604546 -0.04600557 -0.03706302
-#> [7] -1.37328309 -0.23148483
+#> [1]  0.52231445  0.49025563  0.01549589  0.22617101  2.91720589 -0.83800685
+#> [7] -0.16122798  0.78605203  1.71989692
+survfit0$coefficients
+#>                 L0                 A0 as.numeric(N2 > 0) as.numeric(N3 > 0) 
+#>          0.4992621          0.4886078          2.9137524         -0.8701628 
+#> as.numeric(N4 > 0)                 L1                 L2 
+#>         -0.1773796          0.7505560          1.7159796
 # Process 4
-survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + N2 + N3 + N4 + L1 + L2,
-                      data = data_int[N4 < 2])
-#> Warning in agreg.fit(X, Y, istrat, offset, init, control, weights = weights, :
-#> Loglik converged before variable 5 ; beta may be infinite.
-beta[,4]
-#> [1] -0.45118452  0.53396282 -0.58447914 -1.45004733  0.79063918  0.31987884
-#> [7] -0.44942142 -0.07501029
+survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + 
+                    as.numeric(N2 > 0) +
+                    as.numeric(N3 > 0) + 
+                    as.numeric(N4 > 0) +
+                    L1 + L2, 
+                  data = data_int[N4 < 2])
+beta[,5]
+#> [1]  1.1568636  0.2728892  0.5230086 -1.1245055 -2.1943049 -0.2784228  0.9041844
+#> [8] -0.8703628 -1.4782499
+survfit4$coefficients
+#>                 L0                 A0 as.numeric(N2 > 0) as.numeric(N3 > 0) 
+#>          1.1844766          0.2978987         -2.2129026         -0.2793258 
+#> as.numeric(N4 > 0)                 L1                 L2 
+#>          0.9018055         -0.8918543         -1.4748364
 ```
 
 Plotting data

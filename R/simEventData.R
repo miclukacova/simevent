@@ -95,8 +95,8 @@ simEventData <- function(N,                       # Number of individuals
   phi <- function(i) {
     exp(L0[i] / 50 * beta[1,] +
           A0[i] * beta[2,] +
-          L[i] * beta[3,] +
-          A[i] * beta[4,] +
+          as.numeric(L[i] > 0) * beta[3,] +
+          as.numeric(A[i] > 0) * beta[4,] +
           if(num_add_cov > 0) L1[i,] %*% beta[5:(4 + num_add_cov),] else 0)
   }
 

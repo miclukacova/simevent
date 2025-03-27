@@ -260,7 +260,7 @@ plotEventData(data, title = "Confounding setting")
 
 `simEventData2` is a function for more generel event history simulations. The structure and the arguments of the function resemble `simEventData`. The number of events simulated is determined by the length of the `eta` vector, `nu` vector or the number of columns in the `beta` matrix. We specify the beta matrix as
 ```{r}
-beta <- matrix(rnorm(8*5), ncol = 5, nrow = 8)
+beta <- matrix(rnorm(9*5), ncol = 5, nrow = 9)
 ```
 
 We choose to specify to additional covariates by
@@ -286,7 +286,7 @@ at_risk <- function(i, event_counts) {
 We simulate data by the function call
 ```{r}
 set.seed(973)
-data <- simEventData2(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk)
+data <- simEventData2(N = 20000, beta = beta, add_cov = add_cov, at_risk = at_risk)
 ```
 
 Transform data
@@ -298,13 +298,24 @@ Fitting models
 ```{r}
 library(survival)
 # Process 0
-survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N2 + N3 + N4 + L1 + L2, 
-                       data = data_int)
+survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ 
+                    L0 + A0 + 
+                    as.numeric(N2 > 0) +
+                    as.numeric(N3 > 0) + 
+                    as.numeric(N4 > 0) +
+                    L1 + L2, 
+                  data = data_int)
 beta[,1]
+survfit0$coefficients
 # Process 4
-survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + N2 + N3 + N4 + L1 + L2,
-                      data = data_int[N4 < 2])
-beta[,4]
+survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + 
+                    as.numeric(N2 > 0) +
+                    as.numeric(N3 > 0) + 
+                    as.numeric(N4 > 0) +
+                    L1 + L2, 
+                  data = data_int[N4 < 2])
+beta[,5]
+survfit4$coefficients
 ```
 
 Plotting data

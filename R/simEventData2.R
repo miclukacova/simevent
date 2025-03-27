@@ -103,8 +103,8 @@ simEventData2 <- function(N,                      # Number of individuals
     exp(
         L0[i] * beta[1,] +
         A0[i] * beta[2,] +
-        event_counts[i,] %*% beta[2 : (1 + num_events),] +
-        if(num_add_cov > 0) L1[i,] %*% beta[(2 + num_events):(1 + num_events + num_add_cov),] else 0)
+        as.numeric(event_counts[i,] > 0) %*% beta[3: (2 + num_events),] +
+        if(num_add_cov > 0) L1[i,] %*% beta[(3 + num_events):(2 + num_events + num_add_cov),] else 0)
   }
 
   lambda <- function(t, i) {
