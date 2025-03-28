@@ -41,52 +41,45 @@ simConfounding <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1, beta_A_
                            eta = rep(0.1,4), nu = rep(1.1,4),
                            followup = Inf, cens = 1, op = 1){
 
-  Time <- A0 <- ID <- NULL
+  Time <- A0 <- N0 <- N1 <- ID <- NULL
 
   if(op == 0){
-    at_risk <- function(i, L, A) {
+    at_risk <- function(i, event_counts) {
       return(c(
         cens, # You might be at risk for censoring
         1, # If you have not died yet you are at risk for dying
         0, # You are never at risk for an operation
-        as.numeric(L[i] == 0))) # You are only at risk for a change in the covariate process if you have not experienced a change yet
+        as.numeric(event_counts[i,4] == 0))) # You are only at risk for a change in the covariate process if you have not experienced a change yet
     }
   }
   else{
-    at_risk <- function(i, L, A) {
+    at_risk <- function(i, event_counts) {
       return(c(
         cens, # You might be at risk for censoring
         1, # If you have not died yet you are at risk for dying
-        as.numeric(A[i] == 0), # You are at risk for an operation if you have not had one yet
-        as.numeric(L[i] == 0))) # You are only at risk for a change in the covariate process if you have not experienced a change yet
+        as.numeric(event_counts[i,3] == 0), # You are at risk for an operation if you have not had one yet
+        as.numeric(event_counts[i,4] == 0))) # You are only at risk for a change in the covariate process if you have not experienced a change yet
     }
   }
 
-  beta <- matrix(ncol = 4, nrow = 4)
+  beta <- matrix(ncol = 4, nrow = 6)
 
+  # The effect of L0 on the processes C, D, A, L
+  beta[1,] <- c(beta_L0_C, beta_L0_D, beta_L0_A, beta_L0_L)
   # A0 is 0
   beta[2,] <- 0
-  # The effect of L0 on the probability of A = 1 and L = 1
-  beta[1,c(3,4)] <- c(beta_L0_A, beta_L0_L)
-  # The effect of L = 1 on the probability of A = 1
-  beta[3,3] <- beta_L_A
-  # The effect of A = 1 on the probability of L = 1
-  beta[4,4] <- beta_A_L
-  # The effect of A = 1 on the risk of Death
-  beta[4,2] <- beta_A_D
-  # The effect of L0, L = 1 on the risk of Death
-  beta[c(1,3),2] <- c(beta_L0_D, beta_L_D)
-  # Censorering does not depend on anything
-  beta[,1] <- c(beta_L0_C, 0, beta_L_C, beta_A_C)
+  # The processes C and D are terminal
+  beta[c(3,4),] <- 0
+  # The effect of A on the processes C, D, A, L
+  beta[5,] <- c(beta_A_C, beta_A_D, 0, beta_A_L)
+  # The effect of L on the processes C, D, A, L
+  beta[6,] <- c(beta_L_C, beta_L_D, beta_L_A, 0)
 
-  # A = 1 does not affect the intensity of A (the event occurs only once)
-  beta[4,3] <- 0
-  # L = 1 does not affect the intensity of L (the event occurs only once)
-  beta[3,4] <- 0
 
   data <- simEventData(N, beta = beta, eta = eta, nu = nu, max_cens = followup,
                          at_risk = at_risk)
-  data[, A0 := NULL]
+  data[, c("N0", "N1", "A0") := NULL]
+  colnames(data)[c(5,6)] <- c("A", "L")
 
   return(data)
 }

@@ -10,10 +10,10 @@ test_that("simConfounding simulates data in the right way",{
   data_int <- IntFormatData(data_test)
 
   # Fit models
-  survfit_cens <- coxph(Surv(tstart, tstop, Delta == 0) ~ I(L0 / 50) + L + A, data = data_int)
-  survfit_death <- coxph(Surv(tstart, tstop, Delta == 1) ~ I(L0 / 50) + L + A, data = data_int)
-  survfit_oper <- coxph(Surv(tstart, tstop, Delta == 2) ~ I(L0 / 50) + L, data = data_int[A == 0])
-  survfit_cov <- coxph(Surv(tstart, tstop, Delta == 3) ~ I(L0 / 50) + A, data = data_int[L == 0])
+  survfit_cens <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + L + A, data = data_int)
+  survfit_death <- coxph(Surv(tstart, tstop, Delta == 1) ~ L0 + L + A, data = data_int)
+  survfit_oper <- coxph(Surv(tstart, tstop, Delta == 2) ~ L0  + L, data = data_int[A == 0])
+  survfit_cov <- coxph(Surv(tstart, tstop, Delta == 3) ~ L0 + A, data = data_int[L == 0])
 
   # Compare confidence intervals and true values
   expect_true(confint(survfit_cens, level = 0.99)[1,1] <= 0 & 0 <= confint(survfit_cens, level = 0.99)[1,2])

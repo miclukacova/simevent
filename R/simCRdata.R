@@ -17,20 +17,21 @@
 #' @examples
 #' simCRdata(10)
 simCRdata <- function(N,
-                        beta = NULL,
-                        eta = rep(0.1,3),
-                        nu = rep(1.1,3)
+                      beta = NULL,
+                      eta = rep(0.1,3),
+                      nu = rep(1.1,3)
 ){
 
-  at_risk <- function(i, L, A) c(1,1,1,0)
+  at_risk <- function(i, event_counts) c(1,1,1)
 
   if(is.null(beta)){
     beta <- matrix(0, ncol = 3, nrow = 2)
   }
 
-  beta <- rbind(c(beta[1,],0), c(beta[2,],0), rep(0,4), rep(0,4))
-  results <- simEventData(N, beta, c(eta,0), c(nu,0), at_risk, term_deltas = c(0,1,2))
-  results <- results[, !c("L", "A")]
+  beta <- rbind(beta, matrix(0, ncol = 3, nrow = 3))
+  results <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
+                          term_deltas = c(0,1,2))
+  results <- results[, !c("N0", "N1", "N2")]
 
   return(results)
 }

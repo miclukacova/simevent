@@ -6,14 +6,17 @@
 \usage{
 simT2D(
   N,
-  eta = rep(0.1, 4),
-  nu = rep(1.1, 4),
+  eta = rep(0.1, 3),
+  nu = rep(1.1, 3),
   cens = 1,
   beta_L0_D = 1,
   beta_L0_L = 1,
   beta_L_D = 1,
   beta_A0_D = 0,
   beta_A0_L = 0,
+  beta_L0_C = 0,
+  beta_A0_C = 0,
+  beta_L_C = 0,
   followup = Inf
 )
 }
@@ -36,6 +39,12 @@ simT2D(
 \item{beta_A0_D}{Specifies how baseline treatment affects risk of death. Is by default set to 0.}
 
 \item{beta_A0_L}{Specifies how baseline treatment affects risk of T2D. Is by default set to 0.}
+
+\item{beta_L0_C}{The effect of covariate L0 on the probability of C = 1. Is by default set to 0.}
+
+\item{beta_A0_C}{The effect of covariate A0 = 1 on the probability of C = 1. Is by default set to 0.}
+
+\item{beta_L_C}{The effect of covariate L = 1 on the probability of C = 1. Is by default set to 0.}
 
 \item{followup}{A maximal censoring time. By default set to infinity.}
 }

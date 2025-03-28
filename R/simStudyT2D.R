@@ -18,9 +18,9 @@
 #' @param beta_A0_L Specifies how A0 affects risk of T2D.
 #' @param beta_L_D Specifies how change in the covariate process affects risk of death.
 #' @param beta_A0_D Specifies how A0 affects risk of death.
-#' @param eta Vector of length 4 of shape parameters for the Weibull intensity with parameterization
+#' @param eta Vector of length 3 of shape parameters for the Weibull intensity with parameterization
 #' \deqn{\eta \nu t^{\nu - 1}}. Default is set to 0.1 for all events.
-#' @param nu Vector of scale parameters for the Weibull hazard. Default is set to 1.1 for all events.
+#' @param nu Vector of length 3 of scale parameters for the Weibull hazard. Default is set to 1.1 for all events.
 #' @param tau The time at which the survival probability is estimated.
 #'
 #' @returns Results of simulation study in the form of a B times 8 matrix. The columns are the estimates of
@@ -31,7 +31,7 @@
 #' simStudyT2D(N = 100, B = 10, beta_L0_D = 1, beta_L0_L = 1, beta_A0_L = -1,
 #'             beta_L_D = 1, beta_A0_D = 0, tau = 1)
 simStudyT2D <- function(N, B, beta_L0_D, beta_L0_L, beta_A0_L, beta_L_D, beta_A0_D,
-                        eta= rep(0.1,4), nu = rep(1.1,4), tau = 1){
+                        eta= rep(0.1,3), nu = rep(1.1,3), tau = 1){
 
   Delta <- ID <- Time_T2D <- Time <- NULL
 
@@ -46,7 +46,7 @@ simStudyT2D <- function(N, B, beta_L0_D, beta_L0_L, beta_A0_L, beta_L_D, beta_A0
                         beta_A0_L = beta_A0_L, beta_L_D = beta_L_D, beta_A0_D = beta_A0_D, cens = 1)
 
     # T2D events
-    T2D_events <- data_boot[Delta == 3]
+    T2D_events <- data_boot[Delta == 2]
 
     # T2D people
     T2D_peeps <- data_boot[ID %in% T2D_events$ID]

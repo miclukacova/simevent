@@ -21,14 +21,18 @@ simSurvData <- function(N,
                           nu = rep(1.1,2)
 ){
 
-  at_risk <- function(i, L, A) c(1,1,0,0)
+  at_risk <- function(i, event_counts) c(1,1)
 
   if(is.null(beta)){
     beta <- matrix(0, ncol = 2, nrow = 2)
   }
-  beta <- rbind(c(beta[1,],0, 0), c(beta[2,],0, 0),  rep(0,4), rep(0,4))
-  results <- simEventData(N, beta, c(eta,0,0), c(nu,0,0), at_risk)
-  results <- results[, !c("L", "A")]
+
+  beta <- rbind(beta, matrix(0, nrow = 2, ncol = 2))
+
+  results <- simEventData(N, beta, eta = eta, nu = nu, at_risk = at_risk)
+
+  # We don't need columns for terminal events
+  results <- results[, !c("N0", "N1")]
 
   return(results)
 }

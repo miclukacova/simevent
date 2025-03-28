@@ -12,8 +12,8 @@ simStudyT2D(
   beta_A0_L,
   beta_L_D,
   beta_A0_D,
-  eta = rep(0.1, 4),
-  nu = rep(1.1, 4),
+  eta = rep(0.1, 3),
+  nu = rep(1.1, 3),
   tau = 1
 )
 }
@@ -32,10 +32,10 @@ simStudyT2D(
 
 \item{beta_A0_D}{Specifies how A0 affects risk of death.}
 
-\item{eta}{Vector of length 4 of shape parameters for the Weibull intensity with parameterization
+\item{eta}{Vector of length 3 of shape parameters for the Weibull intensity with parameterization
 \deqn{\eta \nu t^{\nu - 1}}. Default is set to 0.1 for all events.}
 
-\item{nu}{Vector of scale parameters for the Weibull hazard. Default is set to 1.1 for all events.}
+\item{nu}{Vector of length 3 of scale parameters for the Weibull hazard. Default is set to 1.1 for all events.}
 
 \item{tau}{The time at which the survival probability is estimated.}
 }

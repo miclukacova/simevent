@@ -23,6 +23,9 @@
 #' @param beta_A0_D Specifies how baseline treatment affects risk of death. Is by default set to 0.
 #' @param beta_A0_L Specifies how baseline treatment affects risk of T2D. Is by default set to 0.
 #' @param beta_L0_D Specifies how baseline covariate affects risk of Death. Is by default set to 1.
+#' @param beta_L0_C The effect of covariate L0 on the probability of C = 1. Is by default set to 0.
+#' @param beta_A0_C The effect of covariate A0 = 1 on the probability of C = 1. Is by default set to 0.
+#' @param beta_L_C The effect of covariate L = 1 on the probability of C = 1. Is by default set to 0.
 #' @param cens Specifies whether you are at risk of being censored
 #'
 #' @return  Data frame containing the simulated data. There is a column for ID, time of event (Time),
@@ -31,44 +34,39 @@
 #'
 #' @examples
 #' simT2D(10)
-simT2D <- function(N, eta = rep(0.1,4), nu = rep(1.1,4),  cens = 1,
-                              beta_L0_D = 1,beta_L0_L = 1, beta_L_D = 1,
-                              beta_A0_D = 0,beta_A0_L = 0, followup = Inf){
+simT2D <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
+                   beta_L0_D = 1, beta_L0_L = 1, beta_L_D = 1, beta_A0_D = 0,
+                   beta_A0_L = 0, beta_L0_C = 0, beta_A0_C = 0, beta_L_C = 0,
+                   followup = Inf){
 
-  at_risk <- function(i, L, A) {
+  at_risk <- function(i, event_counts) {
     return(c(
-      cens,
-      # If you have not died yet or been censored yet, you are at risk for dying or being censored
-      1,
-      # You are never at risk for an operation
-      0,
-      # You are only at risk for a change in the covariate process if you have not experienced a change yet
-      as.numeric(L[i] == 0)))
+      cens,                                 # If you have not yet  been censored you are at risk
+      1,                                    # If you have not died yet you are at risk
+      as.numeric(event_counts[i, 3] == 0))) # Only at risk for the covariate process if you have not experienced one yet
   }
 
-  Time <- ID <- A <- NULL
-  beta <- matrix(ncol = 4, nrow = 5)
+  Time <- ID <- N0 <- N1 <- NULL
+  beta <- matrix(ncol = 3, nrow = 5) # Three events and two baseline covariates
 
-  # No A
-  beta[4,] <- 0; beta[,3] <- 0
-  # How L0 affects the probability of L = 1
-  beta[1,4] <- beta_L0_L
-  # How A0 = 1 affects the risk of L = 1
-  beta[2,4] <- beta_A0_L
-  # L0 increases the risk of death
-  beta[1,2] <- beta_L0_D
-  # How A0 affects the risk of death
-  beta[2,2] <- beta_A0_D
-  # L = 1 does not affect the intensity of L (the event occurs only once)
-  beta[3,4] <- 0
-  # Censorering does not depend on anything
-  beta[,1] <- 0
-  # Effect of L = 1 on risk of death
-  beta[3,2] <- beta_L_D
+  # The effect of L0 on C, D, L
+  beta[1,] <- c(beta_L0_C, beta_L0_D, beta_L0_L)
+  # How A0 on C, D, L
+  beta[2,] <- c(beta_A0_C, beta_A0_D, beta_A0_L)
+  # Censoring process is a terminal process
+  beta[3,] <- 0;
+  # Death process is a terminal process
+  beta[4,] <- 0;
+  # The effect of L on C, D, L
+  beta[5,] <- c(beta_L_C, beta_L_D, 0)
 
   data <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
                          max_cens = followup)
-  data[, A := NULL]
+
+  # We don't need columns for terminal events
+  data[, N0 := NULL]; data[, N1 := NULL]
+
+  colnames(data)[6] <- c("L")
 
   return(data)
 }

@@ -10,9 +10,9 @@ test_that("simT2D simulates data in the right way",{
   data_int <- IntFormatData(data_test)
 
   # Fit models
-  survfit_cens <- coxph(Surv(tstart, tstop, Delta == 0) ~ I(L0 / 50) + A0 + L, data = data_int)
-  survfit_death <- coxph(Surv(tstart, tstop, Delta == 1) ~ I(L0 / 50) + A0 + L, data = data_int)
-  survfit_cov <- coxph(Surv(tstart, tstop, Delta == 3) ~ I(L0 / 50) + A0, data = data_int[L == 0])
+  survfit_cens <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + L, data = data_int)
+  survfit_death <- coxph(Surv(tstart, tstop, Delta == 1) ~ L0 + A0 + L, data = data_int)
+  survfit_cov <- coxph(Surv(tstart, tstop, Delta == 2) ~ L0 + A0, data = data_int[L == 0])
 
   # Compare confidence intervals and true values
   expect_true(confint(survfit_cens, level = 0.99)[1,1] <= 0 & 0 <= confint(survfit_cens, level = 0.99)[1,2])
