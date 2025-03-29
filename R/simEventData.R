@@ -1,4 +1,4 @@
-#' `simEventData` is a function to simulate continous time to event data, e.g. observational
+#' `simEventData` is a function to simulate continuous time to event data, e.g. observational
 #' healthcare data. The number of events simulated corresponds to the length of the \eqn{\eta}
 #' and \eqn{\nu} vector, as well as the number of columns in the \eqn{\beta} matrix. By
 #' default 4 different types of events are simulated. The first two being terminal
@@ -176,6 +176,7 @@ simEventData <- function(N,                      # Number of individuals
     # Simulate event
     Deltas <- sapply(alive, function(i) sample(seq_len(num_events), size = 1, prob = probs(T_k[i], i)) - 1)
 
+    # Store data
     kth_event <- data.table(ID = alive,
                             Time = T_k[alive],
                             Delta = Deltas,
@@ -188,7 +189,6 @@ simEventData <- function(N,                      # Number of individuals
     for (j in seq_len(num_events)) {
       event_counts[alive, j] <- event_counts[alive, j] + (Deltas == (j - 1))
     }
-
     # Who is still alive and uncensored?
     alive <- alive[! Deltas %in% term_deltas]
   }

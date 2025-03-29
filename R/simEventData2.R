@@ -1,4 +1,4 @@
-#' `simEventData` is a function to simulate continous time to event data, e.g. observational
+#' `simEventData2` is a function to simulate continuous time to event data, e.g. observational
 #' healthcare data. The number of events simulated corresponds to the length of the \eqn{\eta}
 #' and \eqn{\nu} vector, as well as the number of columns in the \eqn{\beta} matrix. By
 #' default 4 different types of events are simulated. The first two being terminal
@@ -47,9 +47,9 @@
 #' @export
 #'
 #' @examples
-#' simEventData(N = 10)
+#' simEventData2(N = 10)
 
-simEventData <- function(N,                      # Number of individuals
+simEventData2 <- function(N,                      # Number of individuals
                           beta = NULL,            # Effects
                           eta = NULL,       # Shape parameters
                           nu = NULL,        # Scale parameters
@@ -103,12 +103,14 @@ simEventData <- function(N,                      # Number of individuals
     at_risk <- function(events) return(rep(1,num_events))
   }
 
+  f <- function(events) as.numeric(events > 0)
+
   # Intensities
   phi <- function(i) {
     exp(
         L0[i] * beta[1,] +
         A0[i] * beta[2,] +
-        as.numeric(event_counts[i,] > 0) %*% beta[3: (2 + num_events),] +
+        f(event_counts[i,]) %*% beta[3: (2 + num_events),] +
         if(num_add_cov > 0) L1[i,] %*% beta[(3 + num_events):(2 + num_events + num_add_cov),] else 0)
   }
 
