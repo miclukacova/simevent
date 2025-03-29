@@ -4,11 +4,11 @@ library(testthat)
 test_that("simEventData simulates data in the right way",{
   set.seed(857)
   # Generate data
-  at_risk <- function(i, event_counts) {
+  at_risk <- function(events) {
     return(c(
-      1,1,                                   # Always at risk for event 0 and 1
-      as.numeric(event_counts[i, 3] < 1),    # Can experience event 2 once
-      as.numeric(event_counts[i, 4] < 1)))   # Can experience event 3 once
+      1,1,                          # Always at risk for event 0 and 1
+      as.numeric(events[3] < 1),    # Can experience event 2 once
+      as.numeric(events[4] < 1)))   # Can experience event 3 once
   }
   beta <- matrix(rnorm(24,0,1), ncol = 4, nrow = 6)
   data_test <- simEventData(5000, beta = beta, at_risk = at_risk)

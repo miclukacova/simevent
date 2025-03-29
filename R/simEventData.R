@@ -1,10 +1,10 @@
-#' `simEventData` is a function to simulate event data, e.g. observational healthcare
-#' data. The number of events simulated corresponds to the length of the \eqn{\eta}
+#' `simEventData` is a function to simulate continous time to event data, e.g. observational
+#' healthcare data. The number of events simulated corresponds to the length of the \eqn{\eta}
 #' and \eqn{\nu} vector, as well as the number of columns in the \eqn{\beta} matrix. By
 #' default 4 different types of events are simulated. The first two being terminal
 #' processes. The simulations build upon a counting process framework, where the events
 #' have intensities given by
-#' \deqn{\lambda^x(t) = \lambda_0^x \exp(\beta^T_x L}
+#' \deqn{\lambda^x(t) = \lambda_0^x \exp(\beta^T_x L)}
 #' L here represents covariates and event counts. The baseline intensity \eqn{\lambda_0^x}
 #' is given by
 #' \deqn{\lambda_0^x(t)=\eta^x \nu^x t^{\nu^x - 1}}
@@ -16,25 +16,23 @@
 #' @title Simulate Event Data
 #'
 #' @param N A double for the number of simulated individuals
-#' @param beta A matrix of doubles for the effects on the intensities. The columns
-#' represent the events. In the default case 4 events. The rows represent covariates
-#' and processes: the first two rows determine the effects of the baseline covariate
-#' \eqn{L0} and \eqn{A0} on the processes. The next rows determine the effects of the
-#' processes, followed by additional baseline covariates. The \eqn{\beta} matrix is
-#' by default set to 0.
-#' @param eta Vector of shape parameters for the Weibull intensity with parameterization
-#' \deqn{\eta \nu t^{\nu - 1}} Default is set to 0.1 for all events.
-#' @param nu Vector of scale parameters for the Weibull intensity. Default is set
+#' @param beta A matrix of doubles for the effects of covariates and events on the
+#' intensities. The columns represent the events. In the default case 4 events.
+#' The rows represent covariates  and processes: the first two rows determine the
+#' effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
+#' next rows determine the effects of the processes, followed by additional baseline
+#' covariates. The \eqn{\beta} matrix is by default set to 0.
+#' @param eta Vector of shape parameters for the baseline intensity. Default is set
+#' to 0.1 for all events.
+#' @param nu Vector of scale parameters for the baseline intensity. Default is set
 #' to 1.1 for all events.
-#' @param at_risk At risk function. Default is set to setting where all events
-#' can always occur. The \code{at_risk} function determines whether an individual
-#' is at risk for a specific event. The function takes as input i (the index belonging
-#' to a particular individual), and the matrix event_counts, which keeps track of
-#' the occurrence of the different event. The matrix is N times number of events
-#' An entrance \eqn{x_{ij}} indicates how many times individual i has experienced
-#' event j. The function returns a vector of 0's  and 1's corresponding to whether
-#' individual i is at risk for the particular events.
-#' @param term_deltas Terminal events. Default is set so that event 1 and 2 are terminal events.
+#' @param at_risk At risk function. The \code{at_risk} function determines whether
+#' an individual is at risk for a specific event. The function takes as input a vector
+#' `events` of event counts. The function returns a vector of 0's and 1's indicating
+#' which events the subject is at risk for. Default is set to a setting where you
+#' are always at risk for all events.
+#' @param term_deltas Terminal events. Default is set so that event 0 and 1 are
+#' terminal events.
 #' @param max_cens A maximum censoring time. By default set to infinity. If the event
 #' time is larger than this maximimal censoring time the event becomes event 0 with
 #' probability 1.
@@ -62,13 +60,14 @@ simEventData <- function(N,                      # Number of individuals
 ){
   ID <- NULL
 
-  # Check
+  # Check of add_cov
   if(!(is.null(add_cov) | is.list(add_cov))){
     stop("add_cov needs to be list of random functions")
   }
   # Number of additional baseline covariates
   num_add_cov <- length(add_cov)
 
+  # Number of events
   if (!is.null(eta)) {
     num_events <- length(eta)
   } else if (!is.null(nu)) {
@@ -79,6 +78,7 @@ simEventData <- function(N,                      # Number of individuals
     num_events <- 4
   }
 
+  # Default values of beta, eta, nu
   if(is.null(beta)){
     beta <- matrix(0, nrow = 2 + num_events + num_add_cov, ncol = num_events)
   }
@@ -89,7 +89,7 @@ simEventData <- function(N,                      # Number of individuals
     nu <- rep(1.1, num_events)
   }
 
-  # Check
+  # Check of dimensions
   if(num_events != length(nu) || num_events != ncol(beta)){
     stop("Length of eta should be equal to nu and number of columns of beta")
   }
@@ -98,9 +98,9 @@ simEventData <- function(N,                      # Number of individuals
          number of additional covariates + 2")
   }
 
-
+  # Default at_risk
   if(is.null(at_risk)){
-    at_risk <- function(i, event_counts) return(rep(1,num_events))
+    at_risk <- function(events) return(rep(1,num_events))
   }
 
   # Intensities
@@ -113,19 +113,19 @@ simEventData <- function(N,                      # Number of individuals
   }
 
   lambda <- function(t, i) {
-    at_risk(i, event_counts) * eta * nu * t ^ (nu - 1) * phi(i)
+    at_risk(event_counts[i,]) * eta * nu * t ^ (nu - 1) * phi(i)
   }
 
   # If all events have same parameter, the inverse simplifies
   if(all(nu[1] == nu)){
     inverse_sc_haz <- function(p, t, i) {
-      denom <- sum(at_risk(i, event_counts) * eta * phi(i))
+      denom <- sum(at_risk(event_counts[i,]) * eta * phi(i))
       (p / denom + t^nu[1])^(1 / nu[1]) - t
     }
   } else{
     # Summed cumulative hazard
     sum_cum_haz <- function(u, t, i) {
-      sum(at_risk(i, event_counts) * eta * phi(i) * ((t + u) ^ nu - t ^ nu))
+      sum(at_risk(event_counts[i,]) * eta * phi(i) * ((t + u) ^ nu - t ^ nu))
     }
 
     # Inverse summed cumulative hazard function

@@ -39,11 +39,11 @@ simT2D <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
                    beta_A0_L = 0, beta_L0_C = 0, beta_A0_C = 0, beta_L_C = 0,
                    followup = Inf){
 
-  at_risk <- function(i, event_counts) {
+  at_risk <- function(events) {
     return(c(
       cens,                                 # If you have not yet  been censored you are at risk
       1,                                    # If you have not died yet you are at risk
-      as.numeric(event_counts[i, 3] == 0))) # Only at risk for the covariate process if you have not experienced one yet
+      as.numeric(events[3] == 0))) # Only at risk for the covariate process if you have not experienced one yet
   }
 
   Time <- ID <- N0 <- N1 <- NULL

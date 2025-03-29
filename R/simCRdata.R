@@ -22,7 +22,7 @@ simCRdata <- function(N,
                       nu = rep(1.1,3)
 ){
 
-  at_risk <- function(i, event_counts) c(1,1,1)
+  at_risk <- function(events) c(1,1,1)
 
   if(is.null(beta)){
     beta <- matrix(0, ncol = 3, nrow = 2)

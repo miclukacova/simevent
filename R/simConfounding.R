@@ -44,21 +44,21 @@ simConfounding <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1, beta_A_
   Time <- A0 <- N0 <- N1 <- ID <- NULL
 
   if(op == 0){
-    at_risk <- function(i, event_counts) {
+    at_risk <- function(events) {
       return(c(
         cens, # You might be at risk for censoring
         1, # If you have not died yet you are at risk for dying
         0, # You are never at risk for an operation
-        as.numeric(event_counts[i,4] == 0))) # You are only at risk for a change in the covariate process if you have not experienced a change yet
+        as.numeric(events[4] == 0))) # You are only at risk for a change in the covariate process if you have not experienced a change yet
     }
   }
   else{
-    at_risk <- function(i, event_counts) {
+    at_risk <- function(events) {
       return(c(
         cens, # You might be at risk for censoring
         1, # If you have not died yet you are at risk for dying
-        as.numeric(event_counts[i,3] == 0), # You are at risk for an operation if you have not had one yet
-        as.numeric(event_counts[i,4] == 0))) # You are only at risk for a change in the covariate process if you have not experienced a change yet
+        as.numeric(events[3] == 0), # You are at risk for an operation if you have not had one yet
+        as.numeric(events[4] == 0))) # You are only at risk for a change in the covariate process if you have not experienced a change yet
     }
   }
 

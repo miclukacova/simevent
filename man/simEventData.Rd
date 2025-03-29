@@ -18,29 +18,27 @@ simEventData(
 \arguments{
 \item{N}{A double for the number of simulated individuals}
 
-\item{beta}{A matrix of doubles for the effects on the intensities. The columns
-represent the events. In the default case 4 events. The rows represent covariates
-and processes: the first two rows determine the effects of the baseline covariate
-\eqn{L0} and \eqn{A0} on the processes. The next rows determine the effects of the
-processes, followed by additional baseline covariates. The \eqn{\beta} matrix is
-by default set to 0.}
+\item{beta}{A matrix of doubles for the effects of covariates and events on the
+intensities. The columns represent the events. In the default case 4 events.
+The rows represent covariates  and processes: the first two rows determine the
+effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
+next rows determine the effects of the processes, followed by additional baseline
+covariates. The \eqn{\beta} matrix is by default set to 0.}
 
-\item{eta}{Vector of shape parameters for the Weibull intensity with parameterization
-\deqn{\eta \nu t^{\nu - 1}} Default is set to 0.1 for all events.}
+\item{eta}{Vector of shape parameters for the baseline intensity. Default is set
+to 0.1 for all events.}
 
-\item{nu}{Vector of scale parameters for the Weibull intensity. Default is set
+\item{nu}{Vector of scale parameters for the baseline intensity. Default is set
 to 1.1 for all events.}
 
-\item{at_risk}{At risk function. Default is set to setting where all events
-can always occur. The \code{at_risk} function determines whether an individual
-is at risk for a specific event. The function takes as input i (the index belonging
-to a particular individual), and the matrix event_counts, which keeps track of
-the occurrence of the different event. The matrix is N times number of events
-An entrance \eqn{x_{ij}} indicates how many times individual i has experienced
-event j. The function returns a vector of 0's  and 1's corresponding to whether
-individual i is at risk for the particular events.}
+\item{at_risk}{At risk function. The \code{at_risk} function determines whether
+an individual is at risk for a specific event. The function takes as input a vector
+\code{events} of event counts. The function returns a vector of 0's and 1's indicating
+which events the subject is at risk for. Default is set to a setting where you
+are always at risk for all events.}
 
-\item{term_deltas}{Terminal events. Default is set so that event 1 and 2 are terminal events.}
+\item{term_deltas}{Terminal events. Default is set so that event 0 and 1 are
+terminal events.}
 
 \item{max_cens}{A maximum censoring time. By default set to infinity. If the event
 time is larger than this maximimal censoring time the event becomes event 0 with
@@ -57,13 +55,13 @@ the count of the various events: N1, N2, .... In case of additional covariates
 these are included in the data as well, named L1, L2, ....
 }
 \description{
-\code{simEventData} is a function to simulate event data, e.g. observational healthcare
-data. The number of events simulated corresponds to the length of the \eqn{\eta}
+\code{simEventData} is a function to simulate continous time to event data, e.g. observational
+healthcare data. The number of events simulated corresponds to the length of the \eqn{\eta}
 and \eqn{\nu} vector, as well as the number of columns in the \eqn{\beta} matrix. By
 default 4 different types of events are simulated. The first two being terminal
 processes. The simulations build upon a counting process framework, where the events
 have intensities given by
-\deqn{\lambda^x(t) = \lambda_0^x \exp(\beta^T_x L}
+\deqn{\lambda^x(t) = \lambda_0^x \exp(\beta^T_x L)}
 L here represents covariates and event counts. The baseline intensity \eqn{\lambda_0^x}
 is given by
 \deqn{\lambda_0^x(t)=\eta^x \nu^x t^{\nu^x - 1}}
