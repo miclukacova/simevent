@@ -49,10 +49,10 @@
 #' @examples
 #' simEventData(N = 10)
 
-simEventData <- function(N,                      # Number of individuals
+simEventData <- function(N,                       # Number of individuals
                           beta = NULL,            # Effects
-                          eta = NULL,       # Shape parameters
-                          nu = NULL,        # Scale parameters
+                          eta = NULL,             # Shape parameters
+                          nu = NULL,              # Scale parameters
                           at_risk = NULL,         # Function defining the setting
                           term_deltas = c(0,1),   # Terminal events
                           max_cens = Inf,         # Followup time
