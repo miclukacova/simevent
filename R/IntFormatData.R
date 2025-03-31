@@ -3,7 +3,8 @@
 #'
 #' @title Transformation of Event Data into Interval Format
 #'
-#' @param data Event data: a data frame containing an ID, Time, Delta and Covariates columns.
+#' @param data Event data: a data frame containing an ID, Time, Delta, Covariates and Processes columns.
+#' @param N_cols The indices of the columns in data that belong to counting processes
 #'
 #' @return Event data in a tstart tstop format
 #' @export
@@ -12,22 +13,26 @@
 #' data <- simEventData(10)
 #' IntFormatData(data)
 
-IntFormatData <- function(data) {
+IntFormatData <- function(data, N_cols = 6:9) {
 
   k <- ID <- tstart <- tstop <- Time <- NULL
-
   data <- copy(data)
 
-  # Creating a k variable
+  # Shifting values of counting processes
+  data[, (N_cols) := lapply(.SD, data.table::shift, fill = 0), by = ID, .SDcols = N_cols]
+
+  # Creating k variable
   data[, k:= stats::ave(ID, ID, FUN = seq_along)]
   max_k <- max(data$k)
 
+  # Starting the new data format
   data_k <- list()
   data_k[[1]] <- data[data$k == 1,]
 
   data_k[[1]][, tstart := 0]
   data_k[[1]][, tstop := Time]
 
+  # Going through all events
   for(i in 2:max_k){
     data_k[[i]] <- data[data$k == i,]
 

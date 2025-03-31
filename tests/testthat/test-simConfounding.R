@@ -7,7 +7,7 @@ test_that("simConfounding simulates data in the right way",{
   data_test <- simConfounding(500)
 
   # Transform data into tstart tstop format
-  data_int <- IntFormatData(data_test)
+  data_int <- IntFormatData(data_test, N_cols = 5:6)
 
   # Fit models
   survfit_cens <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + L + A, data = data_int)

@@ -4,10 +4,12 @@
 \alias{IntFormatData}
 \title{Transformation of Event Data into Interval Format}
 \usage{
-IntFormatData(data)
+IntFormatData(data, N_cols = 6:9)
 }
 \arguments{
-\item{data}{Event data: a data frame containing an ID, Time, Delta and Covariates columns.}
+\item{data}{Event data: a data frame containing an ID, Time, Delta, Covariates and Processes columns.}
+
+\item{N_cols}{The indices of the columns in data that belong to counting processes}
 }
 \value{
 Event data in a tstart tstop format

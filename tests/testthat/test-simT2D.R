@@ -7,7 +7,7 @@ test_that("simT2D simulates data in the right way",{
   data_test <- simT2D(1000)
 
   # Transform data into tstart tstop format
-  data_int <- IntFormatData(data_test)
+  data_int <- IntFormatData(data_test, N_cols = 6)
 
   # Fit models
   survfit_cens <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + L, data = data_int)

@@ -176,6 +176,11 @@ simEventData <- function(N,                       # Number of individuals
     # Simulate event
     Deltas <- sapply(alive, function(i) sample(seq_len(num_events), size = 1, prob = probs(T_k[i], i)) - 1)
 
+    # Update event counts
+    for (j in seq_len(num_events)) {
+      event_counts[alive, j] <- event_counts[alive, j] + (Deltas == (j - 1))
+    }
+
     # Store data
     kth_event <- data.table(ID = alive,
                             Time = T_k[alive],
@@ -185,10 +190,6 @@ simEventData <- function(N,                       # Number of individuals
     kth_event <- cbind(kth_event, L1[alive,], data.table(event_counts)[alive,])
     res <- rbind(res, kth_event)
 
-    # Update event counts
-    for (j in seq_len(num_events)) {
-      event_counts[alive, j] <- event_counts[alive, j] + (Deltas == (j - 1))
-    }
     # Who is still alive and uncensored?
     alive <- alive[! Deltas %in% term_deltas]
   }
