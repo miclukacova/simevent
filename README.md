@@ -93,19 +93,19 @@ head(data)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0    L1         L2    N0    N1    N2
 #>    <int>     <num> <num>     <num> <int> <num>      <num> <num> <num> <num>
-#> 1:     1  1.485037     1 0.0482511     1     0  0.9036369     0     0     0
-#> 2:     2  1.438677     3 0.2186699     0     0  1.0631460     0     0     0
-#> 3:     2  9.493541     2 0.2186699     0     0  1.0631460     0     0     0
-#> 4:     2 12.358772     2 0.2186699     0     0  1.0631460     0     0     1
-#> 5:     2 14.498814     0 0.2186699     0     0  1.0631460     0     0     2
-#> 6:     3  3.391032     0 0.5021846     0     0 -0.2266280     0     0     0
+#> 1:     1 5.8835851     1 0.0482511     1     0  0.9036369     0     1     0
+#> 2:     2 2.8236241     0 0.2186699     0     0  1.0631460     1     0     0
+#> 3:     3 2.0835582     2 0.5021846     0     0 -0.2266280     0     0     1
+#> 4:     3 2.0858978     1 0.5021846     0     0 -0.2266280     0     1     1
+#> 5:     4 2.9572284     0 0.4053148     1     0  1.2534397     1     0     0
+#> 6:     5 0.3670054     1 0.3986500     1     0 -0.9204445     0     1     0
 #>       N3    N4
 #>    <num> <num>
 #> 1:     0     0
 #> 2:     0     0
-#> 3:     1     0
-#> 4:     1     0
-#> 5:     1     0
+#> 3:     0     0
+#> 4:     0     0
+#> 5:     0     0
 #> 6:     0     0
 ```
 
@@ -118,10 +118,11 @@ intensities of the different counting processes. A tool for this is the
 Cox proportional hazards model. In order to fit a Cox proportional
 hazards model with the `survival` package, the data needs to be
 transformed into the so called format, this can be done by the function
-`IntFormatData`.
+`IntFormatData`, where you need to specify the indices of the columns
+that contain data regarding counting processes.
 
 ``` r
-data_int <- IntFormatData(data)
+data_int <- IntFormatData(data, N_cols = 8:12)
 ```
 
 Data in the format looks like
@@ -131,20 +132,20 @@ head(data_int)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0    L1         L2    N0    N1    N2
 #>    <int>     <num> <num>     <num> <int> <num>      <num> <num> <num> <num>
-#> 1:     1  1.485037     1 0.0482511     1     0  0.9036369     0     0     0
-#> 2:     2  1.438677     3 0.2186699     0     0  1.0631460     0     0     0
-#> 3:     2  9.493541     2 0.2186699     0     0  1.0631460     0     0     0
-#> 4:     2 12.358772     2 0.2186699     0     0  1.0631460     0     0     1
-#> 5:     2 14.498814     0 0.2186699     0     0  1.0631460     0     0     2
-#> 6:     3  3.391032     0 0.5021846     0     0 -0.2266280     0     0     0
-#>       N3    N4     k    tstart     tstop
-#>    <num> <num> <int>     <num>     <num>
-#> 1:     0     0     1  0.000000  1.485037
-#> 2:     0     0     1  0.000000  1.438677
-#> 3:     1     0     2  1.438677  9.493541
-#> 4:     1     0     3  9.493541 12.358772
-#> 5:     1     0     4 12.358772 14.498814
-#> 6:     0     0     1  0.000000  3.391032
+#> 1:     1 5.8835851     1 0.0482511     1     0  0.9036369     0     0     0
+#> 2:     2 2.8236241     0 0.2186699     0     0  1.0631460     0     0     0
+#> 3:     3 2.0835582     2 0.5021846     0     0 -0.2266280     0     0     0
+#> 4:     3 2.0858978     1 0.5021846     0     0 -0.2266280     0     0     1
+#> 5:     4 2.9572284     0 0.4053148     1     0  1.2534397     0     0     0
+#> 6:     5 0.3670054     1 0.3986500     1     0 -0.9204445     0     0     0
+#>       N3    N4     k   tstart     tstop
+#>    <num> <num> <int>    <num>     <num>
+#> 1:     0     0     1 0.000000 5.8835851
+#> 2:     0     0     1 0.000000 2.8236241
+#> 3:     0     0     1 0.000000 2.0835582
+#> 4:     0     0     2 2.083558 2.0858978
+#> 5:     0     0     1 0.000000 2.9572284
+#> 6:     0     0     1 0.000000 0.3670054
 ```
 
 The data contains the same information as the original data, only now

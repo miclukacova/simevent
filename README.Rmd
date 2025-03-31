@@ -82,10 +82,10 @@ head(data)
 
 From data we can for example see that Individual $1$ has a baseline covariate $L_0$ of $0.0482511$, does get baseline treatment ($A_0 = 1$) and experienced the terminal event $0$ at Time $1.03$. 
 
-It could be of interest to estimate the effects of covariates on the intensities of the different counting processes. A tool for this is the Cox proportional hazards model. In order to fit a Cox proportional hazards model with the `survival` package, the data needs to be transformed into the so called \textit{tstart} \textit{tstop} format, this can be done by the function `IntFormatData`. 
+It could be of interest to estimate the effects of covariates on the intensities of the different counting processes. A tool for this is the Cox proportional hazards model. In order to fit a Cox proportional hazards model with the `survival` package, the data needs to be transformed into the so called \textit{tstart} \textit{tstop} format, this can be done by the function `IntFormatData`, where you need to specify the indices of the columns that contain data regarding counting processes. 
 
 ```{r}
-data_int <- IntFormatData(data)
+data_int <- IntFormatData(data, N_cols = 8:12)
 ```
 
 Data in the \textit{tstart tstop} format looks like
