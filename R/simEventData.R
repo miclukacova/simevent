@@ -17,11 +17,12 @@
 #'
 #' @param N A double for the number of simulated individuals
 #' @param beta A matrix of doubles for the effects of covariates and events on the
-#' intensities. The columns represent the events. In the default case 4 events.
-#' The rows represent covariates  and processes: the first two rows determine the
+#' intensities. The columns represent the events N0, N1, .... In the default case 4 events.
+#' The rows represent covariates and processes: the first two rows determine the
 #' effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
-#' next rows determine the effects of the processes, followed by additional baseline
-#' covariates. The \eqn{\beta} matrix is by default set to 0.
+#' next rows determine the effects of the processes N0, N1,..., followed by additional
+#' baseline covariates, by default named L1, L2,.... The \eqn{\beta} matrix is by
+#' default set to 0.
 #' @param eta Vector of shape parameters for the baseline intensity. Default is set
 #' to 0.1 for all events.
 #' @param nu Vector of scale parameters for the baseline intensity. Default is set
@@ -36,10 +37,18 @@
 #' @param max_cens A maximum censoring time. By default set to infinity. If the event
 #' time is larger than this maximimal censoring time the event becomes event 0 with
 #' probability 1.
-#' @param add_cov List of random generator functions for the distributions of
+#' @param add_cov Named list of random generator functions for the distributions of
 #' additional baseline covariates. The functions should take the number of observations
 #' as input. By default set to NULL.
-#'
+#' @param override_beta This argument is a named list. The argument has two applications.
+#' One possibility is instead of specifying the whole beta matrix, the user can
+#' specify the relevant entries, and the rest will by default be 0. Imagine you want
+#' to specify the effect of L0 on N1 to be equal to 2, this could be done by
+#' override_beta = list("L0" = c("N1" = 2))
+#' In general if you want the effect \eqn{\beta_{x,y}= z}, you can specify the
+#' override_beta argument as
+#' override_beta = list("x" = c("y" = z))
+#' Where x and y are names of processes or covariates.
 #' @return data.table containing the simulated data. There is a column for ID, time
 #' of event (Time), event (Delta), baseline covariate (L0), Baseline Treatment (A0),
 #' the count of the various events: N1, N2, .... In case of additional covariates
@@ -49,14 +58,15 @@
 #' @examples
 #' simEventData(N = 10)
 
-simEventData <- function(N,                       # Number of individuals
-                          beta = NULL,            # Effects
-                          eta = NULL,             # Shape parameters
-                          nu = NULL,              # Scale parameters
-                          at_risk = NULL,         # Function defining the setting
-                          term_deltas = c(0,1),   # Terminal events
-                          max_cens = Inf,         # Followup time
-                          add_cov = NULL          # Additional baseline covariates
+simEventData <- function(N,                      # Number of individuals
+                         beta = NULL,            # Effects
+                         eta = NULL,             # Shape parameters
+                         nu = NULL,              # Scale parameters
+                         at_risk = NULL,         # Function defining the setting
+                         term_deltas = c(0,1),   # Terminal events
+                         max_cens = Inf,         # Followup time
+                         add_cov = NULL,          # Additional baseline covariates
+                         override_beta = NULL
 ){
   ID <- NULL
 
@@ -159,10 +169,27 @@ simEventData <- function(N,                       # Number of individuals
     L1 <- NULL
   }
 
+  # Naming of beta matrix
+  colnames(beta) <- paste0("N", seq(0,num_events -1))
+  rownames(beta) <- c("L0", "A0", colnames(beta), colnames(L1))
+
+  # Filing out beta matrix
+  if(!is.null(override_beta)){
+    for (bb in 1:length(override_beta)) {
+      if (names(override_beta)[bb] %in% rownames(beta)) {
+        beta[bb, names(override_beta[[bb]])] <- override_beta[[bb]]
+      } #else {
+      #beta <- rbind(beta, matrix(0, nrow = 1, ncol = ncol(beta)))
+      #beta[nrow(beta), names(override_beta[[bb]])] <- override_beta[[bb]]
+      #rownames(beta)[nrow(beta)] <- names(override_beta)[bb]
+      #}
+    }
+  }
+
   # Initialize
   T_k <- rep(0,N)
   event_counts <- matrix(0, nrow = N, ncol = num_events)
-  colnames(event_counts) <- paste0("N", seq(0,num_events -1))
+  colnames(event_counts) <- colnames(beta)
   alive <- 1:N
 
   res <- data.table()
