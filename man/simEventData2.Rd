@@ -12,18 +12,21 @@ simEventData2(
   at_risk = NULL,
   term_deltas = c(0, 1),
   max_cens = Inf,
-  add_cov = NULL
+  add_cov = NULL,
+  override_beta = NULL,
+  max_events = 10
 )
 }
 \arguments{
 \item{N}{A double for the number of simulated individuals}
 
 \item{beta}{A matrix of doubles for the effects of covariates and events on the
-intensities. The columns represent the events. In the default case 4 events.
-The rows represent covariates  and processes: the first two rows determine the
+intensities. The columns represent the events N0, N1, .... In the default case 4 events.
+The rows represent covariates and processes: the first two rows determine the
 effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
-next rows determine the effects of the processes, followed by additional baseline
-covariates. The \eqn{\beta} matrix is by default set to 0.}
+next rows determine the effects of the processes N0, N1,..., followed by additional
+baseline covariates, by default named L1, L2,.... The \eqn{\beta} matrix is by
+default set to 0.}
 
 \item{eta}{Vector of shape parameters for the baseline intensity. Default is set
 to 0.1 for all events.}
@@ -44,9 +47,23 @@ terminal events.}
 time is larger than this maximimal censoring time the event becomes event 0 with
 probability 1.}
 
-\item{add_cov}{List of random generator functions for the distributions of
+\item{add_cov}{Named list of random generator functions for the distributions of
 additional baseline covariates. The functions should take the number of observations
 as input. By default set to NULL.}
+
+\item{override_beta}{This argument is a named list containing named vectors.
+override_beta has two applications. One possibility is instead of specifying
+the whole beta matrix, the user can specify the relevant entries, and the rest
+will by default be 0. Imagine you want to specify the effect of L0 on N1 to be
+equal to 2, this could be done by override_beta = list("L0" = c("N1" = 2))
+In general if you want the effect \eqn{\beta_{x,y}= z}, you can specify the
+override_beta argument as
+override_beta = list("x" = c("y" = z))
+Where x and y are names of processes or covariates.
+The second application is for specifying non linearities in case of recurrent
+events.}
+
+\item{max_events}{Number of maximal events per individual}
 }
 \value{
 data.table containing the simulated data. There is a column for ID, time
@@ -71,5 +88,5 @@ and \eqn{\eta} parameters also influence the intensities of the various events
 through the baseline intensity.
 }
 \examples{
-simEventData2(N = 10)
+#simEventData2(10)
 }

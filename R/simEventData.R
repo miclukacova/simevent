@@ -49,6 +49,8 @@
 #' override_beta argument as
 #' override_beta = list("x" = c("y" = z))
 #' Where x and y are names of processes or covariates.
+#' @param max_events Number of maximal events per individual
+#'
 #' @return data.table containing the simulated data. There is a column for ID, time
 #' of event (Time), event (Delta), baseline covariate (L0), Baseline Treatment (A0),
 #' the count of the various events: N1, N2, .... In case of additional covariates
@@ -65,8 +67,9 @@ simEventData <- function(N,                      # Number of individuals
                          at_risk = NULL,         # Function defining the setting
                          term_deltas = c(0,1),   # Terminal events
                          max_cens = Inf,         # Followup time
-                         add_cov = NULL,          # Additional baseline covariates
-                         override_beta = NULL
+                         add_cov = NULL,         # Additional baseline covariates
+                         override_beta = NULL,   # Argument to easily override entries in beta
+                         max_events = 10         # Number of maximal events per individual
 ){
   ID <- NULL
 
@@ -77,27 +80,15 @@ simEventData <- function(N,                      # Number of individuals
   # Number of additional baseline covariates
   num_add_cov <- length(add_cov)
 
-  # Number of events
-  if (!is.null(eta)) {
-    num_events <- length(eta)
-  } else if (!is.null(nu)) {
-    num_events <- length(nu)
-  } else if (!is.null(beta)) {
-    num_events <- ncol(beta)
-  } else {
-    num_events <- 4
-  }
+  # Determine number of events
+  num_events <- if (!is.null(eta)) length(eta) else
+                if (!is.null(nu)) length(nu) else
+                if (!is.null(beta)) ncol(beta) else 4
 
-  # Default values of beta, eta, nu
-  if(is.null(beta)){
-    beta <- matrix(0, nrow = 2 + num_events + num_add_cov, ncol = num_events)
-  }
-  if(is.null(eta)){
-    eta <- rep(0.1, num_events)
-  }
-  if(is.null(nu)){
-    nu <- rep(1.1, num_events)
-  }
+  # Set default values for beta, eta, and nu
+  beta <- if (!is.null(beta)) beta else matrix(0, nrow = 2 + num_events + num_add_cov, ncol = num_events)
+  eta  <- if (!is.null(eta)) eta   else rep(0.1, num_events)
+  nu   <- if (!is.null(nu)) nu     else rep(1.1, num_events)
 
   # Check of dimensions
   if(num_events != length(nu) || num_events != ncol(beta)){
@@ -123,7 +114,8 @@ simEventData <- function(N,                      # Number of individuals
   }
 
   lambda <- function(t, i) {
-    at_risk(event_counts[i,]) * eta * nu * t ^ (nu - 1) * phi(i)
+    risk_vec <- at_risk(event_counts[i, ])
+    risk_vec * eta * nu * t^(nu - 1) * phi(i)
   }
 
   # If all events have same parameter, the inverse simplifies
@@ -185,19 +177,21 @@ simEventData <- function(N,                      # Number of individuals
       #}
     }
   }
-
   # Initialize
-  T_k <- rep(0,N)
+  T_k <- rep(0,N)                         # Time 0
+  alive <- 1:N                            # Keeping track of who is alive
+  res_list <- vector("list", max_events)  # For results
+  idx <- 1                                # Index
+
+  # Create a matrix for the event counts
   event_counts <- matrix(0, nrow = N, ncol = num_events)
   colnames(event_counts) <- colnames(beta)
-  alive <- 1:N
 
-  res <- data.table()
 
   while(length(alive) != 0){
     # Simulate time
-    V <- stats::runif(N)
-    W <- sapply(alive, function(i) inverse_sc_haz(-log(V)[i], T_k[i], i))
+    V <- -log(stats::runif(N))
+    W <- sapply(alive, function(i) inverse_sc_haz(V[i], T_k[i], i))
     T_k[alive] <- T_k[alive] + W
 
     # Simulate event
@@ -214,13 +208,15 @@ simEventData <- function(N,                      # Number of individuals
                             Delta = Deltas,
                             L0 = L0[alive],
                             A0 = A0[alive])
-    kth_event <- cbind(kth_event, L1[alive,], data.table(event_counts)[alive,])
-    res <- rbind(res, kth_event)
+
+    res_list[[idx]] <- cbind(kth_event, L1[alive,], data.table(event_counts)[alive,])
+    idx <- idx + 1
 
     # Who is still alive and uncensored?
     alive <- alive[! Deltas %in% term_deltas]
   }
 
+  res <- data.table::rbindlist(res_list)
   setkey(res, ID)
 
   return(res)

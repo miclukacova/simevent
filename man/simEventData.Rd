@@ -13,7 +13,8 @@ simEventData(
   term_deltas = c(0, 1),
   max_cens = Inf,
   add_cov = NULL,
-  override_beta = NULL
+  override_beta = NULL,
+  max_events = 10
 )
 }
 \arguments{
@@ -59,6 +60,8 @@ In general if you want the effect \eqn{\beta_{x,y}= z}, you can specify the
 override_beta argument as
 override_beta = list("x" = c("y" = z))
 Where x and y are names of processes or covariates.}
+
+\item{max_events}{Number of maximal events per individual}
 }
 \value{
 data.table containing the simulated data. There is a column for ID, time
