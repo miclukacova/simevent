@@ -99,8 +99,7 @@ The data contains the same information as the original data, only now three addi
 ```{r}
 library(survival)
 # Process 0
-survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ 
-                    L0 + A0 + 
+survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + 
                     as.numeric(N2 > 0) +
                     as.numeric(N3 > 0) + 
                     as.numeric(N4 > 0) +
@@ -123,6 +122,16 @@ One can visualize the data with use of the function `plotEventData`.
 plotEventData(data[1:100,])
 ```
 The plot shows the event history of the 100 first rows of data, the different colors of the dots illustrate the different events. The $x$-axis is the timeline. 
+
+### Specifying an entry in the beta matrix with use of override_beta
+
+We can specify an entry in the beta matrix with use of the argument `override_beta`. For example the following code sets the effect of L0 on the processes N0 and N1 equal to 0. 
+
+```{r}
+data <- simEventData(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     override_beta = list("L0" = c("N0" = 0, "N1" = 0)))
+```
+
 
 ## Example 2: Survival Data
 

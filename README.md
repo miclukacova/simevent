@@ -93,12 +93,12 @@ head(data)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0    L1         L2    N0    N1    N2
 #>    <int>     <num> <num>     <num> <int> <num>      <num> <num> <num> <num>
-#> 1:     1 5.8835851     1 0.0482511     1     0  0.9036369     0     1     0
-#> 2:     2 2.8236241     0 0.2186699     0     0  1.0631460     1     0     0
-#> 3:     3 2.0835582     2 0.5021846     0     0 -0.2266280     0     0     1
-#> 4:     3 2.0858978     1 0.5021846     0     0 -0.2266280     0     1     1
-#> 5:     4 2.9572284     0 0.4053148     1     0  1.2534397     1     0     0
-#> 6:     5 0.3670054     1 0.3986500     1     0 -0.9204445     0     1     0
+#> 1:     1 0.8848577     0 0.0482511     1     0  0.9036369     1     0     0
+#> 2:     2 1.1833330     0 0.2186699     0     0  1.0631460     1     0     0
+#> 3:     3 2.1956540     1 0.5021846     0     0 -0.2266280     0     1     0
+#> 4:     4 0.2193077     2 0.4053148     1     0  1.2534397     0     0     1
+#> 5:     4 0.4662299     2 0.4053148     1     0  1.2534397     0     0     2
+#> 6:     4 0.7129790     1 0.4053148     1     0  1.2534397     0     1     2
 #>       N3    N4
 #>    <num> <num>
 #> 1:     0     0
@@ -132,20 +132,20 @@ head(data_int)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0    L1         L2    N0    N1    N2
 #>    <int>     <num> <num>     <num> <int> <num>      <num> <num> <num> <num>
-#> 1:     1 5.8835851     1 0.0482511     1     0  0.9036369     0     0     0
-#> 2:     2 2.8236241     0 0.2186699     0     0  1.0631460     0     0     0
-#> 3:     3 2.0835582     2 0.5021846     0     0 -0.2266280     0     0     0
-#> 4:     3 2.0858978     1 0.5021846     0     0 -0.2266280     0     0     1
-#> 5:     4 2.9572284     0 0.4053148     1     0  1.2534397     0     0     0
-#> 6:     5 0.3670054     1 0.3986500     1     0 -0.9204445     0     0     0
-#>       N3    N4     k   tstart     tstop
-#>    <num> <num> <int>    <num>     <num>
-#> 1:     0     0     1 0.000000 5.8835851
-#> 2:     0     0     1 0.000000 2.8236241
-#> 3:     0     0     1 0.000000 2.0835582
-#> 4:     0     0     2 2.083558 2.0858978
-#> 5:     0     0     1 0.000000 2.9572284
-#> 6:     0     0     1 0.000000 0.3670054
+#> 1:     1 0.8848577     0 0.0482511     1     0  0.9036369     0     0     0
+#> 2:     2 1.1833330     0 0.2186699     0     0  1.0631460     0     0     0
+#> 3:     3 2.1956540     1 0.5021846     0     0 -0.2266280     0     0     0
+#> 4:     4 0.2193077     2 0.4053148     1     0  1.2534397     0     0     0
+#> 5:     4 0.4662299     2 0.4053148     1     0  1.2534397     0     0     1
+#> 6:     4 0.7129790     1 0.4053148     1     0  1.2534397     0     0     2
+#>       N3    N4     k    tstart     tstop
+#>    <num> <num> <int>     <num>     <num>
+#> 1:     0     0     1 0.0000000 0.8848577
+#> 2:     0     0     1 0.0000000 1.1833330
+#> 3:     0     0     1 0.0000000 2.1956540
+#> 4:     0     0     1 0.0000000 0.2193077
+#> 5:     0     0     2 0.2193077 0.4662299
+#> 6:     0     0     3 0.4662299 0.7129790
 ```
 
 The data contains the same information as the original data, only now
@@ -160,8 +160,7 @@ following code
 ``` r
 library(survival)
 # Process 0
-survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ 
-                    L0 + A0 + 
+survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + 
                     as.numeric(N2 > 0) +
                     as.numeric(N3 > 0) + 
                     as.numeric(N4 > 0) +
@@ -192,6 +191,17 @@ plot shows the event history of the 100 first rows of data, the
 different colors of the dots illustrate the different events. The
 $x$-axis is the timeline.
 
+### Specifying an entry in the beta matrix with use of override_beta
+
+We can specify an entry in the beta matrix with use of the argument
+`override_beta`. For example the following code sets the effect of L0 on
+the processes N0 and N1 equal to 0.
+
+``` r
+data <- simEventData(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     override_beta = list("L0" = c("N0" = 0, "N1" = 0)))
+```
+
 ## Example 2: Survival Data
 
 A special case of the general setting is the survival setting, one can
@@ -202,7 +212,7 @@ data <- simSurvData(100)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
 
 One can again specify the effects of $A_0$ and $L_0$ on the risk of
 death and censoring by the `beta` argument.
@@ -231,7 +241,7 @@ data <- simSurvData(100, beta = beta, eta = eta, nu = nu)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
 
 ## Example 3: Competing Risk Data
 
@@ -244,7 +254,7 @@ data <- simCRdata(100)
 plotEventData(data, title = "Competing Risk Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
 
 ## Example 4: Type 2 Diabetes
 
@@ -272,7 +282,7 @@ data <- simT2D(N = 100,
 plotEventData(data, title = "T2D data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
 
 ## Example 5: Unobserved Covariate Setting
 
@@ -316,4 +326,4 @@ operation/treatment event (op = 1), where there is a censoring process
 plotEventData(data, title = "Confounding setting")
 ```
 
-<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-23-1.png" width="100%" />
