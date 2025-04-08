@@ -14,7 +14,10 @@ simEventData(
   max_cens = Inf,
   add_cov = NULL,
   override_beta = NULL,
-  max_events = 10
+  max_events = 10,
+  lower = 10^(-10),
+  upper = 200,
+  gen_A0 = NULL
 )
 }
 \arguments{
@@ -24,9 +27,9 @@ simEventData(
 intensities. The columns represent the events N0, N1, .... In the default case 4 events.
 The rows represent covariates and processes: the first two rows determine the
 effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
-next rows determine the effects of the processes N0, N1,..., followed by additional
-baseline covariates, by default named L1, L2,.... The \eqn{\beta} matrix is by
-default set to 0.}
+next rows determine the effects of the additional baseline covariates, by default
+named L1, L2,... on the processes, followed by the effects of the processes N0,
+N1,.... The \eqn{\beta} matrix is by  default set to 0.}
 
 \item{eta}{Vector of shape parameters for the baseline intensity. Default is set
 to 0.1 for all events.}
@@ -62,6 +65,13 @@ override_beta = list("x" = c("y" = z))
 Where x and y are names of processes or covariates.}
 
 \item{max_events}{Number of maximal events per individual}
+
+\item{lower}{Number of maximal events per individual}
+
+\item{upper}{Number of maximal events per individual}
+
+\item{gen_A0}{Function for generation of A0 covariate. Function of N (number
+of individuals) and L0 (baseline covariate).}
 }
 \value{
 data.table containing the simulated data. There is a column for ID, time

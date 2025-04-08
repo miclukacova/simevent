@@ -20,9 +20,9 @@
 #' intensities. The columns represent the events N0, N1, .... In the default case 4 events.
 #' The rows represent covariates and processes: the first two rows determine the
 #' effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
-#' next rows determine the effects of the processes N0, N1,..., followed by additional
-#' baseline covariates, by default named L1, L2,.... The \eqn{\beta} matrix is by
-#' default set to 0.
+#' next rows determine the effects of the additional baseline covariates, by default
+#'  named L1, L2,... on the processes, followed by the effects of the processes N0,
+#'  N1,.... The \eqn{\beta} matrix is by  default set to 0.
 #' @param eta Vector of shape parameters for the baseline intensity. Default is set
 #' to 0.1 for all events.
 #' @param nu Vector of scale parameters for the baseline intensity. Default is set
@@ -50,6 +50,11 @@
 #' override_beta = list("x" = c("y" = z))
 #' Where x and y are names of processes or covariates.
 #' @param max_events Number of maximal events per individual
+#' @param lower Number of maximal events per individual
+#' @param upper Number of maximal events per individual
+#' @param gen_A0 Function for generation of A0 covariate. Function of N (number
+#' of individuals) and L0 (baseline covariate).
+#'
 #'
 #' @return data.table containing the simulated data. There is a column for ID, time
 #' of event (Time), event (Delta), baseline covariate (L0), Baseline Treatment (A0),
@@ -69,24 +74,42 @@ simEventData <- function(N,                      # Number of individuals
                          max_cens = Inf,         # Followup time
                          add_cov = NULL,         # Additional baseline covariates
                          override_beta = NULL,   # Argument to easily override entries in beta
-                         max_events = 10         # Number of maximal events per individual
+                         max_events = 10,        # Number of maximal events per individual
+                         lower = 10^(-10),       # Lower bound for inverse cumulative hazard
+                         upper = 200,            # Upper bound for inverse cumulative hazard
+                         gen_A0 = NULL           # Function for generation of A0
 ){
   ID <- NULL
 
+  ############################ Check and useful quantities #####################
   # Check of add_cov
   if(!(is.null(add_cov) | is.list(add_cov))){
     stop("add_cov needs to be list of random functions")
   }
+
   # Number of additional baseline covariates
   num_add_cov <- length(add_cov)
 
   # Determine number of events
   num_events <- if (!is.null(eta)) length(eta) else
-                if (!is.null(nu)) length(nu) else
-                if (!is.null(beta)) ncol(beta) else 4
+    if (!is.null(nu)) length(nu) else
+      if (!is.null(beta)) ncol(beta) else 4
+
+  # Useful indices
+  N_start <- 3 + num_add_cov
+  N_stop <- 2 + num_add_cov + num_events
+
+  ############################ Default values ##################################
 
   # Set default values for beta, eta, and nu
-  beta <- if (!is.null(beta)) beta else matrix(0, nrow = 2 + num_events + num_add_cov, ncol = num_events)
+  beta <- if (!is.null(beta)) beta else matrix(0, nrow = N_stop, ncol = num_events)
+  colnames(beta) <- paste0("N", seq(0, num_events -1))
+
+  if((N_stop) != nrow(beta)){
+    stop("Number of rows in beta should equal the sum of number of event and
+         number of additional covariates + 2")
+  }
+
   eta  <- if (!is.null(eta)) eta   else rep(0.1, num_events)
   nu   <- if (!is.null(nu)) nu     else rep(1.1, num_events)
 
@@ -94,40 +117,87 @@ simEventData <- function(N,                      # Number of individuals
   if(num_events != length(nu) || num_events != ncol(beta)){
     stop("Length of eta should be equal to nu and number of columns of beta")
   }
-  if((num_events + num_add_cov + 2) != nrow(beta)){
-    stop("Number of rows in beta should equal the sum of number of event and
-         number of additional covariates + 2")
-  }
 
   # Default at_risk
   if(is.null(at_risk)){
-    at_risk <- function(events) return(rep(1,num_events))
+    at_risk <- function(events) return(rep(1, num_events))
+  }
+  # Default A0 generation
+  if(is.null(gen_A0)){
+    gen_A0 <- function(N, L0) stats::rbinom(N, 1, 0.5)
+  }
+
+  # Matrix for storing values
+  simmatrix <- matrix(0, nrow = N, ncol = (2 + num_events + num_add_cov))
+
+  # Generate additional covariates if distributions are specified
+  if (num_add_cov != 0) {
+    simmatrix[,3:(2+length(add_cov))] <- sapply(add_cov, function(f) f(N))
+  }
+
+  # Naming of matrices
+  if (is.null(names(add_cov)) && num_add_cov != 0) {
+    colnames(simmatrix) <- c("L0", "A0", paste0("L", seq_len(num_add_cov)), colnames(beta))
+  } else {
+    colnames(simmatrix) <- c("L0", "A0", names(add_cov), colnames(beta))
+  }
+
+  rownames(beta) <- colnames(simmatrix)
+
+  # Filing out beta matrix
+  if(!is.null(override_beta)){
+    for (bb in 1:length(override_beta)) {
+      if (names(override_beta)[bb] %in% rownames(beta)) {
+        beta[bb, names(override_beta[[bb]])] <- override_beta[[bb]]
+      } else {
+        beta <- rbind(beta, matrix(0, nrow = 1, ncol = ncol(beta)))
+        beta[nrow(beta), names(override_beta[[bb]])] <- override_beta[[bb]]
+        rownames(beta)[nrow(beta)] <- names(override_beta)[bb]
+      }
+    }
+  }
+
+  ############################ Functions #######################################
+
+  # Proportional hazard
+  if(nrow(beta) == N_stop){
+    calculate_phi <- function(simmatrix) {
+      effects <- matrix(nrow = N, ncol = num_events)
+      for(i in 1:N){
+        effects[i,] <- simmatrix[i,] %*% beta
+      }
+      return(exp(effects))
+    }
+  } else {
+    calculate_phi <- function(simmatrix) {
+      obj <- data.frame(simmatrix)
+      effects <- matrix(nrow = N, ncol = num_events)
+      for(i in 1:N){
+        terms <- sapply(1:nrow(beta), function(bb) {
+          with(obj[i,], eval(parse(text = rownames(beta)[bb]))) * beta[bb,]
+        })
+        effects[i,] <- rowSums(terms)
+      }
+      return(exp(effects))
+    }
   }
 
   # Intensities
-  phi <- function(i) {
-    exp(
-        L0[i] * beta[1,] +
-        A0[i] * beta[2,] +
-        as.numeric(event_counts[i,] > 0) %*% beta[3: (2 + num_events),] +
-        if(num_add_cov > 0) L1[i,] %*% beta[(3 + num_events):(2 + num_events + num_add_cov),] else 0)
-  }
-
   lambda <- function(t, i) {
-    risk_vec <- at_risk(event_counts[i, ])
-    risk_vec * eta * nu * t^(nu - 1) * phi(i)
+    risk_vec <- at_risk(simmatrix[i, N_start:N_stop])
+    risk_vec * eta * nu * t^(nu - 1) * phi[i,]
   }
 
   # If all events have same parameter, the inverse simplifies
   if(all(nu[1] == nu)){
     inverse_sc_haz <- function(p, t, i) {
-      denom <- sum(at_risk(event_counts[i,]) * eta * phi(i))
+      denom <- sum(at_risk(simmatrix[i, N_start:N_stop]) * eta * phi[i,])
       (p / denom + t^nu[1])^(1 / nu[1]) - t
     }
   } else{
     # Summed cumulative hazard
     sum_cum_haz <- function(u, t, i) {
-      sum(at_risk(event_counts[i,]) * eta * phi(i) * ((t + u) ^ nu - t ^ nu))
+      sum(at_risk(simmatrix[i, N_start:N_stop]) * eta * phi[i,] * ((t + u) ^ nu - t ^ nu))
     }
 
     # Inverse summed cumulative hazard function
@@ -139,77 +209,50 @@ simEventData <- function(N,                      # Number of individuals
 
   # Event probabilities
   probs <- function(t, i){
-    if(t > max_cens){
-      probs <- c(1, rep(0, num_events - 1))
-    }
-    else{
-      probs <- lambda(t, i)
-      summ <- sum(probs)
-      probs / summ
-    }
+    probs <- lambda(t, i)
+    summ <- sum(probs)
+    probs / summ
   }
+
+  ############################ Initializing Simulations ########################
 
   # Draw baseline covariates
-  L0 <- stats::runif(N)
-  A0 <- stats::rbinom(N, 1, 0.5)
+  simmatrix[,1] <- stats::runif(N)           # L0
+  simmatrix[,2] <- gen_A0(N, L0)             # A0
 
-  # Generate additional covariates if distributions are specified
-  if (num_add_cov != 0) {
-    L1 <- sapply(add_cov, function(f) f(N))
-    colnames(L1) <- paste0("L", seq_len(ncol(L1)))
-  } else {
-    L1 <- NULL
-  }
-
-  # Naming of beta matrix
-  colnames(beta) <- paste0("N", seq(0,num_events -1))
-  rownames(beta) <- c("L0", "A0", colnames(beta), colnames(L1))
-
-  # Filing out beta matrix
-  if(!is.null(override_beta)){
-    for (bb in 1:length(override_beta)) {
-      if (names(override_beta)[bb] %in% rownames(beta)) {
-        beta[bb, names(override_beta[[bb]])] <- override_beta[[bb]]
-      } #else {
-      #beta <- rbind(beta, matrix(0, nrow = 1, ncol = ncol(beta)))
-      #beta[nrow(beta), names(override_beta[[bb]])] <- override_beta[[bb]]
-      #rownames(beta)[nrow(beta)] <- names(override_beta)[bb]
-      #}
-    }
-  }
   # Initialize
   T_k <- rep(0,N)                         # Time 0
   alive <- 1:N                            # Keeping track of who is alive
   res_list <- vector("list", max_events)  # For results
   idx <- 1                                # Index
 
-  # Create a matrix for the event counts
-  event_counts <- matrix(0, nrow = N, ncol = num_events)
-  colnames(event_counts) <- colnames(beta)
 
+  ############################ Simulations #####################################
 
   while(length(alive) != 0){
     # Simulate time
     V <- -log(stats::runif(N))
+    phi <- calculate_phi(simmatrix)
     W <- sapply(alive, function(i) inverse_sc_haz(V[i], T_k[i], i))
     T_k[alive] <- T_k[alive] + W
+
+    # Maximal censoring time
+    alive[T_k[alive] > max_cens] <- 0
+    T_k[T_k[alive] > max_cens] <- max_cens
 
     # Simulate event
     Deltas <- sapply(alive, function(i) sample(seq_len(num_events), size = 1, prob = probs(T_k[i], i)) - 1)
 
     # Update event counts
-    for (j in seq_len(num_events)) {
-      event_counts[alive, j] <- event_counts[alive, j] + (Deltas == (j - 1))
-    }
+    simmatrix[cbind(alive, 2 + num_add_cov + Deltas + 1)] <-                    # Kig på det her !!!
+      simmatrix[cbind(alive, 2 + num_add_cov + Deltas + 1)] + 1
 
     # Store data
     kth_event <- data.table(ID = alive,
                             Time = T_k[alive],
-                            Delta = Deltas,
-                            L0 = L0[alive],
-                            A0 = A0[alive])
+                            Delta = Deltas)
 
-    res_list[[idx]] <- cbind(kth_event, L1[alive,], data.table(event_counts)[alive,])
+    res_list[[idx]] <- cbind(kth_event, as.data.table(simmatrix[alive, , drop = FALSE]))
     idx <- idx + 1
 
     # Who is still alive and uncensored?
@@ -221,3 +264,17 @@ simEventData <- function(N,                      # Number of individuals
 
   return(res)
 }
+
+#N = 10                      # Number of individuals
+#beta = NULL            # Effects
+#eta = NULL             # Shape parameters
+#nu = NULL              # Scale parameters
+#at_risk = NULL        # Function defining the setting
+#term_deltas = c(0,1)   # Terminal events
+#max_cens = Inf        # Followup time
+#add_cov = NULL        # Additional baseline covariates
+#override_beta = NULL   # Argument to easily override entries in beta
+#max_events = 10      # Number of maximal events per individual
+#lower = 10^(-10)      # Lower bound for inverse cumulative hazard
+#upper = 200          # Upper bound for inverse cumulative hazard
+#gen_A0 = NULL           # Function for generation of A0
