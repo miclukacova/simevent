@@ -120,7 +120,8 @@ simEventData <- function(N,                      # Number of individuals
 
   # Default at_risk
   if(is.null(at_risk)){
-    at_risk <- function(events) return(rep(1, num_events))
+    riskss <- rep(1, num_events)
+    at_risk <- function(events) return(riskss)
   }
   # Default A0 generation
   if(is.null(gen_A0)){
@@ -162,11 +163,7 @@ simEventData <- function(N,                      # Number of individuals
   # Proportional hazard
   if(nrow(beta) == N_stop){
     calculate_phi <- function(simmatrix) {
-      effects <- matrix(nrow = N, ncol = num_events)
-      for(i in 1:N){
-        effects[i,] <- simmatrix[i,] %*% beta
-      }
-      return(exp(effects))
+      exp(simmatrix %*% beta)
     }
   } else {
     calculate_phi <- function(simmatrix) {
@@ -252,7 +249,7 @@ simEventData <- function(N,                      # Number of individuals
                             Time = T_k[alive],
                             Delta = Deltas)
 
-    res_list[[idx]] <- cbind(kth_event, as.data.table(simmatrix[alive, , drop = FALSE]))
+    res_list[[idx]] <- cbind(kth_event, data.table::as.data.table(simmatrix[alive, , drop = FALSE]))
     idx <- idx + 1
 
     # Who is still alive and uncensored?
