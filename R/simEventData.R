@@ -186,7 +186,7 @@ simEventData <- function(N,                      # Number of individuals
   }
 
   # If all events have same parameter, the inverse simplifies
-  if(all(nu[1] == nu)){
+  if(all(nu[1] == nu) && all(eta[1] == eta)){
     inverse_sc_haz <- function(p, t, i) {
       denom <- sum(at_risk(simmatrix[i, N_start:N_stop]) * eta * phi[i,])
       (p / denom + t^nu[1])^(1 / nu[1]) - t
@@ -200,7 +200,7 @@ simEventData <- function(N,                      # Number of individuals
     # Inverse summed cumulative hazard function
     inverse_sc_haz <- function(p, t, i) {
       root_function <- function(u) sum_cum_haz(u, t, i) - p
-      stats::uniroot(root_function, lower = 10^-15, upper = 200)$root
+      stats::uniroot(root_function, lower = lower, upper = upper)$root
     }
   }
 
@@ -238,10 +238,11 @@ simEventData <- function(N,                      # Number of individuals
     T_k[T_k[alive] > max_cens] <- max_cens
 
     # Simulate event
-    Deltas <- sapply(alive, function(i) sample(seq_len(num_events), size = 1, prob = probs(T_k[i], i)) - 1)
+    probs_mat <- sapply(alive, function(i) probs(T_k[i], i), simplify = "array")
+    Deltas <- apply(probs_mat, 2, function(p) sample(seq_along(p), 1, prob = p)) - 1
 
     # Update event counts
-    simmatrix[cbind(alive, 2 + num_add_cov + Deltas + 1)] <-                    # Kig på det her !!!
+    simmatrix[cbind(alive, 2 + num_add_cov + Deltas + 1)] <-
       simmatrix[cbind(alive, 2 + num_add_cov + Deltas + 1)] + 1
 
     # Store data
