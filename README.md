@@ -91,27 +91,27 @@ The simulated data looks like
 ``` r
 head(data)
 #> Key: <ID>
-#>       ID      Time Delta        L0    A0    L1         L2    N0    N1    N2
-#>    <int>     <num> <num>     <num> <int> <num>      <num> <num> <num> <num>
-#> 1:     1 0.8848577     0 0.0482511     1     0  0.9036369     1     0     0
-#> 2:     2 1.1833330     0 0.2186699     0     0  1.0631460     1     0     0
-#> 3:     3 2.1956540     1 0.5021846     0     0 -0.2266280     0     1     0
-#> 4:     4 0.2193077     2 0.4053148     1     0  1.2534397     0     0     1
-#> 5:     4 0.4662299     2 0.4053148     1     0  1.2534397     0     0     2
-#> 6:     4 0.7129790     1 0.4053148     1     0  1.2534397     0     1     2
+#>       ID      Time Delta       L0    A0    L1         L2    N0    N1    N2
+#>    <int>     <num> <num>    <num> <num> <num>      <num> <num> <num> <num>
+#> 1:     1 1.8744581     2 0.816906     1     0  0.2555876     0     0     1
+#> 2:     1 3.5176995     0 0.816906     1     0  0.2555876     1     0     1
+#> 3:     2 0.3885784     4 0.789366     1     0 -0.6972059     0     0     0
+#> 4:     2 1.2240710     2 0.789366     1     0 -0.6972059     0     0     1
+#> 5:     2 1.3586336     2 0.789366     1     0 -0.6972059     0     0     2
+#> 6:     2 1.6123448     0 0.789366     1     0 -0.6972059     1     0     2
 #>       N3    N4
 #>    <num> <num>
 #> 1:     0     0
 #> 2:     0     0
-#> 3:     0     0
-#> 4:     0     0
-#> 5:     0     0
-#> 6:     0     0
+#> 3:     0     1
+#> 4:     0     1
+#> 5:     0     1
+#> 6:     0     1
 ```
 
 From data we can for example see that Individual $1$ has a baseline
-covariate $L_0$ of $0.0482511$, does get baseline treatment ($A_0 = 1$)
-and experienced the terminal event $0$ at Time $1.03$.
+covariate $L_0$ of $0.816906$, does get baseline treatment ($A_0 = 1$)
+and experienced the event $2$ at Time $0.8638205$.
 
 It could be of interest to estimate the effects of covariates on the
 intensities of the different counting processes. A tool for this is the
@@ -130,22 +130,22 @@ Data in the format looks like
 ``` r
 head(data_int)
 #> Key: <ID>
-#>       ID      Time Delta        L0    A0    L1         L2    N0    N1    N2
-#>    <int>     <num> <num>     <num> <int> <num>      <num> <num> <num> <num>
-#> 1:     1 0.8848577     0 0.0482511     1     0  0.9036369     0     0     0
-#> 2:     2 1.1833330     0 0.2186699     0     0  1.0631460     0     0     0
-#> 3:     3 2.1956540     1 0.5021846     0     0 -0.2266280     0     0     0
-#> 4:     4 0.2193077     2 0.4053148     1     0  1.2534397     0     0     0
-#> 5:     4 0.4662299     2 0.4053148     1     0  1.2534397     0     0     1
-#> 6:     4 0.7129790     1 0.4053148     1     0  1.2534397     0     0     2
+#>       ID      Time Delta       L0    A0    L1         L2    N0    N1    N2
+#>    <int>     <num> <num>    <num> <num> <num>      <num> <num> <num> <num>
+#> 1:     1 1.8744581     2 0.816906     1     0  0.2555876     0     0     0
+#> 2:     1 3.5176995     0 0.816906     1     0  0.2555876     0     0     1
+#> 3:     2 0.3885784     4 0.789366     1     0 -0.6972059     0     0     0
+#> 4:     2 1.2240710     2 0.789366     1     0 -0.6972059     0     0     0
+#> 5:     2 1.3586336     2 0.789366     1     0 -0.6972059     0     0     1
+#> 6:     2 1.6123448     0 0.789366     1     0 -0.6972059     0     0     2
 #>       N3    N4     k    tstart     tstop
 #>    <num> <num> <int>     <num>     <num>
-#> 1:     0     0     1 0.0000000 0.8848577
-#> 2:     0     0     1 0.0000000 1.1833330
-#> 3:     0     0     1 0.0000000 2.1956540
-#> 4:     0     0     1 0.0000000 0.2193077
-#> 5:     0     0     2 0.2193077 0.4662299
-#> 6:     0     0     3 0.4662299 0.7129790
+#> 1:     0     0     1 0.0000000 1.8744581
+#> 2:     0     0     2 1.8744581 3.5176995
+#> 3:     0     0     1 0.0000000 0.3885784
+#> 4:     0     1     2 0.3885784 1.2240710
+#> 5:     0     1     3 1.2240710 1.3586336
+#> 6:     0     1     4 1.3586336 1.6123448
 ```
 
 The data contains the same information as the original data, only now
@@ -160,19 +160,11 @@ following code
 ``` r
 library(survival)
 # Process 0
-survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + 
-                    as.numeric(N2 > 0) +
-                    as.numeric(N3 > 0) + 
-                    as.numeric(N4 > 0) +
-                    L1 + L2, 
+survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + L1 + L2 + N2 + N3 + N4, 
                   data = data_int)
 
 # Process 4
-survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + 
-                    as.numeric(N2 > 0) +
-                    as.numeric(N3 > 0) + 
-                    as.numeric(N4 > 0) +
-                    L1 + L2, 
+survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + L1 + L2 + N2 + N3 + N4, 
                   data = data_int[N4 < 2])
 ```
 
@@ -191,15 +183,25 @@ plot shows the event history of the 100 first rows of data, the
 different colors of the dots illustrate the different events. The
 $x$-axis is the timeline.
 
-### Specifying an entry in the beta matrix with use of override_beta
+### The argument override_beta
 
 We can specify an entry in the beta matrix with use of the argument
 `override_beta`. For example the following code sets the effect of L0 on
 the processes N0 and N1 equal to 0.
 
 ``` r
-data <- simEventData(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
                      override_beta = list("L0" = c("N0" = 0, "N1" = 0)))
+```
+
+In the default case the effects of the counting processes on the
+intensities are linear. This can be altered by the argument
+`override_beta`. For example the following code the effect of N2 on the
+process N1 is set to $0$ if $N2$ is larger than $1$.
+
+``` r
+data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     override_beta = list("N2 > 1" = c("N1" = 2)))
 ```
 
 ## Example 2: Survival Data
@@ -212,7 +214,7 @@ data <- simSurvData(100)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
 
 One can again specify the effects of $A_0$ and $L_0$ on the risk of
 death and censoring by the `beta` argument.
@@ -241,7 +243,7 @@ data <- simSurvData(100, beta = beta, eta = eta, nu = nu)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
 
 ## Example 3: Competing Risk Data
 
@@ -254,7 +256,7 @@ data <- simCRdata(100)
 plotEventData(data, title = "Competing Risk Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
 ## Example 4: Type 2 Diabetes
 
@@ -282,7 +284,7 @@ data <- simT2D(N = 100,
 plotEventData(data, title = "T2D data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
 
 ## Example 5: Unobserved Covariate Setting
 
@@ -326,4 +328,4 @@ operation/treatment event (op = 1), where there is a censoring process
 plotEventData(data, title = "Confounding setting")
 ```
 
-<img src="man/figures/README-unnamed-chunk-23-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-24-1.png" width="100%" />
