@@ -35,8 +35,8 @@
 #' @param term_deltas Terminal events. Default is set so that event 0 and 1 are
 #' terminal events.
 #' @param max_cens A maximum censoring time. By default set to infinity. If the event
-#' time is larger than this maximimal censoring time the event becomes event 0 with
-#' probability 1.
+#' time is larger than this maximal censoring time the event is set to 0 with prob
+#' ability 1 and the event time is set to `max_cens`.
 #' @param add_cov Named list of random generator functions for the distributions of
 #' additional baseline covariates. The functions should take the number of observations
 #' as input. By default set to NULL.
@@ -206,6 +206,7 @@ simEventData <- function(N,                      # Number of individuals
 
   # Event probabilities
   probs <- function(t, i){
+    if(t == max_cens) return(c(1, rep(0, (num_events - 1))))
     probs <- lambda(t, i)
     summ <- sum(probs)
     probs / summ
@@ -214,8 +215,8 @@ simEventData <- function(N,                      # Number of individuals
   ############################ Initializing Simulations ########################
 
   # Draw baseline covariates
-  simmatrix[,1] <- stats::runif(N)           # L0
-  simmatrix[,2] <- gen_A0(N, L0)             # A0
+  simmatrix[,1] <- stats::runif(N)        # L0
+  simmatrix[,2] <- gen_A0(N, L0)          # A0
 
   # Initialize
   T_k <- rep(0,N)                         # Time 0
@@ -234,8 +235,7 @@ simEventData <- function(N,                      # Number of individuals
     T_k[alive] <- T_k[alive] + W
 
     # Maximal censoring time
-    alive[T_k[alive] > max_cens] <- 0
-    T_k[T_k[alive] > max_cens] <- max_cens
+    T_k[T_k > max_cens] <- max_cens
 
     # Simulate event
     probs_mat <- sapply(alive, function(i) probs(T_k[i], i), simplify = "array")
@@ -254,7 +254,7 @@ simEventData <- function(N,                      # Number of individuals
     idx <- idx + 1
 
     # Who is still alive and uncensored?
-    alive <- alive[! Deltas %in% term_deltas]
+    alive <- alive[!Deltas %in% term_deltas]
   }
 
   res <- data.table::rbindlist(res_list)

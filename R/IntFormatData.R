@@ -1,5 +1,7 @@
 #' The function transforms the simulated event data containing time dependent covariates
-#' into the tstart tstop format used by the coxph function.
+#' into a format that can be used for classical inference. Three variables are added,
+#' called `tstart`, `tstop` and `k`. The two former are used in for example the coxph
+#' function, and the latter counts the number of events.
 #'
 #' @title Transformation of Event Data into Interval Format
 #'

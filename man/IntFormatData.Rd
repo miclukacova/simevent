@@ -16,7 +16,9 @@ Event data in a tstart tstop format
 }
 \description{
 The function transforms the simulated event data containing time dependent covariates
-into the tstart tstop format used by the coxph function.
+into a format that can be used for classical inference. Three variables are added,
+called \code{tstart}, \code{tstop} and \code{k}. The two former are used in for example the coxph
+function, and the latter counts the number of events.
 }
 \examples{
 data <- simEventData(10)

@@ -15,7 +15,7 @@ simEventData(
   add_cov = NULL,
   override_beta = NULL,
   max_events = 10,
-  lower = 10^(-10),
+  lower = 10^(-15),
   upper = 200,
   gen_A0 = NULL
 )
@@ -47,8 +47,8 @@ are always at risk for all events.}
 terminal events.}
 
 \item{max_cens}{A maximum censoring time. By default set to infinity. If the event
-time is larger than this maximimal censoring time the event becomes event 0 with
-probability 1.}
+time is larger than this maximal censoring time the event is set to 0 with prob
+ability 1 and the event time is set to \code{max_cens}.}
 
 \item{add_cov}{Named list of random generator functions for the distributions of
 additional baseline covariates. The functions should take the number of observations
