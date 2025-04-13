@@ -11,7 +11,7 @@ test_that("simEventData simulates data in the right way",{
       as.numeric(events[4] < 1)))   # Can experience event 3 once
   }
   beta <- matrix(rnorm(24,0,1), ncol = 4, nrow = 6)
-  data_test <- simEventData(5000, beta = beta, at_risk = at_risk)
+  data_test <- simEventData(6000, beta = beta, at_risk = at_risk)
 
   # Transform data into tstart tstop format
   data_int <- IntFormatData(data_test)

@@ -167,14 +167,11 @@ simEventData <- function(N,                      # Number of individuals
     }
   } else {
     calculate_phi <- function(simmatrix) {
-      obj <- data.frame(simmatrix)
-      effects <- matrix(nrow = N, ncol = num_events)
-      for(i in 1:N){
-        terms <- sapply(1:nrow(beta), function(bb) {
-          with(obj[i,], eval(parse(text = rownames(beta)[bb]))) * beta[bb,]
-        })
-        effects[i,] <- rowSums(terms)
-      }
+      obj <- as.data.frame(simmatrix)
+      X <- sapply(rownames(beta), function(expr) {
+        eval(parse(text = expr), envir = obj)
+      })
+      effects <- as.matrix(X) %*% beta
       return(exp(effects))
     }
   }
@@ -215,14 +212,14 @@ simEventData <- function(N,                      # Number of individuals
   ############################ Initializing Simulations ########################
 
   # Draw baseline covariates
-  simmatrix[,1] <- stats::runif(N)        # L0
-  simmatrix[,2] <- gen_A0(N, L0)          # A0
+  simmatrix[,1] <- stats::runif(N)                   # L0
+  simmatrix[,2] <- gen_A0(N, simmatrix[,1])          # A0
 
   # Initialize
-  T_k <- rep(0,N)                         # Time 0
-  alive <- 1:N                            # Keeping track of who is alive
-  res_list <- vector("list", max_events)  # For results
-  idx <- 1                                # Index
+  T_k <- rep(0,N)                                    # Time 0
+  alive <- 1:N                                       # Keeping track of who is alive
+  res_list <- vector("list", max_events)             # For results
+  idx <- 1                                           # Index
 
 
   ############################ Simulations #####################################
@@ -239,7 +236,7 @@ simEventData <- function(N,                      # Number of individuals
 
     # Simulate event
     probs_mat <- sapply(alive, function(i) probs(T_k[i], i), simplify = "array")
-    Deltas <- apply(probs_mat, 2, function(p) sample(seq_along(p), 1, prob = p)) - 1
+    Deltas <- sampleEvents(probs_mat)
 
     # Update event counts
     simmatrix[cbind(alive, 2 + num_add_cov + Deltas + 1)] <-
@@ -263,16 +260,6 @@ simEventData <- function(N,                      # Number of individuals
   return(res)
 }
 
-#N = 10                      # Number of individuals
-#beta = NULL            # Effects
-#eta = NULL             # Shape parameters
-#nu = NULL              # Scale parameters
-#at_risk = NULL        # Function defining the setting
-#term_deltas = c(0,1)   # Terminal events
-#max_cens = Inf        # Followup time
-#add_cov = NULL        # Additional baseline covariates
-#override_beta = NULL   # Argument to easily override entries in beta
-#max_events = 10      # Number of maximal events per individual
-#lower = 10^(-10)      # Lower bound for inverse cumulative hazard
-#upper = 200          # Upper bound for inverse cumulative hazard
-#gen_A0 = NULL           # Function for generation of A0
+
+
+
