@@ -73,11 +73,11 @@ simEventData <- function(N,                      # Number of individuals
                          term_deltas = c(0,1),   # Terminal events
                          max_cens = Inf,         # Followup time
                          add_cov = NULL,         # Additional baseline covariates
-                         override_beta = NULL,   # Argument to easily override entries in beta
-                         max_events = 10,        # Number of maximal events per individual
-                         lower = 10^(-15),       # Lower bound for inverse cumulative hazard
-                         upper = 200,            # Upper bound for inverse cumulative hazard
-                         gen_A0 = NULL           # Function for generation of A0
+                         override_beta = NULL,   # Override beta
+                         max_events = 10,        # Maximal events per individual
+                         lower = 10^(-15),       # Lower bound for ICH
+                         upper = 200,            # Upper bound for ICH
+                         gen_A0 = NULL           # Generation of A0
 ){
   ID <- NULL
 

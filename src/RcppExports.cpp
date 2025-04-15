@@ -10,6 +10,26 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// inverseScHazCpp
+double inverseScHazCpp(double p, double t, double lower, double upper, NumericVector eta, NumericVector nu, NumericVector phi, NumericVector at_risk, double tol, int max_iter);
+RcppExport SEXP _simevent_inverseScHazCpp(SEXP pSEXP, SEXP tSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP etaSEXP, SEXP nuSEXP, SEXP phiSEXP, SEXP at_riskSEXP, SEXP tolSEXP, SEXP max_iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type lower(lowerSEXP);
+    Rcpp::traits::input_parameter< double >::type upper(upperSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type nu(nuSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type at_risk(at_riskSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    rcpp_result_gen = Rcpp::wrap(inverseScHazCpp(p, t, lower, upper, eta, nu, phi, at_risk, tol, max_iter));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sampleEvents
 IntegerVector sampleEvents(NumericMatrix probs);
 RcppExport SEXP _simevent_sampleEvents(SEXP probsSEXP) {
@@ -23,6 +43,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_simevent_inverseScHazCpp", (DL_FUNC) &_simevent_inverseScHazCpp, 10},
     {"_simevent_sampleEvents", (DL_FUNC) &_simevent_sampleEvents, 1},
     {NULL, NULL, 0}
 };
