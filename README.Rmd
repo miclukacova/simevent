@@ -50,10 +50,10 @@ beta <- matrix(rnorm(9*5), ncol = 5, nrow = 9)
 To include additional baseline covariates, the user can specify random generator functions to generate the covariates. We will in the following include two additional baseline covariates, one with a Bernoulli distribution with success parameter 0.2, and one with a normal distribution. The functions should take as input the number of draws to make. We choose to specify two additional covariates by
 
 ```{r}
-# additional covariates
+# Additional covariates
 func1 <- function(N) rbinom(N, 1, 0.2)
 func2 <- function(N) rnorm(N)
-add_cov <- list(func1, func2)
+add_cov <- list("Z1" = func1, "Z2" = func2)
 ```
 
 One can specify an at_risk function
@@ -99,11 +99,11 @@ The data contains the same information as the original data, only now three addi
 ```{r}
 library(survival)
 # Process 0
-survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + L1 + L2 + N2 + N3 + N4, 
+survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4, 
                   data = data_int)
 
 # Process 4
-survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + L1 + L2 + N2 + N3 + N4, 
+survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4, 
                   data = data_int[N4 < 2])
 ```
 

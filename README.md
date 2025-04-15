@@ -56,10 +56,10 @@ distribution. The functions should take as input the number of draws to
 make. We choose to specify two additional covariates by
 
 ``` r
-# additional covariates
+# Additional covariates
 func1 <- function(N) rbinom(N, 1, 0.2)
 func2 <- function(N) rnorm(N)
-add_cov <- list(func1, func2)
+add_cov <- list("Z1" = func1, "Z2" = func2)
 ```
 
 One can specify an at_risk function
@@ -91,22 +91,22 @@ The simulated data looks like
 ``` r
 head(data)
 #> Key: <ID>
-#>       ID      Time Delta       L0    A0    L1         L2    N0    N1    N2
-#>    <int>     <num> <num>    <num> <num> <num>      <num> <num> <num> <num>
-#> 1:     1 1.8744581     2 0.816906     1     0  0.2555876     0     0     1
-#> 2:     1 3.5176995     0 0.816906     1     0  0.2555876     1     0     1
-#> 3:     2 0.3885784     4 0.789366     1     0 -0.6972059     0     0     0
-#> 4:     2 1.2240710     2 0.789366     1     0 -0.6972059     0     0     1
-#> 5:     2 1.3586336     2 0.789366     1     0 -0.6972059     0     0     2
-#> 6:     2 1.6123448     0 0.789366     1     0 -0.6972059     1     0     2
+#>       ID      Time Delta        L0    A0    Z1         Z2    N0    N1    N2
+#>    <int>     <num> <int>     <num> <num> <num>      <num> <num> <num> <num>
+#> 1:     1 2.2155444     4 0.8169060     1     0  0.2555876     0     0     0
+#> 2:     1 3.4203598     2 0.8169060     1     0  0.2555876     0     0     1
+#> 3:     1 4.2398814     0 0.8169060     1     0  0.2555876     1     0     1
+#> 4:     2 0.7664782     2 0.7893660     1     0 -0.6972059     0     0     1
+#> 5:     2 1.5081069     1 0.7893660     1     0 -0.6972059     0     1     1
+#> 6:     3 1.2323103     0 0.8561421     1     0  0.7786811     1     0     0
 #>       N3    N4
 #>    <num> <num>
-#> 1:     0     0
-#> 2:     0     0
+#> 1:     0     1
+#> 2:     0     1
 #> 3:     0     1
-#> 4:     0     1
-#> 5:     0     1
-#> 6:     0     1
+#> 4:     0     0
+#> 5:     0     0
+#> 6:     0     0
 ```
 
 From data we can for example see that Individual $1$ has a baseline
@@ -130,22 +130,22 @@ Data in the format looks like
 ``` r
 head(data_int)
 #> Key: <ID>
-#>       ID      Time Delta       L0    A0    L1         L2    N0    N1    N2
-#>    <int>     <num> <num>    <num> <num> <num>      <num> <num> <num> <num>
-#> 1:     1 1.8744581     2 0.816906     1     0  0.2555876     0     0     0
-#> 2:     1 3.5176995     0 0.816906     1     0  0.2555876     0     0     1
-#> 3:     2 0.3885784     4 0.789366     1     0 -0.6972059     0     0     0
-#> 4:     2 1.2240710     2 0.789366     1     0 -0.6972059     0     0     0
-#> 5:     2 1.3586336     2 0.789366     1     0 -0.6972059     0     0     1
-#> 6:     2 1.6123448     0 0.789366     1     0 -0.6972059     0     0     2
+#>       ID      Time Delta        L0    A0    Z1         Z2    N0    N1    N2
+#>    <int>     <num> <int>     <num> <num> <num>      <num> <num> <num> <num>
+#> 1:     1 2.2155444     4 0.8169060     1     0  0.2555876     0     0     0
+#> 2:     1 3.4203598     2 0.8169060     1     0  0.2555876     0     0     0
+#> 3:     1 4.2398814     0 0.8169060     1     0  0.2555876     0     0     1
+#> 4:     2 0.7664782     2 0.7893660     1     0 -0.6972059     0     0     0
+#> 5:     2 1.5081069     1 0.7893660     1     0 -0.6972059     0     0     1
+#> 6:     3 1.2323103     0 0.8561421     1     0  0.7786811     0     0     0
 #>       N3    N4     k    tstart     tstop
 #>    <num> <num> <int>     <num>     <num>
-#> 1:     0     0     1 0.0000000 1.8744581
-#> 2:     0     0     2 1.8744581 3.5176995
-#> 3:     0     0     1 0.0000000 0.3885784
-#> 4:     0     1     2 0.3885784 1.2240710
-#> 5:     0     1     3 1.2240710 1.3586336
-#> 6:     0     1     4 1.3586336 1.6123448
+#> 1:     0     0     1 0.0000000 2.2155444
+#> 2:     0     1     2 2.2155444 3.4203598
+#> 3:     0     1     3 3.4203598 4.2398814
+#> 4:     0     0     1 0.0000000 0.7664782
+#> 5:     0     0     2 0.7664782 1.5081069
+#> 6:     0     0     1 0.0000000 1.2323103
 ```
 
 The data contains the same information as the original data, only now
@@ -160,11 +160,11 @@ following code
 ``` r
 library(survival)
 # Process 0
-survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + L1 + L2 + N2 + N3 + N4, 
+survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4, 
                   data = data_int)
 
 # Process 4
-survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + L1 + L2 + N2 + N3 + N4, 
+survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4, 
                   data = data_int[N4 < 2])
 ```
 
