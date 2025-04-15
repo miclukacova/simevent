@@ -182,22 +182,18 @@ simEventData <- function(N,                      # Number of individuals
     risk_vec * eta * nu * t^(nu - 1) * phi[i,]
   }
 
-  # If all events have same parameter, the inverse simplifies
+  # If all events have the same parameter, the inverse of the cumulative hazard simplifies
   if(all(nu[1] == nu) && all(eta[1] == eta)){
     inverse_sc_haz <- function(p, t, i) {
       denom <- sum(at_risk(simmatrix[i, N_start:N_stop]) * eta * phi[i,])
       (p / denom + t^nu[1])^(1 / nu[1]) - t
     }
+  # Otherwise we use a numerical inverse coded in rcpp
   } else{
-    # Summed cumulative hazard
-    sum_cum_haz <- function(u, t, i) {
-      sum(at_risk(simmatrix[i, N_start:N_stop]) * eta * phi[i,] * ((t + u) ^ nu - t ^ nu))
-    }
-
-    # Inverse summed cumulative hazard function
     inverse_sc_haz <- function(p, t, i) {
-      root_function <- function(u) sum_cum_haz(u, t, i) - p
-      stats::uniroot(root_function, lower = lower, upper = upper)$root
+      inverseScHaz(p, t, lower = lower, upper = upper, eta = eta, nu = nu,
+                     phi = phi[i,], at_risk = at_risk(simmatrix[i, N_start:N_stop]))
+
     }
   }
 
