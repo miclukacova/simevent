@@ -30,21 +30,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// sampleEvents
-IntegerVector sampleEvents(NumericMatrix probs);
-RcppExport SEXP _simevent_sampleEvents(SEXP probsSEXP) {
+// sampleEventsCpp
+IntegerVector sampleEventsCpp(NumericMatrix probs);
+RcppExport SEXP _simevent_sampleEventsCpp(SEXP probsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type probs(probsSEXP);
-    rcpp_result_gen = Rcpp::wrap(sampleEvents(probs));
+    rcpp_result_gen = Rcpp::wrap(sampleEventsCpp(probs));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_simevent_inverseScHazCpp", (DL_FUNC) &_simevent_inverseScHazCpp, 10},
-    {"_simevent_sampleEvents", (DL_FUNC) &_simevent_sampleEvents, 1},
+    {"_simevent_sampleEventsCpp", (DL_FUNC) &_simevent_sampleEventsCpp, 1},
     {NULL, NULL, 0}
 };
 

@@ -2,7 +2,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-IntegerVector sampleEvents(NumericMatrix probs) {
+IntegerVector sampleEventsCpp(NumericMatrix probs) {
   int n = probs.ncol();
   int k = probs.nrow();
   IntegerVector result(n);
