@@ -5,7 +5,7 @@ inverseScHazCpp <- function(p, t, lower, upper, eta, nu, phi, at_risk, tol = 1e-
     .Call(`_simevent_inverseScHazCpp`, p, t, lower, upper, eta, nu, phi, at_risk, tol, max_iter)
 }
 
-sampleEvents <- function(probs) {
-    .Call(`_simevent_sampleEvents`, probs)
+sampleEventsCpp <- function(probs) {
+    .Call(`_simevent_sampleEventsCpp`, probs)
 }
 
