@@ -16,24 +16,31 @@
 #' @examples
 #' simSurvData(10)
 simSurvData <- function(N,
-                          beta = NULL,
-                          eta = rep(0.1,2),
-                          nu = rep(1.1,2)
-){
+                        beta = NULL,
+                        eta = rep(0.1,2),
+                        nu = rep(1.1,2),
+                        cens = 1,
+                        ...
+                        ){
 
-  at_risk <- function(events) c(1,1)
 
-  if(is.null(beta)){
-    beta <- matrix(0, ncol = 2, nrow = 2)
-  }
+    at_risk <- function(events) c(cens,1)
 
-  beta <- rbind(beta, matrix(0, nrow = 2, ncol = 2))
+    if(is.null(beta)){
+        beta <- matrix(0, ncol = 2, nrow = 2)
+    }
 
-  results <- simEventData(N, beta, eta = eta, nu = nu, at_risk = at_risk)
+    beta <- rbind(beta, matrix(0, nrow = 2, ncol = 2))
+    
+    dots <- list(...)
+    has_add_cov <- "add_cov" %in% names(dots)
+    if (has_add_cov) beta <- rbind(beta, matrix(c(rep(0, length(dots$add_cov)), rep(0.1, length(dots$add_cov))), nrow = length(dots$add_cov), ncol = ncol(beta)))
 
-  # We don't need columns for terminal events
-  results <- results[, !c("N0", "N1")]
+    results <- simEventData(N, beta, eta = eta, nu = nu, at_risk = at_risk, ...)
 
-  return(results)
+    # We don't need columns for terminal events
+    results <- results[, !c("N0", "N1")]
+
+    return(results)
 }
 

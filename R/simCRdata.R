@@ -19,19 +19,28 @@
 simCRdata <- function(N,
                       beta = NULL,
                       eta = rep(0.1,3),
-                      nu = rep(1.1,3)
+                      nu = rep(1.1,3),
+                      cens = 1,
+                      ...
 ){
 
-  at_risk <- function(events) c(1,1,1)
+    at_risk <- function(events) c(cens,1,1)
 
-  if(is.null(beta)){
-    beta <- matrix(0, ncol = 3, nrow = 2)
-  }
+    if(is.null(beta)){
+        beta <- matrix(0, ncol = 3, nrow = 2)
+    }
 
-  beta <- rbind(beta, matrix(0, ncol = 3, nrow = 3))
-  results <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
-                          term_deltas = c(0,1,2))
-  results <- results[, !c("N0", "N1", "N2")]
+    beta <- rbind(beta, matrix(0, ncol = 3, nrow = 3))
 
-  return(results)
+    dots <- list(...)
+    has_add_cov <- "add_cov" %in% names(dots)
+    if (has_add_cov) beta <- rbind(beta, matrix(c(rep(0, length(dots$add_cov)), rep(0.1, length(dots$add_cov))), nrow = length(dots$add_cov), ncol = ncol(beta)))
+    
+    results <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
+                            term_deltas = c(0,1,2),
+                            ...)
+    
+    results <- results[, !c("N0", "N1", "N2")]
+
+    return(results)
 }

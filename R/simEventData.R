@@ -138,24 +138,25 @@ simEventData <- function(N,                      # Number of individuals
 
   # Naming of matrices
   if (is.null(names(add_cov)) && num_add_cov != 0) {
-    colnames(simmatrix) <- c("L0", "A0", paste0("L", seq_len(num_add_cov)), colnames(beta))
+      colnames(simmatrix) <- c("L0", "A0", paste0("L", seq_len(num_add_cov)), colnames(beta))
   } else {
-    colnames(simmatrix) <- c("L0", "A0", names(add_cov), colnames(beta))
+      colnames(simmatrix) <- c("L0", "A0", names(add_cov), colnames(beta))
   }
 
   rownames(beta) <- colnames(simmatrix)
 
   # Filing out beta matrix
   if(!is.null(override_beta)){
-    for (bb in 1:length(override_beta)) {
-      if (names(override_beta)[bb] %in% rownames(beta)) {
-        beta[bb, names(override_beta[[bb]])] <- override_beta[[bb]]
-      } else {
-        beta <- rbind(beta, matrix(0, nrow = 1, ncol = ncol(beta)))
-        beta[nrow(beta), names(override_beta[[bb]])] <- override_beta[[bb]]
-        rownames(beta)[nrow(beta)] <- names(override_beta)[bb]
+      for (bb in 1:length(override_beta)) {
+          if (names(override_beta)[bb] %in% rownames(beta)) {
+              #beta[bb, names(override_beta[[bb]])] <- override_beta[[bb]]
+              beta[names(override_beta)[bb], names(override_beta[[bb]])] <- override_beta[[bb]]
+          } else {
+              beta <- rbind(beta, matrix(0, nrow = 1, ncol = ncol(beta)))
+              beta[nrow(beta), names(override_beta[[bb]])] <- override_beta[[bb]]
+              rownames(beta)[nrow(beta)] <- names(override_beta)[bb]
+          }
       }
-    }
   }
 
   ############################ Functions #######################################
