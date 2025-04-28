@@ -1,4 +1,4 @@
-#' `simEventData` is a function to simulate continuous time to event data, e.g. observational
+#' `simEventData2` is a function to simulate continuous time to event data, e.g. observational
 #' healthcare data. The number of events simulated corresponds to the length of the \eqn{\eta}
 #' and \eqn{\nu} vector, as well as the number of columns in the \eqn{\beta} matrix. By
 #' default 4 different types of events are simulated. The first two being terminal
@@ -16,22 +16,6 @@
 #' @title Simulate Event Data
 #'
 #' @param N A double for the number of simulated individuals
-#' @param beta A matrix of doubles for the effects of covariates and events on the
-#' intensities. The columns represent the events N0, N1, .... In the default case 4 events.
-#' The rows represent covariates and processes: the first two rows determine the
-#' effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
-#' next rows determine the effects of the additional baseline covariates, by default
-#'  named L1, L2,... on the processes, followed by the effects of the processes N0,
-#'  N1,.... The \eqn{\beta} matrix is by  default set to 0.
-#' @param eta Vector of shape parameters for the baseline intensity. Default is set
-#' to 0.1 for all events.
-#' @param nu Vector of scale parameters for the baseline intensity. Default is set
-#' to 1.1 for all events.
-#' @param at_risk At risk function. The \code{at_risk} function determines whether
-#' an individual is at risk for a specific event. The function takes as input a vector
-#' `events` of event counts. The function returns a vector of 0's and 1's indicating
-#' which events the subject is at risk for. Default is set to a setting where you
-#' are always at risk for all events.
 #' @param term_deltas Terminal events. Default is set so that event 0 and 1 are
 #' terminal events.
 #' @param max_cens A maximum censoring time. By default set to infinity. If the event
@@ -63,13 +47,9 @@
 #' @export
 #'
 #' @examples
-#' simEventData(N = 10)
+#' #simEventData2(N = 10)
 
-simEventData <- function(N,                      # Number of individuals
-                         beta = NULL,            # Effects
-                         eta = NULL,             # Shape parameters
-                         nu = NULL,              # Scale parameters
-                         at_risk = NULL,         # Function defining the setting
+simEventData2 <- function(N,                      # Number of individuals
                          term_deltas = c(0,1),   # Terminal events
                          max_cens = Inf,         # Followup time
                          add_cov = NULL,         # Additional baseline covariates

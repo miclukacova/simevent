@@ -4,7 +4,7 @@
 \alias{simSurvData}
 \title{Simulate Survival Data}
 \usage{
-simSurvData(N, beta = NULL, eta = rep(0.1, 2), nu = rep(1.1, 2))
+simSurvData(N, beta = NULL, eta = rep(0.1, 2), nu = rep(1.1, 2), cens = 1, ...)
 }
 \arguments{
 \item{N}{A double of the number of individuals}
@@ -16,6 +16,11 @@ The columns represent Censoring and Death, while the rows represent L0 and A0.}
 \deqn{\eta \nu t^{\nu - 1}}. Default is set to 0.1 for all events.}
 
 \item{nu}{Vector of length 2 of scale parameters for the Weibull hazard.}
+
+\item{cens}{Binary variable indicating whether there should be a censoring rpocess}
+
+\item{...}{Lets you specify additional covariates. See the arfument \code{add_cov}
+in the function \code{simEventData}.}
 }
 \value{
 Data frame containing the simulated survival data

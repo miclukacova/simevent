@@ -149,7 +149,6 @@ simEventData <- function(N,                      # Number of individuals
   if(!is.null(override_beta)){
       for (bb in 1:length(override_beta)) {
           if (names(override_beta)[bb] %in% rownames(beta)) {
-              #beta[bb, names(override_beta[[bb]])] <- override_beta[[bb]]
               beta[names(override_beta)[bb], names(override_beta[[bb]])] <- override_beta[[bb]]
           } else {
               beta <- rbind(beta, matrix(0, nrow = 1, ncol = ncol(beta)))

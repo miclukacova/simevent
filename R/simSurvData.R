@@ -9,6 +9,9 @@
 #' @param eta Vector of  length 2 of shape parameters for the Weibull hazard with parameterization
 #' \deqn{\eta \nu t^{\nu - 1}}. Default is set to 0.1 for all events.
 #' @param nu Vector of length 2 of scale parameters for the Weibull hazard.
+#' @param cens Binary variable indicating whether there should be a censoring rpocess
+#' @param ... Lets you specify additional covariates. See the arfument `add_cov`
+#' in the function `simEventData`.
 #'
 #' @return  Data frame containing the simulated survival data
 #' @export
@@ -31,7 +34,7 @@ simSurvData <- function(N,
     }
 
     beta <- rbind(beta, matrix(0, nrow = 2, ncol = 2))
-    
+
     dots <- list(...)
     has_add_cov <- "add_cov" %in% names(dots)
     if (has_add_cov) beta <- rbind(beta, matrix(c(rep(0, length(dots$add_cov)), rep(0.1, length(dots$add_cov))), nrow = length(dots$add_cov), ncol = ncol(beta)))
