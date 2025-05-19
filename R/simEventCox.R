@@ -12,10 +12,8 @@
 #' @param max_events Integer. The maximum number of events to simulate (i.e., simulation rounds).
 #' @param n_event_max Integer vector. Maximum number of times each event type can occur per individual.
 #' @param term_events Integer or vector of integers. Indices of event types that are terminal (i.e., stop further simulation for an individual).
-#' @param intervention A named list containing a single intervention function. The name of should be either "cox" or
-#' "basehaz" depending on whether the intervention should intervene on the covariates or the basehazard. The function
-#' intervening on the covariates should be a function of the simulation data, and the function intervening on the basehazard
-#' should be a function of a $j$, the event number, and then the basehazard list.
+#' @param intervention A function of $j$, the event number, and the sim_matrix containing the information. The function should
+#' return a new sim_matrix, altered in the way desired for the intervention.
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -64,7 +62,7 @@ simEventCox <- function(N,
                         max_events = 5,
                         n_event_max = c(1,1),
                         term_events = 1,
-                        intervention = list("No Int" = NULL)) {
+                        intervention = NULL) {
 
   ID <- NULL
 
@@ -77,9 +75,7 @@ simEventCox <- function(N,
   # Matrix for storing data
   sim_data <- data.frame(L0 = sample(L0_old, N, TRUE),
                          A0 = sample(A0_old, N, TRUE))
-
   for (name in names(cox_fits)) sim_data[[name]] <- 0
-
 
   # List for results
   res_list <- vector("list", max_events)                  # For results
@@ -87,36 +83,28 @@ simEventCox <- function(N,
 
   # Base hazard
   basehazz_list <- lapply(cox_fits, function(model) basehaz(model, centered = FALSE))
-  # Jump times of the base hazard
-  jump_times <- lapply(basehazz_list, function(df) c(0,df[["time"]]))
-  basehazz_list <- lapply(basehazz_list, function(df) c(0,df[["hazard"]]))
-  if(names(intervention) == "basehaz"){
-    for(j in seq_len(num_events)){
-      basehazz_list[[j]] <- intervention[[1]](basehazz_list[j])
-    }
-  }
 
+  # The cumulative hazard and inverse cumulative hazard
   cumhaz_fn <- vector("list", num_events)
   invhaz_fn <- vector("list", num_events)
   for(j in seq_len(num_events)) {
-    H_j <- basehazz_list[[j]]
-    t_j <- jump_times[[j]]
+    H_j <- c(0, basehazz_list[[j]][["hazard"]])
+    t_j <- c(0, basehazz_list[[j]][["time"]])
     cumhaz_fn[[j]] <- stats::approxfun(t_j,       H_j,
-                                method="linear", yright = Inf)
+                                       method="linear", yright = Inf)
     # We choose ties = max to ensure that event times are strictly increasing
     invhaz_fn[[j]] <- stats::approxfun(H_j,       t_j,
-                                method="linear", rule=2, ties = max)
-  }
+                                       method="linear", rule=2, ties = max)
+    }
 
   while(num_alive != 0){
-
     # Intervention Cox term
-    if(names(intervention) == "cox"){
+    if(!is.null(intervention)){
       cox_term <- list()
       for(j in seq_len(num_events)){
-        sim_data_cox <- intervention[[1]](j, sim_data)
+        sim_data_cox <- intervention(j, sim_data)
         cox_term[[j]] <- exp(stats::predict(cox_fits[[j]], newdata = sim_data_cox, type="lp", reference = "zero"))
-      }
+        }
       # Calculate the non intervention Cox term
       } else{
       cox_term <- lapply(cox_fits, function(model)
