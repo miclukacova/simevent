@@ -31,7 +31,10 @@ names can be used as column names.}
 
 \item{term_events}{Integer or vector of integers. Indices of event types that are terminal (i.e., stop further simulation for an individual).}
 
-\item{intervention}{description}
+\item{intervention}{A named list containing a single intervention function. The name of should be either "cox" or
+"basehaz" depending on whether the intervention should intervene on the covariates or the basehazard. The function
+intervening on the covariates should be a function of the simulation data, and the function intervening on the basehazard
+should be a function of a $j$, the event number, and then the basehazard list.}
 }
 \value{
 A \code{data.table} with one row per event per individual, including:

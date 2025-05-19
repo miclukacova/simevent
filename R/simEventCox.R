@@ -12,7 +12,10 @@
 #' @param max_events Integer. The maximum number of events to simulate (i.e., simulation rounds).
 #' @param n_event_max Integer vector. Maximum number of times each event type can occur per individual.
 #' @param term_events Integer or vector of integers. Indices of event types that are terminal (i.e., stop further simulation for an individual).
-#' @param intervention description
+#' @param intervention A named list containing a single intervention function. The name of should be either "cox" or
+#' "basehaz" depending on whether the intervention should intervene on the covariates or the basehazard. The function
+#' intervening on the covariates should be a function of the simulation data, and the function intervening on the basehazard
+#' should be a function of a $j$, the event number, and then the basehazard list.
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -82,28 +85,28 @@ simEventCox <- function(N,
   res_list <- vector("list", max_events)                  # For results
   idx <- 1                                                # Index
 
-  # Function to find the cumulative intensity at time t
-  cum_int <- function(int_vals, time_vals, t) {
-    idx <- findInterval(t, time_vals)
-    ifelse(idx == 0, 0, int_vals[idx])
-  }
-
-  # Function to find the inverse cumulative intensity
-  inv_cum_int <- function(int_vals, time_vals, p) {
-    idx <- findInterval(p, int_vals)
-    ifelse(idx == length(time_vals), Inf,  time_vals[idx])
-  }
-
   # Base hazard
   basehazz_list <- lapply(cox_fits, function(model) basehaz(model, centered = FALSE))
   # Jump times of the base hazard
-  jump_times <- lapply(basehazz_list, function(df) df[["time"]])
-  basehazz_list <- lapply(basehazz_list, function(df) df[["hazard"]])
+  jump_times <- lapply(basehazz_list, function(df) c(0,df[["time"]]))
+  basehazz_list <- lapply(basehazz_list, function(df) c(0,df[["hazard"]]))
   if(names(intervention) == "basehaz"){
     basehazz_list <- lapply(basehazz_list, intervention[[1]])
   }
 
-  while(length(alive) != 0){
+  cumhaz_fn <- vector("list", num_events)
+  invhaz_fn <- vector("list", num_events)
+  for(j in seq_len(num_events)) {
+    H_j <- basehazz_list[[j]]
+    t_j <- jump_times[[j]]
+    cumhaz_fn[[j]] <- stats::approxfun(t_j,       H_j,
+                                method="linear", yright = Inf)
+    # We choose ties = max to ensure that event times are strictly increasing
+    invhaz_fn[[j]] <- stats::approxfun(H_j,       t_j,
+                                method="linear", rule=2, ties = max)
+  }
+
+  while(num_alive != 0){
 
     # Intervention Cox term
     if(names(intervention) == "cox"){
@@ -118,26 +121,19 @@ simEventCox <- function(N,
         exp(stats::predict(model, newdata = sim_data, type="lp", reference = "zero")))
     }
 
-    # Calculate the cumulative intensity
-    cumInt_list <- mapply(function(base, cox) {
-      tcrossprod(base, cox)
-    }, basehazz_list, cox_term, SIMPLIFY = FALSE)
-
-    # We find the cumulative intensity of event j and the ith individual at the event time T_k
-    cum_int_Tk <- matrix(ncol = num_events, nrow = num_alive)
-    for(j in seq_len(num_events)){
-      cum_int_Tk[,j] <- sapply(1:num_alive, function(i) cum_int(cumInt_list[[j]][,i], jump_times[[j]], T_k[i]))
-    }
+    # Calculate the cumulative intensity per individual per event
+    cum_int_Tk <- sapply(seq_len(num_events), function(j) {
+      cumhaz_fn[[j]](T_k) * cox_term[[j]]
+    })
 
     # Simulate the uniform random variable
     U <- matrix(-log(stats::runif(num_alive * num_events)), ncol = num_events)  # matrix for the random draws
     V <- U + cum_int_Tk
 
     # Find the event times
-    event_times <- matrix(ncol = num_events, nrow = num_alive)                  # matrix for event times
-    for(j in seq_len(num_events)){
-      event_times[,j] <- sapply(1:num_alive, function(i) inv_cum_int(cumInt_list[[j]][,i], jump_times[[j]], V[i,j]))
-    }
+    event_times <- sapply(seq_len(num_events), function(j) {
+      invhaz_fn[[j]](V[,j] / cox_term[[j]])
+    })
 
     # How many times can you experience the various events?
     for(j in seq_len(num_events)){
