@@ -91,7 +91,9 @@ simEventCox <- function(N,
   jump_times <- lapply(basehazz_list, function(df) c(0,df[["time"]]))
   basehazz_list <- lapply(basehazz_list, function(df) c(0,df[["hazard"]]))
   if(names(intervention) == "basehaz"){
-    basehazz_list <- lapply(basehazz_list, intervention[[1]])
+    for(j in seq_len(num_events)){
+      basehazz_list[[j]] <- intervention[[1]](basehazz_list[j])
+    }
   }
 
   cumhaz_fn <- vector("list", num_events)
