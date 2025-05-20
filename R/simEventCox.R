@@ -136,9 +136,6 @@ simEventCox <- function(N,
     Deltas <- apply(event_times, 1, which.min)
 
     # Update event counts
-    #for(i in 1:num_alive){
-    #  sim_data[i, (Deltas[i] + 2)] <- sim_data[i, (Deltas[i] + 2)] + 1
-    #}
     sim_data[cbind(seq_len(num_alive), Deltas + 2)] <- sim_data[cbind(seq_len(num_alive), Deltas + 2)] + 1
 
     # Store data
