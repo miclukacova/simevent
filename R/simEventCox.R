@@ -72,7 +72,7 @@ simEventCox <- function(N,
   num_alive <- N                                          # Number of alive individuals
   T_k <- rep(0, N)                                        # Last event time
 
-  # Matrix for storing data
+  # Data frame for storing data
   sim_data <- data.frame(L0 = sample(L0_old, N, TRUE),
                          A0 = sample(A0_old, N, TRUE))
   for (name in names(cox_fits)) sim_data[[name]] <- 0
@@ -95,8 +95,9 @@ simEventCox <- function(N,
     # We choose ties = max to ensure that event times are strictly increasing
     invhaz_fn[[j]] <- stats::approxfun(H_j,       t_j,
                                        method="linear", rule=2, ties = max)
-    }
+  }
 
+  # Loop
   while(num_alive != 0){
     # Intervention Cox term
     if(!is.null(intervention)){
@@ -135,9 +136,10 @@ simEventCox <- function(N,
     Deltas <- apply(event_times, 1, which.min)
 
     # Update event counts
-    for(i in 1:num_alive){
-      sim_data[i, (Deltas[i] + 2)] <- sim_data[i, (Deltas[i] + 2)] + 1
-    }
+    #for(i in 1:num_alive){
+    #  sim_data[i, (Deltas[i] + 2)] <- sim_data[i, (Deltas[i] + 2)] + 1
+    #}
+    sim_data[cbind(seq_len(num_alive), Deltas + 2)] <- sim_data[cbind(seq_len(num_alive), Deltas + 2)] + 1
 
     # Store data
     kth_event <- data.table(ID = alive,
