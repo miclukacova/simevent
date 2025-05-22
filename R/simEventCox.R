@@ -12,8 +12,10 @@
 #' @param max_events Integer. The maximum number of events to simulate (i.e., simulation rounds).
 #' @param n_event_max Integer vector. Maximum number of times each event type can occur per individual.
 #' @param term_events Integer or vector of integers. Indices of event types that are terminal (i.e., stop further simulation for an individual).
-#' @param intervention A function of $j$, the event number, and the sim_matrix containing the information. The function should
-#' return a new sim_matrix, altered in the way desired for the intervention.
+#' @param intervention Function that modifies the covariate data used in the simulation
+#' at each step, enabling the incorporation of dynamic interventions. The function should
+#' take the arguments j (the event number) and the sim_matrix containing the simulation information.
+#' The function should return a new sim_matrix, altered in the way desired for the intervention.
 #'
 #' @details
 #' The function simulates individual event histories by:

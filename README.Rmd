@@ -13,6 +13,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r, include = FALSE}
+library(data.table)
+library(ggplot2)
+```
+
+
 # simevent
 
 <!-- badges: start -->
@@ -44,6 +50,7 @@ library(simevent)
 The number of events simulated is determined by the length of the `eta` vector, `nu` vector or the number of columns in the `beta` matrix. The `beta` argument lets the user specify the effects of processes and covariates on the intensities of the processes. We define a new beta matrix. It has dimensions 9x5 since we simulate from a setting where we have two baseline covariates, 5 processes and two additional baseline covariates. 
 
 ```{r}
+set.seed(736)
 beta <- matrix(rnorm(9*5), ncol = 5, nrow = 9)
 ```
 
@@ -82,19 +89,19 @@ head(data)
 
 From data we can for example see that Individual $1$ has a baseline covariate $L_0$ of $0.816906$, does get baseline treatment ($A_0 = 1$) and experienced the event $2$ at Time $0.8638205$. 
 
-It could be of interest to estimate the effects of covariates on the intensities of the different counting processes. A tool for this is the Cox proportional hazards model. In order to fit a Cox proportional hazards model with the `survival` package, the data needs to be transformed into the so called \textit{tstart} \textit{tstop} format, this can be done by the function `IntFormatData`, where you need to specify the indices of the columns that contain data regarding counting processes. 
+It could be of interest to estimate the effects of covariates on the intensities of the different counting processes. A tool for this is the Cox proportional hazards model. In order to fit a Cox proportional hazards model with the `survival` package, the data needs to be transformed into the so called *tstart* *tstop* format, this can be done by the function `IntFormatData`, where you need to specify the indices of the columns that contain data regarding counting processes. 
 
 ```{r}
 data_int <- IntFormatData(data, N_cols = 8:12)
 ```
 
-Data in the \textit{tstart tstop} format looks like
+Data in the *tstart* *tstop* format looks like
 
 ```{r}
 head(data_int)
 ```
 
-The data contains the same information as the original data, only now three additional columns have been added. The column *k*, indicates the number of the event, the column *tstart* indicates the start of a time interval, and the column *tstop* indicates the end of a time interval. In each time interval the covariates (and processes) influencing the intensities of the processes remain constant. Cox proportional hazards models for the death process and operation process can be fitted by the following code
+The data contains the same information as the original data, only now three additional columns have been added. The column *k*, indicates the number of the event, the column *tstart* indicates the start of a time interval, and the column *tstop* indicates the end of a time interval. In each time interval the covariates (and processes) influencing the intensities of the processes remain constant. Cox proportional hazards models for the $N_0$ process and $N_4$ process can be fitted by the following code
 
 ```{r}
 library(survival)
@@ -107,7 +114,32 @@ survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + Z1 + Z2 + N2 + N3 
                   data = data_int[N4 < 2])
 ```
 
-In order to conduct correct inference, only data where the individual is at risk for the event in question is included in the regression. The regression results can be seen by the summary call
+In order to conduct correct inference, only data where the individual is at risk for the event in question is included in the regression. The regression results can be seen by the summary call, as usual. For a sanity check, we can visualize the estimated coefficients and the true values. 
+
+```{r}
+CIs <- cbind("Par" = c(paste0(rownames(confint(survfit0)), "_N0"), 
+                       paste0(rownames(confint(survfit0)), "_N4")), 
+             rbind(confint(survfit0), confint(survfit4)))
+
+rownames(CIs) <- NULL
+colnames(CIs) <- c("Par", "Lower", "Upper")
+CIs <- data.table(CIs)
+CIs[, True_val := c(beta[-c(5,6),1],
+                    beta[-c(5,6),5])]
+
+CIs$Lower <- as.numeric(CIs$Lower)
+CIs$Upper <- as.numeric(CIs$Upper)
+
+pp <- ggplot(data = CIs)+
+  geom_point(aes(y = Par, x = Lower))+
+  geom_point(aes(y = Par, x = Upper))+
+  geom_point(aes(y = Par, x = True_val, col = "Estimate"))+
+  scale_color_manual(values = c("Estimate" = "red"))+
+  geom_segment(aes(y = Par, yend = Par, x = Lower, xend = Upper))+
+  xlab("Estimates")
+pp
+```
+
 
 One can visualize the data with use of the function `plotEventData`.
 ```{r}

@@ -145,7 +145,7 @@ simEventData <- function(N,                      # Number of individuals
 
   rownames(beta) <- colnames(simmatrix)
 
-  # Filing out beta matrix
+  # Filling out beta matrix
   if(!is.null(override_beta)){
       for (bb in 1:length(override_beta)) {
           if (names(override_beta)[bb] %in% rownames(beta)) {

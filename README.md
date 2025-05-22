@@ -45,6 +45,7 @@ have two baseline covariates, 5 processes and two additional baseline
 covariates.
 
 ``` r
+set.seed(736)
 beta <- matrix(rnorm(9*5), ncol = 5, nrow = 9)
 ```
 
@@ -93,17 +94,17 @@ head(data)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0    Z1         Z2    N0    N1    N2
 #>    <int>     <num> <int>     <num> <num> <num>      <num> <num> <num> <num>
-#> 1:     1 2.2155444     4 0.8169060     1     0  0.2555876     0     0     0
-#> 2:     1 3.4203598     2 0.8169060     1     0  0.2555876     0     0     1
-#> 3:     1 4.2398814     0 0.8169060     1     0  0.2555876     1     0     1
-#> 4:     2 0.7664782     2 0.7893660     1     0 -0.6972059     0     0     1
-#> 5:     2 1.5081069     1 0.7893660     1     0 -0.6972059     0     1     1
-#> 6:     3 1.2323103     0 0.8561421     1     0  0.7786811     1     0     0
+#> 1:     1 1.2416160     4 0.8169060     1     0  0.2555876     0     0     0
+#> 2:     1 1.9263014     1 0.8169060     1     0  0.2555876     0     1     0
+#> 3:     2 0.8667134     1 0.7893660     1     0 -0.6972059     0     1     0
+#> 4:     3 0.7956896     0 0.8561421     1     0  0.7786811     1     0     0
+#> 5:     4 1.0532263     2 0.2246642     0     0 -0.7287170     0     0     1
+#> 6:     4 2.2914281     1 0.2246642     0     0 -0.7287170     0     1     1
 #>       N3    N4
 #>    <num> <num>
 #> 1:     0     1
 #> 2:     0     1
-#> 3:     0     1
+#> 3:     0     0
 #> 4:     0     0
 #> 5:     0     0
 #> 6:     0     0
@@ -117,35 +118,35 @@ It could be of interest to estimate the effects of covariates on the
 intensities of the different counting processes. A tool for this is the
 Cox proportional hazards model. In order to fit a Cox proportional
 hazards model with the `survival` package, the data needs to be
-transformed into the so called format, this can be done by the function
-`IntFormatData`, where you need to specify the indices of the columns
-that contain data regarding counting processes.
+transformed into the so called *tstart* *tstop* format, this can be done
+by the function `IntFormatData`, where you need to specify the indices
+of the columns that contain data regarding counting processes.
 
 ``` r
 data_int <- IntFormatData(data, N_cols = 8:12)
 ```
 
-Data in the format looks like
+Data in the *tstart* *tstop* format looks like
 
 ``` r
 head(data_int)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0    Z1         Z2    N0    N1    N2
 #>    <int>     <num> <int>     <num> <num> <num>      <num> <num> <num> <num>
-#> 1:     1 2.2155444     4 0.8169060     1     0  0.2555876     0     0     0
-#> 2:     1 3.4203598     2 0.8169060     1     0  0.2555876     0     0     0
-#> 3:     1 4.2398814     0 0.8169060     1     0  0.2555876     0     0     1
-#> 4:     2 0.7664782     2 0.7893660     1     0 -0.6972059     0     0     0
-#> 5:     2 1.5081069     1 0.7893660     1     0 -0.6972059     0     0     1
-#> 6:     3 1.2323103     0 0.8561421     1     0  0.7786811     0     0     0
-#>       N3    N4     k    tstart     tstop
-#>    <num> <num> <int>     <num>     <num>
-#> 1:     0     0     1 0.0000000 2.2155444
-#> 2:     0     1     2 2.2155444 3.4203598
-#> 3:     0     1     3 3.4203598 4.2398814
-#> 4:     0     0     1 0.0000000 0.7664782
-#> 5:     0     0     2 0.7664782 1.5081069
-#> 6:     0     0     1 0.0000000 1.2323103
+#> 1:     1 1.2416160     4 0.8169060     1     0  0.2555876     0     0     0
+#> 2:     1 1.9263014     1 0.8169060     1     0  0.2555876     0     0     0
+#> 3:     2 0.8667134     1 0.7893660     1     0 -0.6972059     0     0     0
+#> 4:     3 0.7956896     0 0.8561421     1     0  0.7786811     0     0     0
+#> 5:     4 1.0532263     2 0.2246642     0     0 -0.7287170     0     0     0
+#> 6:     4 2.2914281     1 0.2246642     0     0 -0.7287170     0     0     1
+#>       N3    N4     k   tstart     tstop
+#>    <num> <num> <int>    <num>     <num>
+#> 1:     0     0     1 0.000000 1.2416160
+#> 2:     0     1     2 1.241616 1.9263014
+#> 3:     0     0     1 0.000000 0.8667134
+#> 4:     0     0     1 0.000000 0.7956896
+#> 5:     0     0     1 0.000000 1.0532263
+#> 6:     0     0     2 1.053226 2.2914281
 ```
 
 The data contains the same information as the original data, only now
@@ -154,7 +155,7 @@ number of the event, the column *tstart* indicates the start of a time
 interval, and the column *tstop* indicates the end of a time interval.
 In each time interval the covariates (and processes) influencing the
 intensities of the processes remain constant. Cox proportional hazards
-models for the death process and operation process can be fitted by the
+models for the $N_0$ process and $N_4$ process can be fitted by the
 following code
 
 ``` r
@@ -170,7 +171,35 @@ survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + Z1 + Z2 + N2 + N3 
 
 In order to conduct correct inference, only data where the individual is
 at risk for the event in question is included in the regression. The
-regression results can be seen by the summary call
+regression results can be seen by the summary call, as usual. For a
+sanity check, we can visualize the estimated coefficients and the true
+values.
+
+``` r
+CIs <- cbind("Par" = c(paste0(rownames(confint(survfit0)), "_N0"), 
+                       paste0(rownames(confint(survfit0)), "_N4")), 
+             rbind(confint(survfit0), confint(survfit4)))
+
+rownames(CIs) <- NULL
+colnames(CIs) <- c("Par", "Lower", "Upper")
+CIs <- data.table(CIs)
+CIs[, True_val := c(beta[-c(5,6),1],
+                    beta[-c(5,6),5])]
+
+CIs$Lower <- as.numeric(CIs$Lower)
+CIs$Upper <- as.numeric(CIs$Upper)
+
+pp <- ggplot(data = CIs)+
+  geom_point(aes(y = Par, x = Lower))+
+  geom_point(aes(y = Par, x = Upper))+
+  geom_point(aes(y = Par, x = True_val, col = "Estimate"))+
+  scale_color_manual(values = c("Estimate" = "red"))+
+  geom_segment(aes(y = Par, yend = Par, x = Lower, xend = Upper))+
+  xlab("Estimates")
+pp
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 One can visualize the data with use of the function `plotEventData`.
 
@@ -178,7 +207,7 @@ One can visualize the data with use of the function `plotEventData`.
 plotEventData(data[1:100,])
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" /> The
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" /> The
 plot shows the event history of the 100 first rows of data, the
 different colors of the dots illustrate the different events. The
 $x$-axis is the timeline.
@@ -214,7 +243,7 @@ data <- simSurvData(100)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
 
 One can again specify the effects of $A_0$ and $L_0$ on the risk of
 death and censoring by the `beta` argument.
@@ -243,7 +272,7 @@ data <- simSurvData(100, beta = beta, eta = eta, nu = nu)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
 
 ## Example 3: Competing Risk Data
 
@@ -256,7 +285,7 @@ data <- simCRdata(100)
 plotEventData(data, title = "Competing Risk Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
 
 ## Example 4: Type 2 Diabetes
 
@@ -284,7 +313,7 @@ data <- simT2D(N = 100,
 plotEventData(data, title = "T2D data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />
 
 ## Example 5: Unobserved Covariate Setting
 
@@ -328,4 +357,4 @@ operation/treatment event (op = 1), where there is a censoring process
 plotEventData(data, title = "Confounding setting")
 ```
 
-<img src="man/figures/README-unnamed-chunk-24-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
