@@ -20,7 +20,9 @@ simConfounding(
   nu = rep(1.1, 4),
   followup = Inf,
   cens = 1,
-  op = 1
+  op = 1,
+  lower = 10^(-15),
+  upper = 200
 )
 }
 \arguments{
@@ -56,6 +58,12 @@ simConfounding(
 \item{cens}{Specifies whether you are at risk of being censored}
 
 \item{op}{Specifies whether you are at risk of being operated}
+
+\item{lower}{Lower bound for the uniroot function used to find the inverse
+cumulative hazard.}
+
+\item{upper}{Upper bound for the uniroot function used to find the inverse
+cumulative hazard.}
 }
 \value{
 Data frame containing the simulated data. There is a column for ID, time of event (Time),

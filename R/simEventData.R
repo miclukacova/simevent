@@ -50,8 +50,10 @@
 #' override_beta = list("x" = c("y" = z))
 #' Where x and y are names of processes or covariates.
 #' @param max_events Number of maximal events per individual
-#' @param lower Number of maximal events per individual
-#' @param upper Number of maximal events per individual
+#' @param lower Lower bound for the uniroot function used to find the inverse
+#' cumulative hazard.
+#' @param upper Upper bound for the uniroot function used to find the inverse
+#' cumulative hazard.
 #' @param gen_A0 Function for generation of A0 covariate. Function of N (number
 #' of individuals) and L0 (baseline covariate).
 #'

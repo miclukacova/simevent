@@ -27,6 +27,10 @@
 #' @param beta_A0_C The effect of covariate A0 = 1 on the probability of C = 1. Is by default set to 0.
 #' @param beta_L_C The effect of covariate L = 1 on the probability of C = 1. Is by default set to 0.
 #' @param cens Specifies whether you are at risk of being censored
+#' @param lower Lower bound for the uniroot function used to find the inverse
+#' cumulative hazard.
+#' @param upper Upper bound for the uniroot function used to find the inverse
+#' cumulative hazard.
 #'
 #' @return  Data frame containing the simulated data. There is a column for ID, time of event (Time),
 #' event type (Delta), baseline covariate (L0) and additional covariate (L).
@@ -37,7 +41,7 @@
 simT2D <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
                    beta_L0_D = 1, beta_L0_L = 1, beta_L_D = 1, beta_A0_D = 0,
                    beta_A0_L = 0, beta_L0_C = 0, beta_A0_C = 0, beta_L_C = 0,
-                   followup = Inf){
+                   followup = Inf, lower = 10^(-15), upper = 200){
 
   at_risk <- function(events) {
     return(c(
@@ -61,7 +65,7 @@ simT2D <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
   beta[5,] <- c(beta_L_C, beta_L_D, 0)
 
   data <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
-                         max_cens = followup)
+                         max_cens = followup, lower = lower, upper = upper)
 
   # We don't need columns for terminal events
   data[, N0 := NULL]; data[, N1 := NULL]

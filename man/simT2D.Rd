@@ -17,7 +17,9 @@ simT2D(
   beta_L0_C = 0,
   beta_A0_C = 0,
   beta_L_C = 0,
-  followup = Inf
+  followup = Inf,
+  lower = 10^(-15),
+  upper = 200
 )
 }
 \arguments{
@@ -47,6 +49,12 @@ simT2D(
 \item{beta_L_C}{The effect of covariate L = 1 on the probability of C = 1. Is by default set to 0.}
 
 \item{followup}{A maximal censoring time. By default set to infinity.}
+
+\item{lower}{Lower bound for the uniroot function used to find the inverse
+cumulative hazard.}
+
+\item{upper}{Upper bound for the uniroot function used to find the inverse
+cumulative hazard.}
 }
 \value{
 Data frame containing the simulated data. There is a column for ID, time of event (Time),

@@ -66,9 +66,11 @@ Where x and y are names of processes or covariates.}
 
 \item{max_events}{Number of maximal events per individual}
 
-\item{lower}{Number of maximal events per individual}
+\item{lower}{Lower bound for the uniroot function used to find the inverse
+cumulative hazard.}
 
-\item{upper}{Number of maximal events per individual}
+\item{upper}{Upper bound for the uniroot function used to find the inverse
+cumulative hazard.}
 
 \item{gen_A0}{Function for generation of A0 covariate. Function of N (number
 of individuals) and L0 (baseline covariate).}

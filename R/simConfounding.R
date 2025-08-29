@@ -27,6 +27,10 @@
 #' @param beta_A_C The effect of operation A = 1 on the probability of C = 1
 #' @param cens Specifies whether you are at risk of being censored
 #' @param op Specifies whether you are at risk of being operated
+#' @param lower Lower bound for the uniroot function used to find the inverse
+#' cumulative hazard.
+#' @param upper Upper bound for the uniroot function used to find the inverse
+#' cumulative hazard.
 #'
 #' @return  Data frame containing the simulated data. There is a column for ID, time of event (Time),
 #' event type (Delta), baseline covariate (L0), additional covariate (L) and  Treatment Process (A).
@@ -39,7 +43,8 @@ simConfounding <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1, beta_A_
                            beta_L0_A = 1, beta_L0_L = 1, beta_L0_D = 1,
                            beta_L0_C = 0, beta_L_C = 0, beta_A_C = 0,
                            eta = rep(0.1,4), nu = rep(1.1,4),
-                           followup = Inf, cens = 1, op = 1){
+                           followup = Inf, cens = 1, op = 1,
+                           lower = 10^(-15), upper = 200){
 
   Time <- A0 <- N0 <- N1 <- ID <- NULL
 

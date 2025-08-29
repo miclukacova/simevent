@@ -35,6 +35,10 @@
 #' @param cens Logical indicating whether there should be a censoring process.
 #' @param generate.A0 Function of number of individuals and L0. The function should output
 #' a vector of length N with A0 values.
+#' @param lower Lower bound for the uniroot function used to find the inverse
+#' cumulative hazard.
+#' @param upper Upper bound for the uniroot function used to find the inverse
+#' cumulative hazard.
 #'
 #' @return  Data frame containing the simulated survival data
 #' @export
@@ -52,7 +56,8 @@ simDropIn <- function(N,
                       adherence = FALSE,
                       followup = Inf,
                       cens = 1,
-                      generate.A0 = function(N, L0) stats::rbinom(N, 1, 0.5)){
+                      generate.A0 = function(N, L0) stats::rbinom(N, 1, 0.5),
+                      lower = 1e-200, upper = 1e10){
 
   N0 <- N1 <- ID <- NULL
 
@@ -112,8 +117,8 @@ simDropIn <- function(N,
                        max_cens = followup,
                        at_risk = at_risk,
                        gen_A0 = generate.A0,
-                       lower = 1e-200,
-                       upper = 1e10)
+                       lower = lower,
+                       upper = upper)
 
   setnames(data, c("N2", "N3"), c("Z", "L"))
   if (length(eta)>4) setnames(data, c("N4"), c("A"))
