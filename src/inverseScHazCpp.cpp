@@ -27,7 +27,7 @@ double inverseScHazCpp(double p,
   double fb = cum_haz(b) - p;
 
   if (fa * fb > 0) {
-    stop("Function does not bracket root.");
+    stop("Function does not bracket root: adjust upper and lower");
   }
 
   for (int iter = 0; iter < max_iter; ++iter) {

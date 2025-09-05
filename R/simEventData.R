@@ -163,12 +163,8 @@ simEventData <- function(N,                      # Number of individuals
   ############################ Functions #######################################
 
   # Proportional hazard
-  if(nrow(beta) == N_stop){
-    calculate_phi <- function(simmatrix) {
-      exp(simmatrix %*% beta)
-    }
-  } else {
-    calculate_phi <- function(simmatrix) {
+  calculate_phi <- function(simmatrix) {
+    if(nrow(beta) == N_stop) return(exp(simmatrix %*% beta)) else {
       obj <- as.data.frame(simmatrix)
       X <- sapply(rownames(beta), function(expr) {
         eval(parse(text = expr), envir = obj)
