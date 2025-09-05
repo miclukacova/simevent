@@ -3,6 +3,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 double inverseScHazCppTryTimeVar(double p,
+                                 double t,
                                  double lower,
                                  double upper,
                                  double t_prime,
@@ -30,10 +31,14 @@ double inverseScHazCppTryTimeVar(double p,
     return sum;
   };
 
+  auto cum_haz_wait = [&](double u, double t) {
+    return cum_haz(u + t) - cum_haz(t);
+  };
+
   double a = lower;
   double b = upper;
-  double fa = cum_haz(a) - p;
-  double fb = cum_haz(b) - p;
+  double fa = cum_haz_wait(a) - p;
+  double fb = cum_haz_wait(b) - p;
 
   if (fa * fb > 0) {
     stop("Function does not bracket root: adjust upper and lower");
@@ -41,7 +46,7 @@ double inverseScHazCppTryTimeVar(double p,
 
   for (int iter = 0; iter < max_iter; ++iter) {
     double mid = 0.5 * (a + b);
-    double fmid = cum_haz(mid) - p;
+    double fmid = cum_haz_wait(mid) - p;
 
     if (std::abs(fmid) < tol) {
       return mid;

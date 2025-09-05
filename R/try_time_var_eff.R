@@ -143,8 +143,8 @@ simEventDataTry <- function(N,                      # Number of individuals
   }
 
   # We calculate the inverse numerically
-  inverse_sc_haz <- function(p, i) {
-    inverseScHazTryTimeVar(p, lower = lower, upper = upper, t_prime = t_prime,
+  inverse_sc_haz <- function(p, t, i) {
+    inverseScHazTryTimeVar(p, t, lower = lower, upper = upper, t_prime = t_prime,
                            eta = eta, nu = nu, phi = phi[i,], phi_prime = phi_prime[i,],
                            at_risk = at_risk(simmatrix[i, N_start:N_stop]))
   }
@@ -177,7 +177,7 @@ simEventDataTry <- function(N,                      # Number of individuals
     V <- -log(stats::runif(N))
     phi <- calculate_phi(simmatrix, beta)
     phi_prime <- calculate_phi(simmatrix, beta_prime)
-    W <- sapply(alive, function(i) inverse_sc_haz(V[i], i))
+    W <- sapply(alive, function(i) inverse_sc_haz(V[i], T_k[i], i))
     T_k[alive] <- T_k[alive] + W
 
     # Maximal censoring time
