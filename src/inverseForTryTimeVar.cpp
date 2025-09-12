@@ -37,8 +37,8 @@ double inverseScHazCppTryTimeVar(double p,
 
   double a = lower;
   double b = upper;
-  double fa = cum_haz_wait(a) - p;
-  double fb = cum_haz_wait(b) - p;
+  double fa = cum_haz_wait(a, t) - p;
+  double fb = cum_haz_wait(b, t) - p;
 
   if (fa * fb > 0) {
     stop("Function does not bracket root: adjust upper and lower");
@@ -46,7 +46,7 @@ double inverseScHazCppTryTimeVar(double p,
 
   for (int iter = 0; iter < max_iter; ++iter) {
     double mid = 0.5 * (a + b);
-    double fmid = cum_haz_wait(mid) - p;
+    double fmid = cum_haz_wait(mid, t) - p;
 
     if (std::abs(fmid) < tol) {
       return mid;

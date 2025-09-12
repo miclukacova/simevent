@@ -21,7 +21,7 @@
 #' The rows represent covariates and processes: the first two rows determine the
 #' effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
 #' next rows determine the effects of the additional baseline covariates, by default
-#'  named L1, L2,... on the processes, followed by the effects of the processes N0,
+#'  named L1, L2,..., on the processes, followed by the effects of the processes N0,
 #'  N1,.... The \eqn{\beta} matrix is by  default set to 0.
 #' @param eta Vector of shape parameters for the baseline intensity. Default is set
 #' to 0.1 for all events.

@@ -62,7 +62,7 @@ simEventDataTry <- function(N,                      # Number of individuals
 
   # Set default values for beta, eta, and nu
   beta <- if(!is.null(beta)) beta else matrix(0, nrow = N_stop, ncol = num_events)
-  time_var_eff <- if (is.null(time_var_eff)) matrix(0, nrow = N_stop, ncol = num_events)
+  time_var_eff <- if(!is.null(time_var_eff)) time_var_eff else matrix(0, nrow = N_stop, ncol = num_events)
   colnames(beta) <- paste0("N", seq(0, num_events -1))
 
   if((N_stop) != nrow(beta)){

@@ -24,6 +24,7 @@
 #' phi_prime <- c(2, 2)
 #' inverseScHazTryTimeVar(p = 0.5, t= 1, t_prime = 2, eta = eta, nu = nu,
 #'                        phi = phi, phi_prime = phi_prime, at_risk = at_risk)
+#'
 inverseScHazTryTimeVar <- function(p, t, lower = 1e-15, upper = 200, t_prime, eta, nu,
                                    phi, phi_prime, at_risk, tol = 1e-9, max_iter = 100) {
   inverseScHazCppTryTimeVar(
