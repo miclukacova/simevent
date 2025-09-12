@@ -1,13 +1,31 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+- [simevent](#simevent)
+  - [Installation](#installation)
+  - [Example 1: simEventData](#example-1-simeventdata)
+    - [The argument override_beta](#the-argument-override_beta)
+  - [Example 2: Survival Data](#example-2-survival-data)
+  - [Example 3: Competing Risk Data](#example-3-competing-risk-data)
+  - [Example 4: Type 2 Diabetes](#example-4-type-2-diabetes)
+  - [Example 5: Unobserved Covariate
+    Setting](#example-5-unobserved-covariate-setting)
+  - [Example 5: Time Varying Effects](#example-5-time-varying-effects)
 
 # simevent
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of `simevent` is to provide functions for the generation and
-analysis of complex continuous time health care data.
+analysis of complex continuous time health care data. The data includes
+variables such as treatment decisions, disease progression, and health
+factors. Currently the package contains 1 general function
+`simEventData`, and 5 special case functions that simulate data from e.g
+the survival setting or the competing risk setting using the underlying
+`simEventData` function. This document is structured as follows: first
+the underlying function is introduced and the arguments explained. Next
+the various wrapper functions are treated. For an indepth introduction
+to the simulation setting see the vignette: xxx.
 
 ## Installation
 
@@ -34,6 +52,7 @@ can read about the different arguments on the help page
 
 ``` r
 ?simEventData
+#> starting httpd help server ... done
 ```
 
 The number of events simulated is determined by the length of the `eta`
@@ -358,3 +377,38 @@ plotEventData(data, title = "Confounding setting")
 ```
 
 <img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
+
+## Example 5: Time Varying Effects
+
+You can simulate from a setting with time varying effects with the
+function …
+
+``` r
+#eta <- rep(0.1, 4)
+#term_deltas <- c(0,1)
+#time_var_eff <- matrix(1, ncol = 4, nrow = 6)
+#beta <- matrix(nrow = 6, ncol = 4, rnorm(4*6, sd = 0.5))
+#
+#data <- simEventDataTry(N = 3*10^4, t_prime = 1, time_var_eff = time_var_eff, eta = eta,
+#                        term_deltas = term_deltas, beta = beta, lower = 10^(-200), upper = 10^2,
+#                        max_events = 5)
+#
+#plotEventData(data[1:1000,][Time <= 1])
+#plotEventData(data[1:1000,])
+#
+#data <- IntFormatData(data)
+#
+## Det gør de her ikke...
+#survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N2 + N3, data = data[Time <= 1])
+#survfit1 <- coxph(Surv(tstart, tstop, Delta == 1) ~ L0 + A0 + N2 + N3, data = data[Time <= 1])
+#survfit2 <- coxph(Surv(tstart, tstop, Delta == 2) ~ L0 + A0 + N2 + N3, data = data[Time <= 1])
+#survfit3 <- coxph(Surv(tstart, tstop, Delta == 2) ~ L0 + A0 + N2 + N3, data = data[Time <= 1])
+#
+## De her koefficienter bliver estimeret rigtigt
+#survfit1.0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N2 + N3, data = data[Time > 1])
+#survfit1.1 <- coxph(Surv(tstart, tstop, Delta == 1) ~ L0 + A0 + N2 + N3, data = data[Time > 1])
+#survfit1.2 <- coxph(Surv(tstart, tstop, Delta == 2) ~ L0 + A0 + N2 + N3, data = data[Time > 1])
+#survfit1.3 <- coxph(Surv(tstart, tstop, Delta == 3) ~ L0 + A0 + N2 + N3, data = data[Time > 1])
+#
+#survfit1.1$coefficients ;beta[c(1,2,5,6),2]+1
+```
