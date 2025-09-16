@@ -1,6 +1,9 @@
+The simevent package
+================
 
 - [simevent](#simevent)
   - [Installation](#installation)
+  - [Usage](#usage)
   - [Example 1: simEventData](#example-1-simeventdata)
     - [The argument override_beta](#the-argument-override_beta)
   - [Example 2: Survival Data](#example-2-survival-data)
@@ -17,25 +20,29 @@
 <!-- badges: end -->
 
 The goal of `simevent` is to provide functions for the generation and
-analysis of complex continuous time health care data. The data includes
-variables such as treatment decisions, disease progression, and health
-factors. Currently the package contains 1 general function
-`simEventData`, and 5 special case functions that simulate data from e.g
-the survival setting or the competing risk setting using the underlying
-`simEventData` function. This document is structured as follows: first
-the underlying function is introduced and the arguments explained. Next
-the various wrapper functions are treated. For an indepth introduction
-to the simulation setting see the vignette: xxx.
+analysis of complex continuous time health care data. The simulated data
+includes variables such as treatment decisions, disease progression, and
+health factors. Currently the package contains 1 general function
+`simEventData`, and 5 wrapper functions that simulate data from specific
+settings e.g the survival setting or the competing risk setting using
+the underlying `simEventData` function.
 
 ## Installation
 
-You can install the development version of simevent from
+You can install the development version of `simevent` from
 [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
 pak::pak("miclukacova/simevent")
 ```
+
+## Usage
+
+The package provides various functions for simulation of data, such as
+`simEventData`. Further it provides functions for visualization, such as
+`plotEventData`, and functions for performing interventions, such as
+`intEffectAlphaT2D`. Below a couple of usage examples are presented.
 
 ## Example 1: simEventData
 
@@ -52,15 +59,14 @@ can read about the different arguments on the help page
 
 ``` r
 ?simEventData
-#> starting httpd help server ... done
 ```
 
 The number of events simulated is determined by the length of the `eta`
 vector, `nu` vector or the number of columns in the `beta` matrix. The
 `beta` argument lets the user specify the effects of processes and
-covariates on the intensities of the processes. We define a new beta
-matrix. It has dimensions 9x5 since we simulate from a setting where we
-have two baseline covariates, 5 processes and two additional baseline
+covariates on the intensities of the processes. Below we define a new
+beta matrix. It has dimensions 9x5 since we simulate from a setting with
+two baseline covariates, 5 processes and 2 additional baseline
 covariates.
 
 ``` r

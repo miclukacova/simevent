@@ -2,7 +2,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-double inverseScHazCppTryTimeVar(double p,
+double inverseScHazCppTimeVar(double p,
                                  double t,
                                  double lower,
                                  double upper,

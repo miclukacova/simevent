@@ -1,8 +1,56 @@
-#' `simEventDataTry` is a work in progress function. We are trying to modify simEventData
-#' so that we can simulate data with time varying effects. For now it only works for
-#' a single event occurrence.
+#' `simEventDataTry` is a function that simulates event data, with the option of
+#' adding time varying effects. The function is build up in the same way as simEventData,
+#' with the additional arguments time_var_eff and t_prime, which specify the change
+#' of the beta matrix at time at time t'.
 #'
 #' @title Simulate Event Data with time varying effects
+#'
+
+#' @param N A double for the number of simulated individuals
+#' @param beta A matrix of doubles for the effects of covariates and events on the
+#' intensities. The columns represent the events N0, N1, .... In the default case 4 events.
+#' The rows represent covariates and processes: the first two rows determine the
+#' effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
+#' next rows determine the effects of the additional baseline covariates, by default
+#'  named L1, L2,..., on the processes, followed by the effects of the processes N0,
+#'  N1,.... The \eqn{\beta} matrix is by  default set to 0.
+#' @param eta Vector of shape parameters for the baseline intensity. Default is set
+#' to 0.1 for all events.
+#' @param nu Vector of scale parameters for the baseline intensity. Default is set
+#' to 1.1 for all events.
+#' @param at_risk At risk function. The \code{at_risk} function determines whether
+#' an individual is at risk for a specific event. The function takes as input a vector
+#' `events` of event counts. The function returns a vector of 0's and 1's indicating
+#' which events the subject is at risk for. Default is set to a setting where you
+#' are always at risk for all events.
+#' @param term_deltas Terminal events. Default is set so that event 0 and 1 are
+#' terminal events.
+#' @param max_cens A maximum censoring time. By default set to infinity. If the event
+#' time is larger than this maximal censoring time the event is set to 0 with prob
+#' ability 1 and the event time is set to `max_cens`.
+#' @param add_cov Named list of random generator functions for the distributions of
+#' additional baseline covariates. The functions should take the number of observations
+#' as input. By default set to NULL.
+#' @param override_beta This argument is a named list. The argument has two applications.
+#' One possibility is instead of specifying the whole beta matrix, the user can
+#' specify the relevant entries, and the rest will by default be 0. Imagine you want
+#' to specify the effect of L0 on N1 to be equal to 2, this could be done by
+#' override_beta = list("L0" = c("N1" = 2))
+#' In general if you want the effect \eqn{\beta_{x,y}= z}, you can specify the
+#' override_beta argument as
+#' override_beta = list("x" = c("y" = z))
+#' Where x and y are names of processes or covariates.
+#' @param max_events Number of maximal events per individual
+#' @param lower Lower bound for the uniroot function used to find the inverse
+#' cumulative hazard.
+#' @param upper Upper bound for the uniroot function used to find the inverse
+#' cumulative hazard.
+#' @param gen_A0 Function for generation of A0 covariate. Function of N (number
+#' of individuals) and L0 (baseline covariate).
+#' @param time_var_eff A matrix of the same dimensions as beta, specifying the
+#' change of the effects at time t_prime.the matrix is in the same format as beta.
+#' @param t_prime The time where the effects change.
+#'
 #' @return data.table containing the simulated data. There is a column for ID, time
 #' of event (Time), event (Delta), baseline covariate (L0), Baseline Treatment (A0),
 #' the count of the various events: N1, N2, .... In case of additional covariates
@@ -12,23 +60,23 @@
 #' @examples
 #' eta <- rep(0.1, 2)
 #' term_deltas <- c(0,1)
-#' simEventDataTry(N = 100, t_prime = 1, eta = eta, term_deltas = term_deltas)
+#' simEventDataTimeVar(N = 100, t_prime = 1, eta = eta, term_deltas = term_deltas)
 #'
-simEventDataTry <- function(N,                      # Number of individuals
-                            beta = NULL,            # Effects
-                            time_var_eff = NULL,    # Time varying effects
-                            t_prime = Inf,          # Time of change in effects
-                            eta = NULL,             # Shape parameters
-                            nu = NULL,              # Scale parameters
-                            at_risk = NULL,         # Function defining the setting
-                            term_deltas = c(0,1),   # Terminal events
-                            max_cens = Inf,         # Followup time
-                            add_cov = NULL,         # Additional baseline covariates
-                            override_beta = NULL,   # Override beta
-                            max_events = 10,        # Maximal events per individual
-                            lower = 10^(-15),       # Lower bound for ICH
-                            upper = 200,            # Upper bound for ICH
-                            gen_A0 = NULL           # Generation of A0
+simEventDataTimeVar <- function(N,                      # Number of individuals
+                                beta = NULL,            # Effects
+                                time_var_eff = NULL,    # Time varying effects
+                                t_prime = Inf,          # Time of change in effects
+                                eta = NULL,             # Shape parameters
+                                nu = NULL,              # Scale parameters
+                                at_risk = NULL,         # Function defining the setting
+                                term_deltas = c(0,1),   # Terminal events
+                                max_cens = Inf,         # Followup time
+                                add_cov = NULL,         # Additional baseline covariates
+                                override_beta = NULL,   # Override beta
+                                max_events = 10,        # Maximal events per individual
+                                lower = 10^(-15),       # Lower bound for ICH
+                                upper = 200,            # Upper bound for ICH
+                                gen_A0 = NULL           # Generation of A0
 ){
   ID <- NULL
 
@@ -144,9 +192,9 @@ simEventDataTry <- function(N,                      # Number of individuals
 
   # We calculate the inverse numerically
   inverse_sc_haz <- function(p, t, i) {
-    inverseScHazTryTimeVar(p, t, lower = lower, upper = upper, t_prime = t_prime,
-                           eta = eta, nu = nu, phi = phi[i,], phi_prime = phi_prime[i,],
-                           at_risk = at_risk(simmatrix[i, N_start:N_stop]))
+    inverseScHazTimeVar(p, t, lower = lower, upper = upper, t_prime = t_prime,
+                        eta = eta, nu = nu, phi = phi[i,], phi_prime = phi_prime[i,],
+                        at_risk = at_risk(simmatrix[i, N_start:N_stop]))
   }
 
   # Event probabilities

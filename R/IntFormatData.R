@@ -7,6 +7,8 @@
 #'
 #' @param data Event data: a data frame containing an ID, Time, Delta, Covariates and Processes columns.
 #' @param N_cols The indices of the columns in data that belong to counting processes
+#' @param timeVar Logical indicating whether the effects are time varying
+#' @param t_prime The time where the effects change
 #'
 #' @return Event data in a tstart tstop format
 #' @export
@@ -15,9 +17,9 @@
 #' data <- simEventData(10)
 #' IntFormatData(data)
 
-IntFormatData <- function(data, N_cols = 6:9) {
+IntFormatData <- function(data, N_cols = 6:9, timeVar = FALSE, t_prime = NULL) {
 
-  k <- ID <- tstart <- tstop <- Time <- NULL
+  k <- ID <- tstart <- tstop <- Time <- t_group <- NULL
   data <- copy(data)
 
   # Shifting values of counting processes
@@ -44,7 +46,22 @@ IntFormatData <- function(data, N_cols = 6:9) {
 
   res <- do.call(rbind, data_k)
 
-  setkey(res, ID)
+  if(timeVar == TRUE){
+    # We select the rows we need to split
+    rows_to_split <- res[tstart <= t_prime & tstop > t_prime]
 
+    # We create a new row marking the time point change
+    data1 <- copy(rows_to_split)[, `:=` (tstop = t_prime, Time = t_prime, Delta = -1)]
+    data2 <- copy(rows_to_split)[, `:=` (tstart = t_prime)]
+
+    # We take all the remaining rows
+    data_new <- data[!(tstart <= t_prime & tstop > t_prime)]
+    res <- rbind(data_new, data1, data2)
+
+    # We create a new variable indicating the time group
+    res[, t_group := (1+(Time > t_prime))]
+  }
+
+  setorder(res, ID, tstart)
   return(res)
 }
