@@ -25,7 +25,8 @@ library(ggplot2)
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of `simevent` is to provide functions for the generation and analysis of complex continuous time health care data. The simulated data includes variables such as treatment decisions, disease progression, and health factors. Currently the package contains 1 general function `simEventData`, and  5 wrapper functions that simulate data from specific settings e.g the survival setting or the competing risk setting using the underlying `simEventData` function. 
+The goal of `simevent` is to provide functions for the generation and analysis of complex continuous time health care data. The simulated data includes variables that can be interpreted as treatment decisions, disease progression, and health factors. Currently the package contains the general function `simEventData`, and 5 wrapper functions that simulate data from specific settings e.g the survival setting or the competing risk setting using the underlying `simEventData` function. The `simEventData` function simulates data from a Cox proportional hazard model with Weibull hazards. The user can specify the parameters and the effects. 
+The function `simEventCox` simulates using a different approach, namely the simulation uses the hazards from a `coxph` fit. This function also enables the user to perform interventions. The package further contains functions for plotting (`plotEventData`), for formatting (`IntFormatData`), and for performing various interventions (e.g. `intEffectAlphaT2D`). 
 
 ## Installation
 
@@ -35,24 +36,26 @@ You can install the development version of `simevent` from [GitHub](https://gith
 # install.packages("pak")
 pak::pak("miclukacova/simevent")
 ```
+
 ## Usage
 
-The package provides various functions for simulation of data, such as `simEventData`. Further it provides functions for visualization, such as `plotEventData`, and functions for performing interventions, such as `intEffectAlphaT2D`. Below a couple of usage examples are presented. 
+The package is loaded with the command
 
-## Example 1: simEventData
-
-This is an example of simulating data using `simEventData` from the `sim_event` package. We load the package
 ```{r library}
 library(simevent)
 ```
 
-`simEventData` is a function for general event history simulations. The function is quite flexible, and does therefore take many arguments. You can read about the different arguments on the help page
+Below we go thorugh different examples of how to use the package.
+
+### Example 1: simEventData
+
+This is an example of simulating data using `simEventData`.`simEventData` is a function for general event history simulations. The function is quite flexible, and does therefore take many arguments. You can read about the different arguments on the help page
 
 ```{r eval=FALSE}
 ?simEventData
 ```
 
-The number of events simulated is determined by the length of the `eta` vector, `nu` vector or the number of columns in the `beta` matrix. The `beta` argument lets the user specify the effects of processes and covariates on the intensities of the processes. Below we define a new beta matrix. It has dimensions 9x5 since we simulate from a setting with two baseline covariates, 5 processes and 2 additional baseline covariates. 
+The number of events simulated is determined by the length of the `eta` vector, `nu` vector or the number of columns in the `beta` matrix. The `beta` argument lets the user specify the effects of processes and covariates on the intensities of the processes. Below we define a new beta matrix. It has dimensions 9x5 since we wish to simulate from a setting with two baseline covariates, 5 processes and 2 additional baseline covariates. 
 
 ```{r}
 set.seed(736)
@@ -80,7 +83,7 @@ at_risk <- function(events) {
   }
 ```
 
-This `at_risk` function for example, allows for recurrent events, letting the individual event 2 and 4 twice. We use the default values of `eta`, `nu` and have no maximal censoring time. The `N` argument lets the user specify number of individuals in the simulation. We simulate data by the function call
+This `at_risk` function for example, allows for recurrent events, letting the individual event 2 and 4 twice. We use the default values of `eta`, `nu` and have no maximal censoring time (`max_cens` = infinity). The `N` argument lets the user specify number of individuals in the simulation. We simulate data by the function call
 
 ```{r}
 set.seed(973)

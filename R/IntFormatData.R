@@ -55,7 +55,7 @@ IntFormatData <- function(data, N_cols = 6:9, timeVar = FALSE, t_prime = NULL) {
     data2 <- copy(rows_to_split)[, `:=` (tstart = t_prime)]
 
     # We take all the remaining rows
-    data_new <- data[!(tstart <= t_prime & tstop > t_prime)]
+    data_new <- res[!(tstart <= t_prime & tstop > t_prime)]
     res <- rbind(data_new, data1, data2)
 
     # We create a new variable indicating the time group

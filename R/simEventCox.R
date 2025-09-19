@@ -5,16 +5,28 @@
 #' and simulation proceeds by iteratively sampling event times until a terminal event occurs.
 #'
 #' @param N Integer. The number of individuals to simulate.
-#' @param cox_fits A list of fitted Cox models (`coxph` objects), one for each type of event. Should be named, so that the
-#' names can be used as column names.
-#' @param L0_old A vector of previously observed baseline covariate values for L0. Used for resampling.
-#' @param A0_old A vector of previously observed baseline covariate values for A0. Used for resampling.
-#' @param max_events Integer. The maximum number of events to simulate (i.e., simulation rounds).
-#' @param n_event_max Integer vector. Maximum number of times each event type can occur per individual.
-#' @param term_events Integer or vector of integers. Indices of event types that are terminal (i.e., stop further simulation for an individual).
-#' @param intervention Function that modifies the covariate data used in the simulation
-#' at each step, enabling the incorporation of dynamic interventions. The function should
-#' take the arguments j (the event number) and the sim_matrix containing the simulation information.
+#' @param cox_fits A list of fitted Cox models (`coxph` objects), one for each type of event.
+#' Should be named, so that the names can be used as column names.
+#' @param L0_old A vector of previously observed baseline covariate values for L0.
+#' Used for resampling.
+#' @param A0_old A vector of previously observed baseline covariate values for A0.
+#' Used for resampling.
+#' @param max_events Integer. The maximum number of events to simulate (i.e.,
+#' simulation rounds).
+#' @param n_event_max Integer vector. Maximum number of times each event type can
+#' occur per individual.
+#' @param term_events Integer or vector of integers. Indices of event types that
+#' are terminal (i.e., stop further simulation for an individual).
+#' @param intervention1 Function for performing interventions regarding covariates.
+#' The function can be used to modify the covariate data used in the simulation at each step,
+#' enabling the incorporation of dynamic interventions. The function should
+#' take the arguments j (the event number) and the sim_matrix containing the simulation
+#' information.
+#' @param intervention2 Function for performing inteventions regarding the hazards.
+#' The function can be used to modify the hazard of each event at each step of the simulation.
+#' The function should take the arguments j (the event number) and the sim_matrix containing the simulation
+#' information.
+#'
 #' The function should return a new sim_matrix, altered in the way desired for the intervention.
 #'
 #' @details
@@ -64,7 +76,8 @@ simEventCox <- function(N,
                         max_events = 5,
                         n_event_max = c(1,1),
                         term_events = 1,
-                        intervention = NULL) {
+                        intervention1 = NULL,
+                        intervention2 = NULL) {
 
   ID <- NULL
 
@@ -92,6 +105,7 @@ simEventCox <- function(N,
   for(j in seq_len(num_events)) {
     H_j <- c(0, basehazz_list[[j]][["hazard"]])
     t_j <- c(0, basehazz_list[[j]][["time"]])
+    if(!is.null(intervention2)) H_j <- intervention2(j, H_j)
     cumhaz_fn[[j]] <- stats::approxfun(t_j,       H_j,
                                        method="linear", yright = Inf)
     # We choose ties = max to ensure that event times are strictly increasing
@@ -102,10 +116,10 @@ simEventCox <- function(N,
   # Loop
   while(num_alive != 0){
     # Intervention Cox term
-    if(!is.null(intervention)){
+    if(!is.null(intervention1)){
       cox_term <- list()
       for(j in seq_len(num_events)){
-        sim_data_cox <- intervention(j, sim_data)
+        sim_data_cox <- intervention1(j, sim_data)
         cox_term[[j]] <- exp(stats::predict(cox_fits[[j]], newdata = sim_data_cox, type="lp", reference = "zero"))
         }
       # Calculate the non intervention Cox term
