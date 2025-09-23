@@ -30,9 +30,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// inverseScHazCppTimeVar
-double inverseScHazCppTimeVar(double p, double t, double lower, double upper, double t_prime, NumericVector eta, NumericVector nu, NumericVector phi, NumericVector phi_prime, NumericVector at_risk, double tol, int max_iter);
-RcppExport SEXP _simevent_inverseScHazCppTimeVar(SEXP pSEXP, SEXP tSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP t_primeSEXP, SEXP etaSEXP, SEXP nuSEXP, SEXP phiSEXP, SEXP phi_primeSEXP, SEXP at_riskSEXP, SEXP tolSEXP, SEXP max_iterSEXP) {
+// inverseScHazTVCpp
+double inverseScHazTVCpp(double p, double t, double lower, double upper, double t_prime, NumericVector eta, NumericVector nu, NumericVector phi, NumericVector phi_prime, NumericVector at_risk, double tol, int max_iter);
+RcppExport SEXP _simevent_inverseScHazTVCpp(SEXP pSEXP, SEXP tSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP t_primeSEXP, SEXP etaSEXP, SEXP nuSEXP, SEXP phiSEXP, SEXP phi_primeSEXP, SEXP at_riskSEXP, SEXP tolSEXP, SEXP max_iterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -48,7 +48,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type at_risk(at_riskSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    rcpp_result_gen = Rcpp::wrap(inverseScHazCppTimeVar(p, t, lower, upper, t_prime, eta, nu, phi, phi_prime, at_risk, tol, max_iter));
+    rcpp_result_gen = Rcpp::wrap(inverseScHazTVCpp(p, t, lower, upper, t_prime, eta, nu, phi, phi_prime, at_risk, tol, max_iter));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -66,7 +66,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_simevent_inverseScHazCpp", (DL_FUNC) &_simevent_inverseScHazCpp, 10},
-    {"_simevent_inverseScHazCppTimeVar", (DL_FUNC) &_simevent_inverseScHazCppTimeVar, 12},
+    {"_simevent_inverseScHazTVCpp", (DL_FUNC) &_simevent_inverseScHazTVCpp, 12},
     {"_simevent_sampleEventsCpp", (DL_FUNC) &_simevent_sampleEventsCpp, 1},
     {NULL, NULL, 0}
 };

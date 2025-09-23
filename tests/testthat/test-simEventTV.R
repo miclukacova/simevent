@@ -14,7 +14,7 @@ test_that("That inverseScHaz and inverseScHazTimeVar are qual when no time varyi
 
   for (t in t_vals) {
     for (p in p_vals) {
-      val1 <- inverseScHazTimeVar(p = p, t = t,
+      val1 <- inverseScHazTV(p = p, t = t,
                                   eta = eta, nu = nu, phi = phi,
                                   at_risk = at_risk,
                                   lower = 1e-15, upper = 200,
@@ -36,7 +36,7 @@ test_that("That inverseScHaz and inverseScHazTimeVar are qual when no time varyi
 
   for (t in t_vals) {
     for (p in p_vals) {
-      val1 <- inverseScHazTimeVar(p = p, t = t,
+      val1 <- inverseScHazTV(p = p, t = t,
                                   eta = eta, nu = nu, phi = phi,
                                   at_risk = at_risk,
                                   lower = 1e-15, upper = 200,
@@ -54,18 +54,18 @@ test_that("That inverseScHaz and inverseScHazTimeVar are qual when no time varyi
   }
 })
 
-test_that("That the simEventDataTimeVar simulates correctly when no time varrying effects",{
+test_that("That the simEventTV simulates correctly when no time varrying effects",{
   set.seed(34730)
 
   eta <- rep(0.1, 2)
   term_deltas <- c(0)
-  time_var_eff <- matrix(0.1, ncol = 2, nrow = 4)
+  tv_eff <- matrix(0.1, ncol = 2, nrow = 4)
   beta <- matrix(nrow = 4, ncol = 2, 0.1)
   t_prime <- 1000
 
-  data <- simEventDataTimeVar(N = 5*10^3, t_prime = t_prime, time_var_eff = time_var_eff, eta = eta,
-                              term_deltas = term_deltas, beta = beta, lower = 10^(-20), upper = 10^2,
-                              max_events = 5)
+  data <- simEventTV(N = 5*10^3, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
+                     term_deltas = term_deltas, beta = beta, lower = 10^(-20), upper = 10^2,
+                     max_events = 5)
 
   data <- IntFormatData(data, N_cols = 6:7)
 
@@ -76,11 +76,11 @@ test_that("That the simEventDataTimeVar simulates correctly when no time varryin
     abs(survfit1$coefficients - beta[c(1,2,4),2]))
 
   t_prime <- 1
-  time_var_eff <- matrix(0.1, ncol = 2, nrow = 4)
+  tv_eff <- matrix(0.1, ncol = 2, nrow = 4)
 
-  data <- simEventDataTimeVar(N = 2*10^4, t_prime = t_prime, time_var_eff = time_var_eff, eta = eta,
-                              term_deltas = term_deltas, beta = beta, lower = 10^(-20), upper = 10^2,
-                              max_events = 5)
+  data <- simEventTV(N = 2*10^4, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
+                     term_deltas = term_deltas, beta = beta, lower = 10^(-20), upper = 10^2,
+                     max_events = 5)
 
   data <- IntFormatData(data, N_cols = 6:7)
 
@@ -93,17 +93,17 @@ test_that("That the simEventDataTimeVar simulates correctly when no time varryin
   expect_equal(errors, 0, tolerance = 0.1*12)
 })
 
-test_that("That the simEventDataTimeVar simulates correctly when time varrying effects",{
+test_that("That the simEventTV simulates correctly when time varrying effects",{
   set.seed(623547)
   eta <- rep(0.1, 2)
   term_deltas <- c(0)
   beta <- matrix(nrow = 4, ncol = 2, 0.1)
-  time_var_eff <- matrix(0.3, ncol = 2, nrow = 4)
+  tv_eff <- matrix(0.3, ncol = 2, nrow = 4)
   t_prime <- 1
 
-  data <- simEventDataTimeVar(N = 5*10^3, t_prime = t_prime, time_var_eff = time_var_eff, eta = eta,
-                              term_deltas = term_deltas, beta = beta, lower = 10^(-20), upper = 10^2,
-                              max_events = 5)
+  data <- simEventTV(N = 5*10^3, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
+                     term_deltas = term_deltas, beta = beta, lower = 10^(-20), upper = 10^2,
+                     max_events = 5)
 
   data <- IntFormatData(data, timeVar = TRUE, t_prime = t_prime, N_cols = 6:7)
 
@@ -115,7 +115,7 @@ test_that("That the simEventDataTimeVar simulates correctly when time varrying e
   errors <- sum(abs(survfit0$coefficients[c(1,3,5)] - beta[c(1,2,4),1]))+
     sum(abs(survfit1$coefficients[c(1,3,5)] - beta[c(1,2,4),2]))
 
-  betap <- beta + time_var_eff
+  betap <- beta + tv_eff
   errors <- errors + sum(abs(survfit0$coefficients[c(2,4,6)] - betap[c(1,2,4),1]))+
     sum(abs(survfit1$coefficients[c(2,4,6)] - betap[c(1,2,4),2]))
   expect_equal(errors, 0, tolerance = 0.1*12)

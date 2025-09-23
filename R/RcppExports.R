@@ -5,8 +5,8 @@ inverseScHazCpp <- function(p, t, lower, upper, eta, nu, phi, at_risk, tol = 1e-
     .Call(`_simevent_inverseScHazCpp`, p, t, lower, upper, eta, nu, phi, at_risk, tol, max_iter)
 }
 
-inverseScHazCppTimeVar <- function(p, t, lower, upper, t_prime, eta, nu, phi, phi_prime, at_risk, tol = 1e-9, max_iter = 100L) {
-    .Call(`_simevent_inverseScHazCppTimeVar`, p, t, lower, upper, t_prime, eta, nu, phi, phi_prime, at_risk, tol, max_iter)
+inverseScHazTVCpp <- function(p, t, lower, upper, t_prime, eta, nu, phi, phi_prime, at_risk, tol = 1e-9, max_iter = 100L) {
+    .Call(`_simevent_inverseScHazTVCpp`, p, t, lower, upper, t_prime, eta, nu, phi, phi_prime, at_risk, tol, max_iter)
 }
 
 sampleEventsCpp <- function(probs) {

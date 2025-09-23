@@ -1,6 +1,6 @@
-#' `simEventDataTry` is a function that simulates event data, with the option of
+#' `simEventTV` is a function that simulates event data, with the option of
 #' adding time varying effects. The function is build up in the same way as simEventData,
-#' with the additional arguments time_var_eff and t_prime, which specify the change
+#' with the additional arguments tv_eff and t_prime, which specify the change
 #' of the beta matrix at time at time t'.
 #'
 #' @title Simulate Event Data with time varying effects
@@ -47,7 +47,7 @@
 #' cumulative hazard.
 #' @param gen_A0 Function for generation of A0 covariate. Function of N (number
 #' of individuals) and L0 (baseline covariate).
-#' @param time_var_eff A matrix of the same dimensions as beta, specifying the
+#' @param tv_eff A matrix of the same dimensions as beta, specifying the
 #' change of the effects at time t_prime.the matrix is in the same format as beta.
 #' @param t_prime The time where the effects change.
 #'
@@ -60,23 +60,23 @@
 #' @examples
 #' eta <- rep(0.1, 2)
 #' term_deltas <- c(0,1)
-#' simEventDataTimeVar(N = 100, t_prime = 1, eta = eta, term_deltas = term_deltas)
+#' simEventTV(N = 100, t_prime = 1, eta = eta, term_deltas = term_deltas)
 #'
-simEventDataTimeVar <- function(N,                      # Number of individuals
-                                beta = NULL,            # Effects
-                                time_var_eff = NULL,    # Time varying effects
-                                t_prime = Inf,          # Time of change in effects
-                                eta = NULL,             # Shape parameters
-                                nu = NULL,              # Scale parameters
-                                at_risk = NULL,         # Function defining the setting
-                                term_deltas = c(0,1),   # Terminal events
-                                max_cens = Inf,         # Followup time
-                                add_cov = NULL,         # Additional baseline covariates
-                                override_beta = NULL,   # Override beta
-                                max_events = 10,        # Maximal events per individual
-                                lower = 10^(-15),       # Lower bound for ICH
-                                upper = 200,            # Upper bound for ICH
-                                gen_A0 = NULL           # Generation of A0
+simEventTV <- function(N,                      # Number of individuals
+                       beta = NULL,            # Effects
+                       tv_eff = NULL,    # Time varying effects
+                       t_prime = Inf,          # Time of change in effects
+                       eta = NULL,             # Shape parameters
+                       nu = NULL,              # Scale parameters
+                       at_risk = NULL,         # Function defining the setting
+                       term_deltas = c(0,1),   # Terminal events
+                       max_cens = Inf,         # Followup time
+                       add_cov = NULL,         # Additional baseline covariates
+                       override_beta = NULL,   # Override beta
+                       max_events = 10,        # Maximal events per individual
+                       lower = 10^(-15),       # Lower bound for ICH
+                       upper = 200,            # Upper bound for ICH
+                       gen_A0 = NULL           # Generation of A0
 ){
   ID <- NULL
 
@@ -98,10 +98,10 @@ simEventDataTimeVar <- function(N,                      # Number of individuals
   N_start <- 3 + num_add_cov
   N_stop <- 2 + num_add_cov + num_events
 
-  # Check of dimensions of time_var_eff
-  if(!is.null(time_var_eff)){
-    if(all(dim(time_var_eff) != c(N_stop, num_events))){
-      stop("Dimensions of time_var_eff need to be (number of covariates + number of events,
+  # Check of dimensions of tv_eff
+  if(!is.null(tv_eff)){
+    if(all(dim(tv_eff) != c(N_stop, num_events))){
+      stop("Dimensions of tv_eff need to be (number of covariates + number of events,
          and number of events)")
     }
   }
@@ -110,7 +110,7 @@ simEventDataTimeVar <- function(N,                      # Number of individuals
 
   # Set default values for beta, eta, and nu
   beta <- if(!is.null(beta)) beta else matrix(0, nrow = N_stop, ncol = num_events)
-  time_var_eff <- if(!is.null(time_var_eff)) time_var_eff else matrix(0, nrow = N_stop, ncol = num_events)
+  tv_eff <- if(!is.null(tv_eff)) tv_eff else matrix(0, nrow = N_stop, ncol = num_events)
   colnames(beta) <- paste0("N", seq(0, num_events -1))
 
   if((N_stop) != nrow(beta)){
@@ -168,7 +168,7 @@ simEventDataTimeVar <- function(N,                      # Number of individuals
 
   # In case of time varying effects
   beta_prime <- beta
-  beta_prime[1:N_stop,] <- beta[1:N_stop,] + time_var_eff
+  beta_prime[1:N_stop,] <- beta[1:N_stop,] + tv_eff
 
   ############################ Functions #######################################
 
@@ -192,9 +192,9 @@ simEventDataTimeVar <- function(N,                      # Number of individuals
 
   # We calculate the inverse numerically
   inverse_sc_haz <- function(p, t, i) {
-    inverseScHazTimeVar(p, t, lower = lower, upper = upper, t_prime = t_prime,
-                        eta = eta, nu = nu, phi = phi[i,], phi_prime = phi_prime[i,],
-                        at_risk = at_risk(simmatrix[i, N_start:N_stop]))
+    inverseScHazTV(p, t, lower = lower, upper = upper, t_prime = t_prime,
+                   eta = eta, nu = nu, phi = phi[i,], phi_prime = phi_prime[i,],
+                   at_risk = at_risk(simmatrix[i, N_start:N_stop]))
   }
 
   # Event probabilities

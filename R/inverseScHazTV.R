@@ -1,7 +1,7 @@
 #' Wrapper for inverse cumulative hazard
 #'
-#' A wrapper around the Rcpp function `inverseScHaz`, used to find the inverse
-#' by numeric methods in case of no simple analytical solution.
+#' A wrapper around the Rcpp function `inverseScHazCppTV`, used to find the inverse
+#' of the summed cumulative hazard.
 #'
 #' @param p The random variable (typically `-log(U)`).
 #' @param t The time of the previous event
@@ -25,23 +25,21 @@
 #' phi <- c(1, 1)
 #' at_risk <- c(1, 1)
 #' phi_prime <- c(2, 2)
-#' inverseScHazTimeVar(p = 0.5, t= 1, t_prime = 2, eta = eta, nu = nu,
+#' inverseScHazTV(p = 0.5, t= 1, t_prime = 2, eta = eta, nu = nu,
 #'                        phi = phi, phi_prime = phi_prime, at_risk = at_risk)
 #'
-inverseScHazTimeVar <- function(p, t, lower = 1e-15, upper = 200, t_prime, eta, nu,
+inverseScHazTV <- function(p, t, lower = 1e-15, upper = 200, t_prime, eta, nu,
                                    phi, phi_prime, at_risk, tol = 1e-9, max_iter = 100) {
-  inverseScHazCppTimeVar(
-    p = p,
-    t = t,
-    lower = lower,
-    upper = upper,
-    t_prime = t_prime,
-    eta = eta,
-    nu = nu,
-    phi = phi,
-    phi_prime = phi_prime,
-    at_risk = at_risk,
-    tol = tol,
-    max_iter = max_iter
-  )
+  inverseScHazTVCpp(p = p,
+                    t = t,
+                    lower = lower,
+                    upper = upper,
+                    t_prime = t_prime,
+                    eta = eta,
+                    nu = nu,
+                    phi = phi,
+                    phi_prime = phi_prime,
+                    at_risk = at_risk,
+                    tol = tol,
+                    max_iter = max_iter)
 }

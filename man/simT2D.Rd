@@ -19,7 +19,9 @@ simT2D(
   beta_L_C = 0,
   followup = Inf,
   lower = 10^(-15),
-  upper = 200
+  upper = 200,
+  beta_L_D_t_prime = NULL,
+  t_prime = NULL
 )
 }
 \arguments{
@@ -55,6 +57,10 @@ cumulative hazard.}
 
 \item{upper}{Upper bound for the uniroot function used to find the inverse
 cumulative hazard.}
+
+\item{beta_L_D_t_prime}{The additional effect T2D has on death after the time t_prime}
+
+\item{t_prime}{The time where the effects change.}
 }
 \value{
 Data frame containing the simulated data. There is a column for ID, time of event (Time),
