@@ -4,14 +4,22 @@ The simevent package
 - [simevent](#simevent)
   - [Installation](#installation)
   - [Usage](#usage)
-  - [Example 1: simEventData](#example-1-simeventdata)
-    - [The argument override_beta](#the-argument-override_beta)
-  - [Example 2: Survival Data](#example-2-survival-data)
-  - [Example 3: Competing Risk Data](#example-3-competing-risk-data)
-  - [Example 4: Type 2 Diabetes](#example-4-type-2-diabetes)
-  - [Example 5: Unobserved Covariate
-    Setting](#example-5-unobserved-covariate-setting)
-  - [Example 5: Time Varying Effects](#example-5-time-varying-effects)
+    - [Example 1: General Event History Simulation with
+      `simEventData`](#example-1-general-event-history-simulation-with-simeventdata)
+    - [Formatting Data for Cox
+      Regression](#formatting-data-for-cox-regression)
+    - [Visualize Event Histories](#visualize-event-histories)
+    - [Using override_beta](#using-override_beta)
+  - [Example 2: Survival Data with
+    `simSurvData`](#example-2-survival-data-with-simsurvdata)
+  - [Example 3: Competing Risk Data with
+    `simCRdata`](#example-3-competing-risk-data-with-simcrdata)
+  - [Example 4: Type 2 Diabetes Data with
+    `simT2D`](#example-4-type-2-diabetes-data-with-simt2d)
+  - [Example 5: Unobserved Covariate with
+    `simConfounding`](#example-5-unobserved-covariate-with-simconfounding)
+  - [Example 5: Time Varying Effects with
+    `simEventTV`](#example-5-time-varying-effects-with-simeventtv)
 
 # simevent
 
@@ -19,13 +27,20 @@ The simevent package
 
 <!-- badges: end -->
 
-The goal of `simevent` is to provide functions for the generation and
-analysis of complex continuous time health care data. The simulated data
-includes variables such as treatment decisions, disease progression, and
-health factors. Currently the package contains 1 general function
-`simEventData`, and 5 wrapper functions that simulate data from specific
-settings e.g the survival setting or the competing risk setting using
-the underlying `simEventData` function.
+The `simevent` package provides tools for simulating and analyzing
+complex continuous-time health care data.The simulated data includes
+variables that can be interpreted as treatment decisions, disease
+progression, and health factors.
+
+At its core is the flexible function `simEventData`, which simulates
+from a Cox proportional hazards model with Weibull hazards. Users can
+specify parameters and covariate effects to create custom scenarios.
+
+In addition, the package offers several wrapper functions for common
+settings (e.g., survival data, competing risks) built on top of
+`simEventData.` It also includes functions for plotting
+(`plotEventData`), formatting (`IntFormatData`), and simulating
+interventions (e.g., `intEffectAlphaT2D`).
 
 ## Installation
 
@@ -39,80 +54,64 @@ pak::pak("miclukacova/simevent")
 
 ## Usage
 
-The package provides various functions for simulation of data, such as
-`simEventData`. Further it provides functions for visualization, such as
-`plotEventData`, and functions for performing interventions, such as
-`intEffectAlphaT2D`. Below a couple of usage examples are presented.
-
-## Example 1: simEventData
-
-This is an example of simulating data using `simEventData` from the
-`sim_event` package. We load the package
+The package is loaded with the command
 
 ``` r
 library(simevent)
 ```
 
-`simEventData` is a function for general event history simulations. The
-function is quite flexible, and does therefore take many arguments. You
-can read about the different arguments on the help page
+### Example 1: General Event History Simulation with `simEventData`
+
+This is an example of simulating data using
+`simEventData`.`simEventData` is a function for general event history
+simulations. The function is quite flexible, and does therefore take
+many arguments. You can read about the different arguments on the help
+page
 
 ``` r
 ?simEventData
 ```
 
-The number of events simulated is determined by the length of the `eta`
-vector, `nu` vector or the number of columns in the `beta` matrix. The
-`beta` argument lets the user specify the effects of processes and
-covariates on the intensities of the processes. Below we define a new
-beta matrix. It has dimensions 9x5 since we simulate from a setting with
-two baseline covariates, 5 processes and 2 additional baseline
-covariates.
+The number of simulated events corresponds to the length of the vectors
+, , or the number of columns in .
+
+Below, we create a 9x5 beta matrix for 5 event processes and 4 baseline
+covariates:
 
 ``` r
 set.seed(736)
 beta <- matrix(rnorm(9*5), ncol = 5, nrow = 9)
 ```
 
-To include additional baseline covariates, the user can specify random
-generator functions to generate the covariates. We will in the following
-include two additional baseline covariates, one with a Bernoulli
-distribution with success parameter 0.2, and one with a normal
-distribution. The functions should take as input the number of draws to
-make. We choose to specify two additional covariates by
+You can add baseline covariates by supplying generator functions:
 
 ``` r
-# Additional covariates
 func1 <- function(N) rbinom(N, 1, 0.2)
 func2 <- function(N) rnorm(N)
 add_cov <- list("Z1" = func1, "Z2" = func2)
 ```
 
-One can specify an at_risk function
+Define an function to specify risk windows for recurrent events:
 
 ``` r
 # at risk function
 at_risk <- function(events) {
   return(c(
     1,1,                         # Always at risk for event 0 and 1
-    as.numeric(events[3] < 2),   # Can experience event 2 twice
-    as.numeric(events[4] < 1),   # Can experience event 3 once
-    as.numeric(events[5] < 2)))  # Can experience event 4 twice
+    as.numeric(events[3] < 2),   # Event 2 can occur twice
+    as.numeric(events[4] < 1),   # Event 3 can occur once
+    as.numeric(events[5] < 2)))  # Event 4 can occur twice
   }
 ```
 
-This `at_risk` function for example, allows for recurrent events,
-letting the individual event 2 and 4 twice. We use the default values of
-$\eta$, $\nu$ and have no maximal censoring time. The `N` argument lets
-the user specify number of individuals in the simulation. We simulate
-data by the function call
+Simulate data for 5000 individuals:
 
 ``` r
 set.seed(973)
 data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk)
 ```
 
-The simulated data looks like
+Preview the simulated data:
 
 ``` r
 head(data)
@@ -135,27 +134,14 @@ head(data)
 #> 6:     0     0
 ```
 
-From data we can for example see that Individual $1$ has a baseline
-covariate $L_0$ of $0.816906$, does get baseline treatment ($A_0 = 1$)
-and experienced the event $2$ at Time $0.8638205$.
+### Formatting Data for Cox Regression
 
-It could be of interest to estimate the effects of covariates on the
-intensities of the different counting processes. A tool for this is the
-Cox proportional hazards model. In order to fit a Cox proportional
-hazards model with the `survival` package, the data needs to be
-transformed into the so called *tstart* *tstop* format, this can be done
-by the function `IntFormatData`, where you need to specify the indices
-of the columns that contain data regarding counting processes.
+Transform the data into *tstart-tstop* format with `IntFormatData`
+(specify columns with counting process data):
 
 ``` r
 data_int <- IntFormatData(data, N_cols = 8:12)
-```
-
-Data in the *tstart* *tstop* format looks like
-
-``` r
 head(data_int)
-#> Key: <ID>
 #>       ID      Time Delta        L0    A0    Z1         Z2    N0    N1    N2
 #>    <int>     <num> <int>     <num> <num> <num>      <num> <num> <num> <num>
 #> 1:     1 1.2416160     4 0.8169060     1     0  0.2555876     0     0     0
@@ -174,17 +160,11 @@ head(data_int)
 #> 6:     0     0     2 1.053226 2.2914281
 ```
 
-The data contains the same information as the original data, only now
-three additional columns have been added. The column *k*, indicates the
-number of the event, the column *tstart* indicates the start of a time
-interval, and the column *tstop* indicates the end of a time interval.
-In each time interval the covariates (and processes) influencing the
-intensities of the processes remain constant. Cox proportional hazards
-models for the $N_0$ process and $N_4$ process can be fitted by the
-following code
+Fit Cox models for processes 0 and 4:
 
 ``` r
 library(survival)
+
 # Process 0
 survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4, 
                   data = data_int)
@@ -194,11 +174,7 @@ survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + Z1 + Z2 + N2 + N3 
                   data = data_int[N4 < 2])
 ```
 
-In order to conduct correct inference, only data where the individual is
-at risk for the event in question is included in the regression. The
-regression results can be seen by the summary call, as usual. For a
-sanity check, we can visualize the estimated coefficients and the true
-values.
+Visualize estimated coefficients alongside true values:
 
 ``` r
 CIs <- cbind("Par" = c(paste0(rownames(confint(survfit0)), "_N0"), 
@@ -224,106 +200,108 @@ pp <- ggplot(data = CIs)+
 pp
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
-One can visualize the data with use of the function `plotEventData`.
+### Visualize Event Histories
+
+Plot the first 100 individuals’ event histories:
 
 ``` r
 plotEventData(data[1:100,])
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" /> The
-plot shows the event history of the 100 first rows of data, the
-different colors of the dots illustrate the different events. The
-$x$-axis is the timeline.
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
-### The argument override_beta
+### Using override_beta
 
-We can specify an entry in the beta matrix with use of the argument
-`override_beta`. For example the following code sets the effect of L0 on
-the processes N0 and N1 equal to 0.
+You can override specific entries in the beta matrix. For example, set
+the effect of on processes and to zero:
 
 ``` r
 data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
                      override_beta = list("L0" = c("N0" = 0, "N1" = 0)))
 ```
 
-In the default case the effects of the counting processes on the
-intensities are linear. This can be altered by the argument
-`override_beta`. For example the following code the effect of N2 on the
-process N1 is set to $0$ if $N2$ is larger than $1$.
+You can also specify non-linear effects, e.g., effect of on set to zero
+if :
 
 ``` r
 data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
                      override_beta = list("N2 > 1" = c("N1" = 2)))
 ```
 
-## Example 2: Survival Data
+## Example 2: Survival Data with `simSurvData`
 
-A special case of the general setting is the survival setting, one can
-simulate data from a survival setting with the function `simSurvData`.
+The function simSurvData allows you to simulate survival data for
+individuals at risk of both censoring (0) and an event (1).
+
+By default, the function simulates survival data with no covariate
+effects:
 
 ``` r
 data <- simSurvData(100)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
 
-One can again specify the effects of $A_0$ and $L_0$ on the risk of
-death and censoring by the `beta` argument.
+You can specify how baseline covariates and affect the risk of censoring
+and death through the matrix. For example:
 
 ``` r
-# No effect of L0 and A0 on censoring process
-beta_C <- c(0,0)
-# Effect of L0 and A0 on death process
-beta_D <- c(1,-1)
+# Effects of L0 and A0 on the censoring hazard (first column)
+beta_C <- c(0, 0)  
 
+# Effects of L0 and A0 on the death hazard (second column)
+beta_D <- c(1, -1)
+
+# Combine into a 2x2 matrix where columns represent censoring and death hazards
 beta <- cbind(beta_C, beta_D)
 ```
 
-And specify the parameters of the Weibull intensity for the censoring
-and death process.
+You can also set the Weibull shape () and scale () parameters for both
+censoring and death hazards:
 
 ``` r
 eta <- c(0.2, 0.2)
 nu <- c(1.05, 1.05)
 ```
 
-We now call the function and visualize the data
+Use the specified parameters to simulate data and visualize it:
 
 ``` r
 data <- simSurvData(100, beta = beta, eta = eta, nu = nu)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
-## Example 3: Competing Risk Data
+## Example 3: Competing Risk Data with `simCRdata`
 
-You can simulate data from a competing risk setting with the function
-`simCRdata`. The arguments `beta`, `eta`, `nu`, work in a similar maner
-as above.
+Simulate competing risk data (similar parameters as above):
 
 ``` r
 data <- simCRdata(100)
 plotEventData(data, title = "Competing Risk Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
 
-## Example 4: Type 2 Diabetes
+## Example 4: Type 2 Diabetes Data with `simT2D`
 
 The function `simT2D` simulates health care data from a setting where
-patients can experience $3$ different events: Censoring (0), Death (1)
-and Type-2-Diabetes (2). The various arguments allow for the different
-scenarios, and you can read about them on the help page
+patients can experience $3$ different events: \* **Censoring** (coded as
+0) \* **Death** (coded as 1), and \* **Type-2-Diabetes** (coded as 2).
+
+You can customize the simulation scenarios by adjusting the function
+arguments. For detailed information about the parameters, see the help
+page:
 
 ``` r
 ?simT2D
 ```
 
-Below is a function call to `simT2D`
+Example simulation
 
 ``` r
 data <- simT2D(N = 100,
@@ -338,25 +316,23 @@ data <- simT2D(N = 100,
 plotEventData(data, title = "T2D data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
-## Example 5: Unobserved Covariate Setting
+## Example 5: Unobserved Covariate with `simConfounding`
 
-The `simConfounding` function was created to simulate data from a
-setting where we have an unobserved confounding process. You can read
-about the function on the help page
+Simulate data with an unobserved confounding process:
 
 ``` r
 ?simConfounding
 ```
 
-One can simulate data from the default setting by the function call
+Default simulation:
 
 ``` r
 data <- simConfounding(100)
 ```
 
-And one can simulate from user specified scenarios by the function call
+Custom scenario:
 
 ``` r
 data <- simConfounding(N = 100,
@@ -372,49 +348,33 @@ data <- simConfounding(N = 100,
                        op = 1)
 ```
 
-For example the function call above simulates from a setting with the
-operation/treatment event (op = 1), where there is a censoring process
-(cens = 1), and where after 5 time units everybody is censored (followup
-= 5). We can again visulize data by the function call to
-`plotEventData`.
+Plot
 
 ``` r
 plotEventData(data, title = "Confounding setting")
 ```
 
-<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />
 
-## Example 5: Time Varying Effects
+## Example 5: Time Varying Effects with `simEventTV`
 
-You can simulate from a setting with time varying effects with the
-function …
+One can simulate a setting with time-varying effects with the function
+`simEventTV`. After the time an additional effect of is added to the
+beta matrix.
 
 ``` r
-#eta <- rep(0.1, 4)
-#term_deltas <- c(0,1)
-#time_var_eff <- matrix(1, ncol = 4, nrow = 6)
-#beta <- matrix(nrow = 6, ncol = 4, rnorm(4*6, sd = 0.5))
-#
-#data <- simEventDataTry(N = 3*10^4, t_prime = 1, time_var_eff = time_var_eff, eta = eta,
-#                        term_deltas = term_deltas, beta = beta, lower = 10^(-200), upper = 10^2,
-#                        max_events = 5)
-#
-#plotEventData(data[1:1000,][Time <= 1])
-#plotEventData(data[1:1000,])
-#
-#data <- IntFormatData(data)
-#
-## Det gør de her ikke...
-#survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N2 + N3, data = data[Time <= 1])
-#survfit1 <- coxph(Surv(tstart, tstop, Delta == 1) ~ L0 + A0 + N2 + N3, data = data[Time <= 1])
-#survfit2 <- coxph(Surv(tstart, tstop, Delta == 2) ~ L0 + A0 + N2 + N3, data = data[Time <= 1])
-#survfit3 <- coxph(Surv(tstart, tstop, Delta == 2) ~ L0 + A0 + N2 + N3, data = data[Time <= 1])
-#
-## De her koefficienter bliver estimeret rigtigt
-#survfit1.0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + N2 + N3, data = data[Time > 1])
-#survfit1.1 <- coxph(Surv(tstart, tstop, Delta == 1) ~ L0 + A0 + N2 + N3, data = data[Time > 1])
-#survfit1.2 <- coxph(Surv(tstart, tstop, Delta == 2) ~ L0 + A0 + N2 + N3, data = data[Time > 1])
-#survfit1.3 <- coxph(Surv(tstart, tstop, Delta == 3) ~ L0 + A0 + N2 + N3, data = data[Time > 1])
-#
-#survfit1.1$coefficients ;beta[c(1,2,5,6),2]+1
+set.seed(6258)
+eta <- rep(0.1, 4)
+term_deltas <- c(0,1)
+tv_eff <- matrix(0.5, ncol = 4, nrow = 6)
+beta <- matrix(nrow = 6, ncol = 4, 0.5)
+t_prime <- 1
+
+data <- simEventTV(N = 1000, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
+                   term_deltas = term_deltas, beta = beta, lower = 10^(-15), upper = 10^2,
+                   max_events = 5)
+
+plotEventData(data)
 ```
+
+<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
