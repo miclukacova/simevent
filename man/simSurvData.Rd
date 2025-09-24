@@ -7,28 +7,37 @@
 simSurvData(N, beta = NULL, eta = rep(0.1, 2), nu = rep(1.1, 2), cens = 1, ...)
 }
 \arguments{
-\item{N}{A double of the number of individuals}
+\item{N}{Numeric scalar. Number of individuals to simulate.}
 
-\item{beta}{A 2X2 matrix with the effect of L0 and A0 on Censoring and Event.
-The columns represent Censoring and Death, while the rows represent L0 and A0.}
+\item{beta}{Numeric 2x2 matrix specifying effects of baseline covariates \code{L0} and \code{A0} on censoring and event hazards.
+\itemize{
+\item Rows correspond to covariates \code{L0} and \code{A0}.
+\item Columns correspond to censoring (1st column) and event (2nd column).
+Defaults to zero matrix if \code{NULL}.
+}}
 
-\item{eta}{Vector of  length 2 of shape parameters for the Weibull hazard with parameterization
-\deqn{\eta \nu t^{\nu - 1}}. Default is set to 0.1 for all events.}
+\item{eta}{Numeric vector of length 2. Shape parameters for Weibull hazard with parameterization \eqn{\eta \nu t^{\nu - 1}}.
+Defaults to \code{rep(0.1, 2)}.}
 
-\item{nu}{Vector of length 2 of scale parameters for the Weibull hazard.}
+\item{nu}{Numeric vector of length 2. Scale parameters for the Weibull hazard. Defaults to \code{rep(1.1, 2)}.}
 
-\item{cens}{Binary variable indicating whether there should be a censoring rpocess}
+\item{cens}{Numeric binary indicator (0 or 1) specifying if censoring is included (default 1).}
 
-\item{...}{Lets you specify additional covariates. See the arfument \code{add_cov}
-in the function \code{simEventData}.}
+\item{...}{Additional arguments passed to \code{simEventData}, including the argument \code{add_cov} to specify extra covariates.}
 }
 \value{
 Data frame containing the simulated survival data
 }
 \description{
-Function to simulate data from a Survival setting. The function simulates data corresponding to $N$ individuals that
-are at risk for censoring (0) and an event (1).
+Simulate Survival Data with Censoring and Event Times
+}
+\details{
+Simulates survival data for \eqn{N} individuals who are at risk for censoring (0) and an event (1).
+The hazard functions for censoring and event times follow Weibull distributions parameterized by
+shape parameters \eqn{\eta} and scale parameters \eqn{\nu}. Covariate effects on censoring and event
+hazards are specified via a matrix \code{beta}.
 }
 \examples{
 simSurvData(10)
+
 }

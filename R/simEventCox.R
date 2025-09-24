@@ -5,61 +5,50 @@
 #' and simulation proceeds by iteratively sampling event times until a terminal event occurs.
 #'
 #' @param N Integer. The number of individuals to simulate.
-#' @param cox_fits A list of fitted Cox models (`coxph` objects), one for each type of event.
-#' Should be named, so that the names can be used as column names.
-#' @param L0_old A vector of previously observed baseline covariate values for L0.
-#' Used for resampling.
-#' @param A0_old A vector of previously observed baseline covariate values for A0.
-#' Used for resampling.
-#' @param max_events Integer. The maximum number of events to simulate (i.e.,
-#' simulation rounds).
-#' @param n_event_max Integer vector. Maximum number of times each event type can
-#' occur per individual.
-#' @param term_events Integer or vector of integers. Indices of event types that
-#' are terminal (i.e., stop further simulation for an individual).
-#' @param intervention1 Function for performing interventions regarding covariates.
-#' The function can be used to modify the covariate data used in the simulation at each step,
-#' enabling the incorporation of dynamic interventions. The function should
-#' take the arguments j (the event number) and the sim_matrix containing the simulation
-#' information.
-#' @param intervention2 Function for performing inteventions regarding the hazards.
-#' The function can be used to modify the hazard of each event at each step of the simulation.
-#' The function should take the arguments j (the event number) and the sim_matrix containing the simulation
-#' information.
-#'
-#' The function should return a new sim_matrix, altered in the way desired for the intervention.
+#' @param cox_fits A named list of fitted Cox proportional hazards models (`coxph` objects),
+#'   one for each event type. The names are used as event type labels.
+#' @param L0_old A vector of previously observed baseline covariate values for L0,
+#'   used for resampling baseline covariates.
+#' @param A0_old A vector of previously observed baseline covariate values for A0,
+#'   used for resampling baseline covariates.
+#' @param max_events Integer. The maximum number of events to simulate per individual.
+#' @param n_event_max Integer vector. Maximum number of times each event type can occur
+#'   per individual.
+#' @param term_events Integer or integer vector. Indices of event types that are terminal,
+#'   i.e., events that stop further simulation for an individual.
+#' @param intervention1 Optional function. Takes arguments `(j, sim_matrix)` and returns
+#'   an updated simulation matrix. Used to modify covariates dynamically at each event iteration.
+#' @param intervention2 Optional function. Takes arguments `(j, H_j)` and returns a modified
+#'   baseline cumulative hazard vector for event type `j`. Allows dynamic hazard modification.
 #'
 #' @details
 #' The function simulates individual event histories by:
 #' \enumerate{
-#'   \item Sampling initial covariate values (L0, A0) from provided vectors.
-#'   \item Iteratively computing cumulative hazard functions based on provided Cox models.
-#'   \item Drawing event times using inverse transform sampling.
-#'   \item Updating covariate histories and censoring individuals after terminal events.
+#'   \item Sampling initial baseline covariates (`L0`, `A0`) by resampling observed values.
+#'   \item Extracting baseline cumulative hazard functions from the Cox models.
+#'   \item Iteratively sampling event times using inverse transform sampling based on hazards.
+#'   \item Updating covariate histories and event counts.
+#'   \item Stopping simulation per individual after a terminal event or maximum events reached.
 #' }
-#' Simulation stops for an individual once a terminal event (as defined by `term_events`) occurs.
 #'
-#' The function supports multiple event types, and different maximum occurrences for each via `n_event_max`.
-#'
-#' @return A `data.table` with one row per event per individual, including:
+#' @return A `data.table` with one row per event per individual containing:
 #' \itemize{
 #'   \item `ID` — Individual identifier.
 #'   \item `Time` — Event time.
-#'   \item `Delta` — Type of event that occurred.
-#'   \item `L0`, `A0` — Baseline covariates.
-#'   \item One column for each event type, indicating cumulative counts.
+#'   \item `Delta` — Event type indicator.
+#'   \item Baseline covariates `L0`, `A0`.
+#'   \item Columns for each event type indicating cumulative event counts.
 #' }
 #'
 #' @import survival
 #' @import data.table
-#' @export
 #'
 #' @examples
 #' # The observed data
 #' data_obs <- simT2D(N = 1000)
 #' data_obs <- IntFormatData(data_obs, N_cols = 6)
 #'
-#' # Fit some Cox models
+#' # Fit Cox models
 #' cox_death <- survival::coxph(survival::Surv(tstart, tstop, Delta == 1)
 #' ~ L0 + A0 + L, data = data_obs)
 #' cox_t2d <- survival::coxph(survival::Surv(tstart, tstop, Delta == 2)
@@ -69,6 +58,7 @@
 #' cox_fits <- list("D" = cox_death, "L" = cox_t2d)
 #' new_data <- simEventCox(100, cox_fits = cox_fits, L0_old = data_obs$L0, A0_old = data_obs$A0)
 #'
+#' @export
 simEventCox <- function(N,
                         cox_fits,
                         L0_old,

@@ -1,30 +1,42 @@
-#' Function that performs a simulation study of the Kaplan-Meier estimator on data
-#' from a T2D diabetes setting. Data is simulated by use of the function simT2D.
-#' Right censoring is incorporated, and the L1 variable is omitted. The estimand is
-#' \deqn{S(\tau | A_0 = 1) = P(T \geq \tau | A_0 = 1) , \quad S(\tau | A_0 = 0) = P(T \geq \tau | A_0 = 0)}
-#' For some \eqn{\tau \in \mathbb{R}}. \eqn{T} is here the survival time *post* T2D diagnose.
-#' The survival function will be estimated by the Kaplan-Meier estimator.
-#' Post T2D diagnose, the setting is simpler, as there are no competing events, only death and censoring.
-#' The Kaplan-Meier estimator will then be an unbiased estimator of the survival probability.
-#' The function generates B data sets with N individuals. For each data set we find the
-#' Kaplan-Meier estimate of \eqn{P(T \geq \tau | A_0 = a_0)}, the SE, and the upper and
-# lower confidence bands, for \deqn{a_0 \in \{0,1\}}.
+#' Simulation Study of the Kaplan-Meier Estimator Post T2D Diagnosis
+#'
+#' This function performs a simulation study evaluating the Kaplan-Meier estimator
+#' in a Type 2 Diabetes (T2D) context. Data is generated using `simT2D`, with
+#' right censoring incorporated. The covariate `L1` is omitted. The estimand is:
+#'
+#' \deqn{S(\tau | A_0 = a_0) = P(T \geq \tau | A_0 = a_0), \quad a_0 \in \{0, 1\}, \ \tau \in \mathbb{R}}
+#'
+#' Here, \eqn{T} is the survival time post T2D diagnosis. After T2D onset, only death and censoring occur (no competing risks),
+#' making the Kaplan-Meier estimator unbiased for the survival probability.
+#'
+#' For each of the \code{B} simulation runs, a dataset with \code{N} individuals is generated. The Kaplan-Meier estimate,
+#' standard error (SE), and 95% confidence interval (CI) for the survival function at time \code{tau} are computed
+#' separately for \eqn{A_0 = 0} and \eqn{A_0 = 1}.
+#'
 #' @title simStudyT2D
 #'
-#' @param N A double of the number of individuals
-#' @param B A double for the number of repetitions
-#' @param beta_L0_D Specifies how L0 affects risk of death.
-#' @param beta_L0_L Specifies how L0 affects risk of T2D.
-#' @param beta_A0_L Specifies how A0 affects risk of T2D.
-#' @param beta_L_D Specifies how change in the covariate process affects risk of death.
-#' @param beta_A0_D Specifies how A0 affects risk of death.
-#' @param eta Vector of length 3 of shape parameters for the Weibull intensity with parameterization
-#' \deqn{\eta \nu t^{\nu - 1}}. Default is set to 0.1 for all events.
-#' @param nu Vector of length 3 of scale parameters for the Weibull hazard. Default is set to 1.1 for all events.
-#' @param tau The time at which the survival probability is estimated.
+#' @param N Integer. Number of individuals in each simulated dataset.
+#' @param B Integer. Number of simulation repetitions.
+#' @param beta_L0_D Numeric. Effect of L0 on risk of death.
+#' @param beta_L0_L Numeric. Effect of L0 on risk of T2D.
+#' @param beta_A0_L Numeric. Effect of A0 on risk of T2D.
+#' @param beta_L_D Numeric. Effect of time-varying covariate on death risk.
+#' @param beta_A0_D Numeric. Effect of A0 on risk of death.
+#' @param eta Numeric vector of length 3. Shape parameters for the Weibull hazard \eqn{\eta \nu t^{\nu - 1}}.
+#'   Default is \code{rep(0.1, 3)}.
+#' @param nu Numeric vector of length 3. Scale parameters for the Weibull hazard. Default is \code{rep(1.1, 3)}.
+#' @param tau Numeric. Time point at which the survival probability is estimated.
 #'
-#' @returns Results of simulation study in the form of a B times 8 matrix. The columns are the estimates of
-#' survival probability, SE, lower and upper CI for respectively A0 = 0 and A0 = 1.
+#' @return A matrix of dimension \code{B x 8}, with the following columns:
+#' \item{Est 0: KM estimate of survival at \code{tau} for A_0 = 0}
+#' \item{Est 1: KM estimate of survival at \code{tau} for A_0 = 1}
+#' \item{SE 0: Standard error of the KM estimate for A_0 = 0}
+#' \item{SE 1: Standard error of the KM estimate for A_0 = 1}
+#' \item{Lower 0: Lower 95 % CI bound for A_0 = 0}
+#' \item{Lower 1: Lower 95 % CI bound for A_0 = 1}
+#' \item{Upper 0: Upper 95 % CI bound for A_0 = 0}
+#' \item{Upper 1: Upper 95 % CI bound for A_0 = 1}
+#'
 #' @export
 #'
 #' @examples

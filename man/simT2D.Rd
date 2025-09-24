@@ -25,60 +25,68 @@ simT2D(
 )
 }
 \arguments{
-\item{N}{A double of the number of individuals}
+\item{N}{Numeric scalar. Number of individuals to simulate.}
 
-\item{eta}{Vector of length 4 of shape parameters for the Weibull intensity with parameterization
-\deqn{\eta \nu t^{\nu - 1}}. Default is set to 0.1 for all events.}
+\item{eta}{Numeric vector of length 3. Shape parameters for Weibull intensities with parameterization \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 3)}.}
 
-\item{nu}{Vector of scale parameters for the Weibull hazard. Default is set to 1.1 for all events.}
+\item{nu}{Numeric vector of length 3. Scale parameters for the Weibull hazards. Defaults to \code{rep(1.1, 3)}.}
 
-\item{cens}{Specifies whether you are at risk of being censored}
+\item{cens}{Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).}
 
-\item{beta_L0_D}{Specifies how baseline covariate affects risk of Death. Is by default set to 1.}
+\item{beta_L0_D}{Numeric scalar. Effect of baseline covariate L0 on death risk (default 1).}
 
-\item{beta_L0_L}{Specifies how change in the covariate process affects risk of death. Is by default set to 1.}
+\item{beta_L0_L}{Numeric scalar. Effect of baseline covariate L0 on covariate change risk (default 1).}
 
-\item{beta_L_D}{Specifies how change in the covariate process affects risk of death. Is by default set to 1.}
+\item{beta_L_D}{Numeric scalar. Effect of covariate change (L = 1) on death risk (default 1).}
 
-\item{beta_A0_D}{Specifies how baseline treatment affects risk of death. Is by default set to 0.}
+\item{beta_A0_D}{Numeric scalar. Effect of baseline treatment (A0 = 1) on death risk (default 0).}
 
-\item{beta_A0_L}{Specifies how baseline treatment affects risk of T2D. Is by default set to 0.}
+\item{beta_A0_L}{Numeric scalar. Effect of baseline treatment (A0 = 1) on covariate change risk (default 0).}
 
-\item{beta_L0_C}{The effect of covariate L0 on the probability of C = 1. Is by default set to 0.}
+\item{beta_L0_C}{Numeric scalar. Effect of baseline covariate L0 on censoring probability (default 0).}
 
-\item{beta_A0_C}{The effect of covariate A0 = 1 on the probability of C = 1. Is by default set to 0.}
+\item{beta_A0_C}{Numeric scalar. Effect of baseline treatment A0 on censoring probability (default 0).}
 
-\item{beta_L_C}{The effect of covariate L = 1 on the probability of C = 1. Is by default set to 0.}
+\item{beta_L_C}{Numeric scalar. Effect of covariate change (L = 1) on censoring probability (default 0).}
 
-\item{followup}{A maximal censoring time. By default set to infinity.}
+\item{followup}{Numeric scalar. Maximum follow-up (censoring) time. Defaults to \code{Inf}.}
 
-\item{lower}{Lower bound for the uniroot function used to find the inverse
-cumulative hazard.}
+\item{lower}{Numeric scalar. Lower bound for root-finding (inverse cumulative hazard) (default \code{1e-15}).}
 
-\item{upper}{Upper bound for the uniroot function used to find the inverse
-cumulative hazard.}
+\item{upper}{Numeric scalar. Upper bound for root-finding (default 200).}
 
-\item{beta_L_D_t_prime}{The additional effect T2D has on death after the time t_prime}
+\item{beta_L_D_t_prime}{Numeric scalar or NULL. Additional effect of covariate change on death risk after time \code{t_prime} (optional).}
 
-\item{t_prime}{The time where the effects change.}
+\item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 }
 \value{
-Data frame containing the simulated data. There is a column for ID, time of event (Time),
-event type (Delta), baseline covariate (L0) and additional covariate (L).
+A data frame containing the simulated data with columns:
+\describe{
+\item{ID}{Individual identifier}
+\item{Time}{Time of the event}
+\item{Delta}{Event type (0 = censoring, 1 = death, 3 = covariate change)}
+\item{L0}{Baseline covariate}
+\item{L}{Covariate indicating change in covariate process}
+}
 }
 \description{
-Function to simulate data from a T2D diabetes setting. 3 different types of
-events are simulated. They can be interpreted as Censoring(0), Death (1) and
-Change in Covariate Process (3). Death and Censoring are terminal events and Change in
-Covariate Process can occur once. The intensities of the various events depend
-upon previous events and the pre specified \eqn{\nu} and \eqn{\eta} parameters.
-The dependence on previous events is controlled by parameters chosen so that a
-large baseline covariate (L0) increases the probability of covariate change (L = 1).
-Initial treatment (A0 = 1) reduces the risk of a change in the covariate process
-(L= 1) and the risk of death. A large baseline covariate (L0) increase the risk of death.
-Censoring does not depend on anything. The risk of death depends on change in
-the covariate process (L = 1) through beta_L_D.
+Simulate Data from a Type 2 Diabetes (T2D) Setting
+}
+\details{
+This function simulates event data representing three event types:
+Censoring (0), Death (1), and Change in Covariate Process (3). Death and Censoring are terminal events,
+while Change in Covariate Process can occur only once.
+
+Event intensities depend on previous events and predefined parameters \eqn{\nu} and \eqn{\eta}.
+
+The arguments \code{beta_X_Y} control how the x affects y. A positive value means that a higher value of X
+increases the intensity of Y, while a negative value decreases the intensity.
+
+The simulation uses an event history framework with terminal events (death, censoring) and a single recurrent covariate change.
+The event intensities depend on covariates and previous events according to user-specified parameters.
+Time-varying effects can be included via \code{beta_L_D_t_prime} and \code{t_prime}.
 }
 \examples{
 simT2D(10)
+
 }

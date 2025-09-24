@@ -1,70 +1,53 @@
+#' Simulate Event Data with Time-Varying Effects
+#'
 #' `simEventTV` is a function that simulates event data, with the option of
-#' adding time varying effects. The function is build up in the same way as simEventData,
-#' with the additional arguments tv_eff and t_prime, which specify the change
-#' of the beta matrix at time at time t'.
+#' adding time varying effects. The function is build up in the same way as `simEventData`,
+#' with the additional arguments `tv_eff` and `t_prime`, which specify the change
+#' of the beta matrix at time `t_prime`.
 #'
-#' @title Simulate Event Data with time varying effects
+#' @title simEventTV
 #'
-
-#' @param N A double for the number of simulated individuals
-#' @param beta A matrix of doubles for the effects of covariates and events on the
-#' intensities. The columns represent the events N0, N1, .... In the default case 4 events.
-#' The rows represent covariates and processes: the first two rows determine the
-#' effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
-#' next rows determine the effects of the additional baseline covariates, by default
-#'  named L1, L2,..., on the processes, followed by the effects of the processes N0,
-#'  N1,.... The \eqn{\beta} matrix is by  default set to 0.
-#' @param eta Vector of shape parameters for the baseline intensity. Default is set
-#' to 0.1 for all events.
-#' @param nu Vector of scale parameters for the baseline intensity. Default is set
-#' to 1.1 for all events.
-#' @param at_risk At risk function. The \code{at_risk} function determines whether
-#' an individual is at risk for a specific event. The function takes as input a vector
-#' `events` of event counts. The function returns a vector of 0's and 1's indicating
-#' which events the subject is at risk for. Default is set to a setting where you
-#' are always at risk for all events.
-#' @param term_deltas Terminal events. Default is set so that event 0 and 1 are
-#' terminal events.
-#' @param max_cens A maximum censoring time. By default set to infinity. If the event
-#' time is larger than this maximal censoring time the event is set to 0 with prob
-#' ability 1 and the event time is set to `max_cens`.
-#' @param add_cov Named list of random generator functions for the distributions of
-#' additional baseline covariates. The functions should take the number of observations
-#' as input. By default set to NULL.
-#' @param override_beta This argument is a named list. The argument has two applications.
-#' One possibility is instead of specifying the whole beta matrix, the user can
-#' specify the relevant entries, and the rest will by default be 0. Imagine you want
-#' to specify the effect of L0 on N1 to be equal to 2, this could be done by
-#' override_beta = list("L0" = c("N1" = 2))
-#' In general if you want the effect \eqn{\beta_{x,y}= z}, you can specify the
-#' override_beta argument as
-#' override_beta = list("x" = c("y" = z))
-#' Where x and y are names of processes or covariates.
-#' @param max_events Number of maximal events per individual
-#' @param lower Lower bound for the uniroot function used to find the inverse
-#' cumulative hazard.
-#' @param upper Upper bound for the uniroot function used to find the inverse
-#' cumulative hazard.
-#' @param gen_A0 Function for generation of A0 covariate. Function of N (number
-#' of individuals) and L0 (baseline covariate).
+#' @param N Integer. Number of individuals to simulate.
+#' @param beta Matrix. Coefficients for covariates and processes. Columns correspond to events (`N0`, `N1`, ...),
+#'             rows correspond to covariates (`L0`, `A0`, ..., and past event counts).
+#' @param tv_eff Matrix. Time-varying changes to `beta`, applied at time `t_prime`.
+#'               Must have same dimensions as `beta`.
+#' @param t_prime Numeric. Time at which `tv_eff` is applied to `beta`.
+#' @param eta Numeric vector. Shape parameters of Weibull intensities for each event.
+#' @param nu Numeric vector. Scale parameters of Weibull intensities for each event.
+#' @param at_risk Function. Determines which events an individual is at risk for, based on event history.
+#' @param term_deltas Integer vector. Event types considered terminal (e.g., death).
+#' @param max_cens Numeric. Maximum censoring time. Defaults to `Inf`.
+#' @param add_cov Named list of functions for generating additional baseline covariates.
+#'                Each function takes one argument `N` and returns a vector of length `N`.
+#' @param override_beta Named list to override elements of `beta`. Format:
+#'                      `list("covariate" = c("event" = value))`.
+#' @param max_events Integer. Maximum number of events allowed per individual.
+#' @param lower Numeric. Lower bound for the root-finding algorithm used in inverse cumulative hazard computation.
+#' @param upper Numeric. Upper bound for the root-finding algorithm used in inverse cumulative hazard computation.
+#' @param gen_A0 Function. Generates baseline treatment assignment. Takes arguments `N` and `L0`.
 #' @param tv_eff A matrix of the same dimensions as beta, specifying the
 #' change of the effects at time t_prime.the matrix is in the same format as beta.
 #' @param t_prime The time where the effects change.
 #'
-#' @return data.table containing the simulated data. There is a column for ID, time
-#' of event (Time), event (Delta), baseline covariate (L0), Baseline Treatment (A0),
-#' the count of the various events: N1, N2, .... In case of additional covariates
-#' these are included in the data as well, named L1, L2, ....
-#' @export
+#' @return A `data.table` with columns:
+#'   \item{ID:}{Individual identifier}
+#'   \item{Time:}{Time of event}
+#'   \item{Delta:}{Type of event}
+#'   \item{L0:}{Baseline covariate}
+#'   \item{A0:}{Baseline treatment}
+#'   \item{N0, N1, ...:}{Cumulative event counts}
+#'   \item{L1, L2, ...:}{Additional covariates (if specified)}
 #'
 #' @examples
 #' eta <- rep(0.1, 2)
-#' term_deltas <- c(0,1)
-#' simEventTV(N = 100, t_prime = 1, eta = eta, term_deltas = term_deltas)
+#' simEventTV(N = 100, t_prime = 1, eta = eta, term_deltas = c(0, 1))
+#'
+#' @export
 #'
 simEventTV <- function(N,                      # Number of individuals
                        beta = NULL,            # Effects
-                       tv_eff = NULL,    # Time varying effects
+                       tv_eff = NULL,          # Time varying effects
                        t_prime = Inf,          # Time of change in effects
                        eta = NULL,             # Shape parameters
                        nu = NULL,              # Scale parameters
@@ -99,11 +82,8 @@ simEventTV <- function(N,                      # Number of individuals
   N_stop <- 2 + num_add_cov + num_events
 
   # Check of dimensions of tv_eff
-  if(!is.null(tv_eff)){
-    if(all(dim(tv_eff) != c(N_stop, num_events))){
-      stop("Dimensions of tv_eff need to be (number of covariates + number of events,
-         and number of events)")
-    }
+  if (!is.null(tv_eff) && any(dim(tv_eff) != c(N_stop, num_events))) {
+    stop(sprintf("Dimensions of tv_eff must be (%d, %d)", N_stop, num_events))
   }
 
   ############################ Default values ##################################

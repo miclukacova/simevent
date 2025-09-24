@@ -2,7 +2,7 @@
 % Please edit documentation in R/simEventTV.R
 \name{simEventTV}
 \alias{simEventTV}
-\title{Simulate Event Data with time varying effects}
+\title{simEventTV}
 \usage{
 simEventTV(
   N,
@@ -23,80 +23,61 @@ simEventTV(
 )
 }
 \arguments{
-\item{N}{A double for the number of simulated individuals}
+\item{N}{Integer. Number of individuals to simulate.}
 
-\item{beta}{A matrix of doubles for the effects of covariates and events on the
-intensities. The columns represent the events N0, N1, .... In the default case 4 events.
-The rows represent covariates and processes: the first two rows determine the
-effects of the baseline covariate \eqn{L0} and \eqn{A0} on the processes. The
-next rows determine the effects of the additional baseline covariates, by default
-named L1, L2,..., on the processes, followed by the effects of the processes N0,
-N1,.... The \eqn{\beta} matrix is by  default set to 0.}
+\item{beta}{Matrix. Coefficients for covariates and processes. Columns correspond to events (\code{N0}, \code{N1}, ...),
+rows correspond to covariates (\code{L0}, \code{A0}, ..., and past event counts).}
 
 \item{tv_eff}{A matrix of the same dimensions as beta, specifying the
 change of the effects at time t_prime.the matrix is in the same format as beta.}
 
 \item{t_prime}{The time where the effects change.}
 
-\item{eta}{Vector of shape parameters for the baseline intensity. Default is set
-to 0.1 for all events.}
+\item{eta}{Numeric vector. Shape parameters of Weibull intensities for each event.}
 
-\item{nu}{Vector of scale parameters for the baseline intensity. Default is set
-to 1.1 for all events.}
+\item{nu}{Numeric vector. Scale parameters of Weibull intensities for each event.}
 
-\item{at_risk}{At risk function. The \code{at_risk} function determines whether
-an individual is at risk for a specific event. The function takes as input a vector
-\code{events} of event counts. The function returns a vector of 0's and 1's indicating
-which events the subject is at risk for. Default is set to a setting where you
-are always at risk for all events.}
+\item{at_risk}{Function. Determines which events an individual is at risk for, based on event history.}
 
-\item{term_deltas}{Terminal events. Default is set so that event 0 and 1 are
-terminal events.}
+\item{term_deltas}{Integer vector. Event types considered terminal (e.g., death).}
 
-\item{max_cens}{A maximum censoring time. By default set to infinity. If the event
-time is larger than this maximal censoring time the event is set to 0 with prob
-ability 1 and the event time is set to \code{max_cens}.}
+\item{max_cens}{Numeric. Maximum censoring time. Defaults to \code{Inf}.}
 
-\item{add_cov}{Named list of random generator functions for the distributions of
-additional baseline covariates. The functions should take the number of observations
-as input. By default set to NULL.}
+\item{add_cov}{Named list of functions for generating additional baseline covariates.
+Each function takes one argument \code{N} and returns a vector of length \code{N}.}
 
-\item{override_beta}{This argument is a named list. The argument has two applications.
-One possibility is instead of specifying the whole beta matrix, the user can
-specify the relevant entries, and the rest will by default be 0. Imagine you want
-to specify the effect of L0 on N1 to be equal to 2, this could be done by
-override_beta = list("L0" = c("N1" = 2))
-In general if you want the effect \eqn{\beta_{x,y}= z}, you can specify the
-override_beta argument as
-override_beta = list("x" = c("y" = z))
-Where x and y are names of processes or covariates.}
+\item{override_beta}{Named list to override elements of \code{beta}. Format:
+\code{list("covariate" = c("event" = value))}.}
 
-\item{max_events}{Number of maximal events per individual}
+\item{max_events}{Integer. Maximum number of events allowed per individual.}
 
-\item{lower}{Lower bound for the uniroot function used to find the inverse
-cumulative hazard.}
+\item{lower}{Numeric. Lower bound for the root-finding algorithm used in inverse cumulative hazard computation.}
 
-\item{upper}{Upper bound for the uniroot function used to find the inverse
-cumulative hazard.}
+\item{upper}{Numeric. Upper bound for the root-finding algorithm used in inverse cumulative hazard computation.}
 
-\item{gen_A0}{Function for generation of A0 covariate. Function of N (number
-of individuals) and L0 (baseline covariate).}
+\item{gen_A0}{Function. Generates baseline treatment assignment. Takes arguments \code{N} and \code{L0}.}
 }
 \value{
-data.table containing the simulated data. There is a column for ID, time
-of event (Time), event (Delta), baseline covariate (L0), Baseline Treatment (A0),
-the count of the various events: N1, N2, .... In case of additional covariates
-these are included in the data as well, named L1, L2, ....
+A \code{data.table} with columns:
+\item{ID:}{Individual identifier}
+\item{Time:}{Time of event}
+\item{Delta:}{Type of event}
+\item{L0:}{Baseline covariate}
+\item{A0:}{Baseline treatment}
+\item{N0, N1, ...:}{Cumulative event counts}
+\item{L1, L2, ...:}{Additional covariates (if specified)}
 }
 \description{
+Simulate Event Data with Time-Varying Effects
+}
+\details{
 \code{simEventTV} is a function that simulates event data, with the option of
-adding time varying effects. The function is build up in the same way as simEventData,
-with the additional arguments tv_eff and t_prime, which specify the change
-of the beta matrix at time at time t'.
+adding time varying effects. The function is build up in the same way as \code{simEventData},
+with the additional arguments \code{tv_eff} and \code{t_prime}, which specify the change
+of the beta matrix at time \code{t_prime}.
 }
 \examples{
 eta <- rep(0.1, 2)
-term_deltas <- c(0,1)
-simEventTV(N = 100, t_prime = 1, eta = eta, term_deltas = term_deltas)
+simEventTV(N = 100, t_prime = 1, eta = eta, term_deltas = c(0, 1))
 
 }
