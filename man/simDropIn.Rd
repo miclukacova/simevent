@@ -2,7 +2,7 @@
 % Please edit documentation in R/simDropIn.R
 \name{simDropIn}
 \alias{simDropIn}
-\title{Simulate Data from the "Drop In" setting}
+\title{\code{simDropIn}}
 \usage{
 simDropIn(
   N,
@@ -39,79 +39,79 @@ simDropIn(
 )
 }
 \arguments{
-\item{N}{A double of the number of individuals}
+\item{N}{Integer. Number of individuals to simulate.}
 
-\item{beta_L_A}{Specifies how L affects A.}
+\item{beta_L_A}{Numeric. Specifies how L affects A.}
 
-\item{beta_L_Z}{Specifies how L affects Z.}
+\item{beta_L_Z}{Numeric. Specifies how L affects Z.}
 
-\item{beta_L_D}{Specifies how L affects D.}
+\item{beta_L_D}{Numeric. Specifies how L affects D.}
 
-\item{beta_L_C}{Specifies how L affects C.}
+\item{beta_L_C}{Numeric. Specifies how L affects C.}
 
-\item{beta_A_L}{Specifies how L affects A.}
+\item{beta_A_L}{Numeric. Specifies how L affects A.}
 
-\item{beta_A_Z}{Specifies how L affects Z.}
+\item{beta_A_Z}{Numeric. Specifies how L affects Z.}
 
-\item{beta_A_D}{Specifies how L affects D.}
+\item{beta_A_D}{Numeric. Specifies how L affects D.}
 
-\item{beta_A_C}{Specifies how L affects C.}
+\item{beta_A_C}{Numeric. Specifies how L affects C.}
 
-\item{beta_Z_L}{Specifies how L affects A.}
+\item{beta_Z_L}{Numeric. Specifies how L affects A.}
 
-\item{beta_Z_A}{Specifies how L affects Z.}
+\item{beta_Z_A}{Numeric. Specifies how L affects Z.}
 
-\item{beta_Z_D}{Specifies how L affects D.}
+\item{beta_Z_D}{Numeric. Specifies how L affects D.}
 
-\item{beta_Z_C}{Specifies how L affects C.}
+\item{beta_Z_C}{Numeric. Specifies how L affects C.}
 
-\item{beta_L0_L}{Specifies how L affects A.}
+\item{beta_L0_L}{Numeric. Specifies how L affects A.}
 
-\item{beta_L0_A}{Specifies how L affects Z.}
+\item{beta_L0_A}{Numeric. Specifies how L affects Z.}
 
-\item{beta_L0_Z}{Specifies how L affects Z.}
+\item{beta_L0_Z}{Numeric. Specifies how L affects Z.}
 
-\item{beta_L0_D}{Specifies how L affects D.}
+\item{beta_L0_D}{Numeric. Specifies how L affects D.}
 
-\item{beta_L0_C}{Specifies how L affects C.}
+\item{beta_L0_C}{Numeric. Specifies how L affects C.}
 
-\item{beta_A0_L}{Specifies how L affects A.}
+\item{beta_A0_L}{Numeric. Specifies how L affects A.}
 
-\item{beta_A0_A}{Specifies how L affects Z.}
+\item{beta_A0_A}{Numeric. Specifies how L affects Z.}
 
-\item{beta_A0_Z}{Specifies how L affects Z.}
+\item{beta_A0_Z}{Numeric. Specifies how L affects Z.}
 
-\item{beta_A0_D}{Specifies how L affects D.}
+\item{beta_A0_D}{Numeric. Specifies how L affects D.}
 
-\item{beta_A0_C}{Specifies how L affects C.}
+\item{beta_A0_C}{Numeric. Specifies how L affects C.}
 
-\item{eta}{Vector of  length 5 of shape parameters for the Weibull hazard with parameterization
+\item{eta}{Numeric vector of length 4 (or 5). Shape parameters of the Weibull baseline intensity for each event type.
 \deqn{\eta \nu t^{\nu - 1}}.}
 
-\item{nu}{Vector of length 5 of scale parameters for the Weibull hazard.}
+\item{nu}{Numeric vector of length 4 (or 5). Scale parameters for the Weibull hazard.}
 
-\item{adherence}{Logical indication whether a Treatment process should be added.}
+\item{adherence}{Logical. Indicator of whether a Treatment process should be added.}
 
-\item{followup}{Maximal censoring time.}
+\item{followup}{Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).}
 
-\item{cens}{Logical indicating whether there should be a censoring process.}
+\item{cens}{Logical. Indicator of whether there should be a censoring process.}
 
-\item{generate.A0}{Function of number of individuals and L0. The function should output
-a vector of length N with A0 values.}
+\item{lower}{Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.}
 
-\item{lower}{Lower bound for the uniroot function used to find the inverse
-cumulative hazard.}
+\item{upper}{Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.}
 
-\item{upper}{Upper bound for the uniroot function used to find the inverse
-cumulative hazard.}
+\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
 }
 \value{
 Data frame containing the simulated survival data
 }
 \description{
-Function to simulate data from a "Drop In" setting. The function simulates data
-corresponding to $N$ individuals that are at risk for 4 or 5 events. Censoring(C),
-Death(D), Drop In Initiation(Z), Change in Covariate Process(L) and potentially Treatment(A).
+Simulate Event Data from a "Drop In" Setting
+}
+\details{
+\code{simDropIn} is a function that simulates data corresponding to \code{N} individuals
+that are at risk for 4 or 5 events. Censoring (C), Death (D), Drop In Initiation (Z),
+Change in Covariate Process (L) and potentially Treatment (A).
 }
 \examples{
 simDropIn(10)

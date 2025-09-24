@@ -26,9 +26,7 @@
 #' @param lower Numeric. Lower bound for the root-finding algorithm used in inverse cumulative hazard computation.
 #' @param upper Numeric. Upper bound for the root-finding algorithm used in inverse cumulative hazard computation.
 #' @param gen_A0 Function. Generates baseline treatment assignment. Takes arguments `N` and `L0`.
-#' @param tv_eff A matrix of the same dimensions as beta, specifying the
-#' change of the effects at time t_prime.the matrix is in the same format as beta.
-#' @param t_prime The time where the effects change.
+#' @param tv_eff Matrix of the same dimensions as beta, specifying the
 #'
 #' @return A `data.table` with columns:
 #'   \item{ID:}{Individual identifier}

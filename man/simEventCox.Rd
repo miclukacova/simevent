@@ -19,45 +19,37 @@ simEventCox(
 \arguments{
 \item{N}{Integer. The number of individuals to simulate.}
 
-\item{cox_fits}{A list of fitted Cox models (\code{coxph} objects), one for each type of event.
-Should be named, so that the names can be used as column names.}
+\item{cox_fits}{A named list of fitted Cox proportional hazards models (\code{coxph} objects),
+one for each event type. The names are used as event type labels.}
 
-\item{L0_old}{A vector of previously observed baseline covariate values for L0.
-Used for resampling.}
+\item{L0_old}{A vector of previously observed baseline covariate values for L0,
+used for resampling baseline covariates.}
 
-\item{A0_old}{A vector of previously observed baseline covariate values for A0.
-Used for resampling.}
+\item{A0_old}{A vector of previously observed baseline covariate values for A0,
+used for resampling baseline covariates.}
 
-\item{max_events}{Integer. The maximum number of events to simulate (i.e.,
-simulation rounds).}
+\item{max_events}{Integer. The maximum number of events to simulate per individual.}
 
-\item{n_event_max}{Integer vector. Maximum number of times each event type can
-occur per individual.}
+\item{n_event_max}{Integer vector. Maximum number of times each event type can occur
+per individual.}
 
-\item{term_events}{Integer or vector of integers. Indices of event types that
-are terminal (i.e., stop further simulation for an individual).}
+\item{term_events}{Integer or integer vector. Indices of event types that are terminal,
+i.e., events that stop further simulation for an individual.}
 
-\item{intervention1}{Function for performing interventions regarding covariates.
-The function can be used to modify the covariate data used in the simulation at each step,
-enabling the incorporation of dynamic interventions. The function should
-take the arguments j (the event number) and the sim_matrix containing the simulation
-information.}
+\item{intervention1}{Optional function. Takes arguments \verb{(j, sim_matrix)} and returns
+an updated simulation matrix. Used to modify covariates dynamically at each event iteration.}
 
-\item{intervention2}{Function for performing inteventions regarding the hazards.
-The function can be used to modify the hazard of each event at each step of the simulation.
-The function should take the arguments j (the event number) and the sim_matrix containing the simulation
-information.
-
-The function should return a new sim_matrix, altered in the way desired for the intervention.}
+\item{intervention2}{Optional function. Takes arguments \verb{(j, H_j)} and returns a modified
+baseline cumulative hazard vector for event type \code{j}. Allows dynamic hazard modification.}
 }
 \value{
-A \code{data.table} with one row per event per individual, including:
+A \code{data.table} with one row per event per individual containing:
 \itemize{
 \item \code{ID} — Individual identifier.
 \item \code{Time} — Event time.
-\item \code{Delta} — Type of event that occurred.
-\item \code{L0}, \code{A0} — Baseline covariates.
-\item One column for each event type, indicating cumulative counts.
+\item \code{Delta} — Event type indicator.
+\item Baseline covariates \code{L0}, \code{A0}.
+\item Columns for each event type indicating cumulative event counts.
 }
 }
 \description{
@@ -68,21 +60,19 @@ and simulation proceeds by iteratively sampling event times until a terminal eve
 \details{
 The function simulates individual event histories by:
 \enumerate{
-\item Sampling initial covariate values (L0, A0) from provided vectors.
-\item Iteratively computing cumulative hazard functions based on provided Cox models.
-\item Drawing event times using inverse transform sampling.
-\item Updating covariate histories and censoring individuals after terminal events.
+\item Sampling initial baseline covariates (\code{L0}, \code{A0}) by resampling observed values.
+\item Extracting baseline cumulative hazard functions from the Cox models.
+\item Iteratively sampling event times using inverse transform sampling based on hazards.
+\item Updating covariate histories and event counts.
+\item Stopping simulation per individual after a terminal event or maximum events reached.
 }
-Simulation stops for an individual once a terminal event (as defined by \code{term_events}) occurs.
-
-The function supports multiple event types, and different maximum occurrences for each via \code{n_event_max}.
 }
 \examples{
 # The observed data
 data_obs <- simT2D(N = 1000)
 data_obs <- IntFormatData(data_obs, N_cols = 6)
 
-# Fit some Cox models
+# Fit Cox models
 cox_death <- survival::coxph(survival::Surv(tstart, tstop, Delta == 1)
 ~ L0 + A0 + L, data = data_obs)
 cox_t2d <- survival::coxph(survival::Surv(tstart, tstop, Delta == 2)

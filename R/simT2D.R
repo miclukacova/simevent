@@ -6,8 +6,12 @@
 #'
 #' Event intensities depend on previous events and predefined parameters \eqn{\nu} and \eqn{\eta}.
 #'
-#' The arguments \code{beta_X_Y} control how the x affects y. A positive value means that a higher value of X
+#' The arguments \code{beta_X_Y} control how the X affects Y. A positive value means that a higher value of X
 #' increases the intensity of Y, while a negative value decreases the intensity.
+#'
+#' The simulation uses an event history framework with terminal events (death, censoring) and a single recurrent covariate change.
+#' The event intensities depend on covariates and previous events according to user-specified parameters.
+#' Time-varying effects can be included via \code{beta_L_D_t_prime} and \code{t_prime}.
 #'
 #' @title Simulate Data in a T2D Diabetes Setting
 #'
@@ -28,18 +32,12 @@
 #' @param upper Numeric scalar. Upper bound for root-finding (default 200).
 #' @param beta_L_D_t_prime Numeric scalar or NULL. Additional effect of covariate change on death risk after time \code{t_prime} (optional).
 #' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
-#'@return A data frame containing the simulated data with columns:
-#' \describe{
-#'   \item{ID}{Individual identifier}
-#'   \item{Time}{Time of the event}
-#'   \item{Delta}{Event type (0 = censoring, 1 = death, 3 = covariate change)}
-#'   \item{L0}{Baseline covariate}
-#'   \item{L}{Covariate indicating change in covariate process}
-#' }
-#' @details
-#' The simulation uses an event history framework with terminal events (death, censoring) and a single recurrent covariate change.
-#' The event intensities depend on covariates and previous events according to user-specified parameters.
-#' Time-varying effects can be included via \code{beta_L_D_t_prime} and \code{t_prime}.
+#' @return A data frame containing the simulated data with columns:
+#'  \item{ID}{Individual identifier}
+#'  \item{Time}{Time of the event}
+#'  \item{Delta}{Event type (0 = censoring, 1 = death, 3 = covariate change)}
+#'  \item{L0}{Baseline covariate}
+#'  \item{L}{Covariate indicating change in covariate process}
 #'
 #' @examples
 #' simT2D(10)

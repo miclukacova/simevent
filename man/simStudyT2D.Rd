@@ -41,14 +41,14 @@ Default is \code{rep(0.1, 3)}.}
 }
 \value{
 A matrix of dimension \code{B x 8}, with the following columns:
-\item{Est 0: KM estimate of survival at \code{tau} for A_0 = 0}
-\item{Est 1: KM estimate of survival at \code{tau} for A_0 = 1}
-\item{SE 0: Standard error of the KM estimate for A_0 = 0}
-\item{SE 1: Standard error of the KM estimate for A_0 = 1}
-\item{Lower 0: Lower 95 \% CI bound for A_0 = 0}
-\item{Lower 1: Lower 95 \% CI bound for A_0 = 1}
-\item{Upper 0: Upper 95 \% CI bound for A_0 = 0}
-\item{Upper 1: Upper 95 \% CI bound for A_0 = 1}
+\item{Est 0:}{ KM estimate of survival at \code{tau} for A_0 = 0}
+\item{Est 1:}{ KM estimate of survival at \code{tau} for A_0 = 1}
+\item{SE 0:}{ Standard error of the KM estimate for A_0 = 0}
+\item{SE 1:}{ Standard error of the KM estimate for A_0 = 1}
+\item{Lower 0:}{ Lower 95 \% CI bound for A_0 = 0}
+\item{Lower 1:}{ Lower 95 \% CI bound for A_0 = 1}
+\item{Upper 0:}{ Upper 95 \% CI bound for A_0 = 0}
+\item{Upper 1:}{ Upper 95 \% CI bound for A_0 = 1}
 }
 \description{
 Simulation Study of the Kaplan-Meier Estimator Post T2D Diagnosis

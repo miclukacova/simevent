@@ -33,7 +33,7 @@ simEventData(
 
 \item{term_deltas}{Integer vector. Event types considered terminal (after which no further events occur). Default is c(0, 1).}
 
-\item{max_cens}{Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).}
+\item{max_cens}{Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no maximal censoring).}
 
 \item{add_cov}{Named list of functions. Functions generating additional baseline covariates. Each function takes integer N and returns a numeric vector of length N. Default is NULL.}
 
@@ -41,7 +41,7 @@ simEventData(
 
 \item{max_events}{Integer. Maximum number of events to simulate per individual. Default is 10.}
 
-\item{lower}{Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \(10^{-15}\).}
+\item{lower}{Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.}
 
 \item{upper}{Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.}
 
@@ -66,7 +66,7 @@ counting process framework. It supports multiple event types (by default 4),
 including terminal events, with intensities influenced by baseline covariates
 and previous event history.
 
-The event intensities for event type \( x \) at time \( t \) are given by
+The event intensities for event type \eqn{x} at time \eqn{t} are given by
 \deqn{
 \lambda^x(t) = \lambda_0^x(t) \exp(\beta_x^T L),
 }
@@ -74,9 +74,8 @@ where the baseline intensity follows a Weibull hazard function:
 \deqn{
 \lambda_0^x(t) = \eta^x \nu^x t^{\nu^x - 1}.
 }
-Here, \( L \) is the vector of covariates and event counts, and \( \beta \) is the matrix
-of regression coefficients representing the effect of covariates and previous events
-on the intensity.
+Here, \eqn{L} is the vector of covariates and event counts, and \eqn{\beta^x} is the
+a vector of coefficients representing the effect of covariates and previous events on the intensity.
 }
 \examples{
 # Simulate data for 10 individuals with default settings

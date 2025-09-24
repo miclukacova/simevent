@@ -5,7 +5,7 @@
 #' including terminal events, with intensities influenced by baseline covariates
 #' and previous event history.
 #'
-#' The event intensities for event type \( x \) at time \( t \) are given by
+#' The event intensities for event type \eqn{x} at time \eqn{t} are given by
 #' \deqn{
 #' \lambda^x(t) = \lambda_0^x(t) \exp(\beta_x^T L),
 #' }
@@ -13,9 +13,8 @@
 #' \deqn{
 #' \lambda_0^x(t) = \eta^x \nu^x t^{\nu^x - 1}.
 #' }
-#' Here, \( L \) is the vector of covariates and event counts, and \( \beta \) is the matrix
-#' of regression coefficients representing the effect of covariates and previous events
-#' on the intensity.
+#' Here, \eqn{L} is the vector of covariates and event counts, and \eqn{\beta^x} is the
+#' a vector of coefficients representing the effect of covariates and previous events on the intensity.
 #'
 #' @title Simulate Event Data with Multiple Event Types and Covariates
 #'
@@ -25,11 +24,11 @@
 #' @param nu Numeric vector. Scale parameters of the Weibull baseline intensity for each event type. Default is 1.1 for all events.
 #' @param at_risk Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector and returns a binary vector. Default returns 1 for all events.
 #' @param term_deltas Integer vector. Event types considered terminal (after which no further events occur). Default is c(0, 1).
-#' @param max_cens Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).
+#' @param max_cens Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no maximal censoring).
 #' @param add_cov Named list of functions. Functions generating additional baseline covariates. Each function takes integer N and returns a numeric vector of length N. Default is NULL.
 #' @param override_beta Named list. Used to specify entries of the \code{beta} matrix to override defaults. For example, \code{list("L0" = c("N1" = 2))} sets the effect of L0 on N1 to 2.
 #' @param max_events Integer. Maximum number of events to simulate per individual. Default is 10.
-#' @param lower Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \(10^{-15}\).
+#' @param lower Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.
 #' @param upper Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.
 #' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
 #'

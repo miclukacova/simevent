@@ -28,10 +28,9 @@ simEventTV(
 \item{beta}{Matrix. Coefficients for covariates and processes. Columns correspond to events (\code{N0}, \code{N1}, ...),
 rows correspond to covariates (\code{L0}, \code{A0}, ..., and past event counts).}
 
-\item{tv_eff}{A matrix of the same dimensions as beta, specifying the
-change of the effects at time t_prime.the matrix is in the same format as beta.}
+\item{tv_eff}{Matrix of the same dimensions as beta, specifying the}
 
-\item{t_prime}{The time where the effects change.}
+\item{t_prime}{Numeric. Time at which \code{tv_eff} is applied to \code{beta}.}
 
 \item{eta}{Numeric vector. Shape parameters of Weibull intensities for each event.}
 
