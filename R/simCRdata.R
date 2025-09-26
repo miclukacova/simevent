@@ -1,21 +1,27 @@
-#' Function to simulate data from a Competing Risk setting. The function simulates data corresponding to $N$ individuals that
-#' are at risk for mutually exclusive types of failure. 3 events can take place, one of which can be interpreted as censoring.
+#' Simulate Competing Risks Data
 #'
-#' @title Simulate Competing risk Data
+#' Simulates competing risks data for \eqn{N} individuals who are at risk of mutually exclusive event types.
+#' Three event types are simulated, where one can be interpreted as censoring.
 #'
-#' @param N A double of the number of individuals
-#' @param beta A 2X3 matrix with the effect of L0 and A0 on the three processes.
-#' The columns represent Process 1, Process 2 and Process 3, while the rows represent L0 and A0.
-#' @param eta Vector of  length 3 of shape parameters for the Weibull hazard with parameterization
-#' \deqn{\eta \nu t^{\nu - 1}}. Default is set to 0.1 for all events.
-#' @param nu Vector of length 3 of scale parameters for the Weibull hazard.
-#' @param cens Binary variable indicating whether there should be a censoring rpocess
-#' @param beta A 2X3 matrix with the effect of L0 and A0 on the three processes.
-#' @param ... Lets you specify additional covariates. See the arfument `add_cov`
-#' in the function `simEventData`.
+#' The event intensities follow Weibull hazard models parameterized by shape and scale parameters \eqn{\eta} and \eqn{\nu}.
+#' Covariate effects on the hazard are specified by the \code{beta} matrix, which models the effects of baseline covariates \code{L0} and \code{A0} on each event type.
 #'
-#' @return  Data frame containing the simulated competing risk data. There is a column for ID, time of event (Time),
-#' event type (Delta), baseline covariate (L0) and baseline Treatment (A0).
+#' @param N Integer. Number of individuals to simulate.
+#' @param beta Numeric matrix of dimension 2x3. Covariate effects of \code{L0} and \code{A0} on the three competing processes (columns correspond to processes). Defaults to zero matrix if \code{NULL}.
+#' @param eta Numeric vector of length 3. Shape parameters for Weibull hazards, parameterized as \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 3)}.
+#' @param nu Numeric vector of length 3. Scale parameters for Weibull hazards. Defaults to \code{rep(1.1, 3)}.
+#' @param cens Binary (0 or 1). Indicates if a censoring process is included. Default is 1.
+#' @param ... Additional arguments passed to \code{\link{simEventData}}, including \code{add_cov} for extra covariates.
+#'
+#' @return A \code{data.frame} with simulated competing risk data including:
+#' \itemize{
+#'   \item \code{ID} - Individual identifier.
+#'   \item \code{Time} - Event time.
+#'   \item \code{Delta} - Event type (0, 1, or 2).
+#'   \item \code{L0} - Baseline covariate.
+#'   \item \code{A0} - Baseline treatment indicator.
+#' }
+#'
 #' @export
 #'
 #' @examples

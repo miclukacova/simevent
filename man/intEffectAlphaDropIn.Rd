@@ -2,7 +2,7 @@
 % Please edit documentation in R/intEffectAlphaDropIn.R
 \name{intEffectAlphaDropIn}
 \alias{intEffectAlphaDropIn}
-\title{Perform intervention}
+\title{Perform intervention on Drop In process intensity}
 \usage{
 intEffectAlphaDropIn(
   N = 10000,
@@ -40,86 +40,88 @@ intEffectAlphaDropIn(
 )
 }
 \arguments{
-\item{N}{A double of the number of individuals to simulate}
+\item{N}{Integer. Number of individuals to simulate.}
 
-\item{alpha}{Double corresponding to the factor to be multiplied onto eta
-parameter of the T2D process}
+\item{alpha}{Numeric. Multiplicative factor applied to the \eqn{\eta} parameter of the Drop In process under intervention.}
 
-\item{tau}{A double deciding the time we compare proportions.}
+\item{tau}{Numeric. Time point at which event proportions are compared.}
 
-\item{a0}{A binary variable deciding whether we are comparing treatment group
-or placebo group.}
+\item{a0}{Binary (0 or 1). Group indicator to subset results.}
 
-\item{plot}{Logical indicating whether a plot should be outputed}
+\item{plot}{Logical. If TRUE, plots of the first 250 events in each group are displayed.}
 
-\item{eta}{Vector of  length 3 of shape parameters for the Weibull hazard
-with parameterization
-\deqn{\eta \nu t^{\nu - 1}}.}
+\item{eta}{Numeric vector of length 4. Shape parameters for the Weibull hazards (default length 4 for 4 processes).}
 
-\item{nu}{Vector of length 3 of scale parameters for the Weibull hazard.}
+\item{nu}{Numeric vector of length 4. Scale parameters for the Weibull hazards.}
 
-\item{beta_L_A}{Specifies how L affects A.}
+\item{beta_L_A}{Numeric. Effect of process L on process A.}
 
-\item{beta_L_Z}{Specifies how L affects Z.}
+\item{beta_L_Z}{Numeric. Effect of process L on process Z.}
 
-\item{beta_L_D}{Specifies how L affects D.}
+\item{beta_L_D}{Numeric. Effect of process L on process D.}
 
-\item{beta_L_C}{Specifies how L affects C.}
+\item{beta_L_C}{Numeric. Effect of process L on process C.}
 
-\item{beta_A_L}{Specifies how L affects A.}
+\item{beta_A_L}{Numeric. Effect of process A on process L.}
 
-\item{beta_A_Z}{Specifies how L affects Z.}
+\item{beta_A_Z}{Numeric. Effect of process A on process Z.}
 
-\item{beta_A_D}{Specifies how L affects D.}
+\item{beta_A_D}{Numeric. Effect of process A on process D.}
 
-\item{beta_A_C}{Specifies how L affects C.}
+\item{beta_A_C}{Numeric. Effect of process A on process C.}
 
-\item{beta_Z_L}{Specifies how L affects A.}
+\item{beta_Z_L}{Numeric. Effect of process Z on process L.}
 
-\item{beta_Z_A}{Specifies how L affects Z.}
+\item{beta_Z_A}{Numeric. Effect of process Z on process A.}
 
-\item{beta_Z_D}{Specifies how L affects D.}
+\item{beta_Z_D}{Numeric. Effect of process Z on process D.}
 
-\item{beta_Z_C}{Specifies how L affects C.}
+\item{beta_Z_C}{Numeric. Effect of process Z on process C.}
 
-\item{beta_L0_L}{Specifies how L affects A.}
+\item{beta_L0_L}{Numeric. Effect of baseline covariate L0 on process L.}
 
-\item{beta_L0_A}{Specifies how L affects Z.}
+\item{beta_L0_A}{Numeric. Effect of baseline covariate L0 on process A.}
 
-\item{beta_L0_Z}{Specifies how L affects Z.}
+\item{beta_L0_Z}{Numeric. Effect of baseline covariate L0 on process Z.}
 
-\item{beta_L0_D}{Specifies how L affects D.}
+\item{beta_L0_D}{Numeric. Effect of baseline covariate L0 on process D.}
 
-\item{beta_L0_C}{Specifies how L affects C.}
+\item{beta_L0_C}{Numeric. Effect of baseline covariate L0 on process C.}
 
-\item{beta_A0_L}{Specifies how L affects A.}
+\item{beta_A0_L}{Numeric. Effect of baseline covariate A0 on process L.}
 
-\item{beta_A0_A}{Specifies how L affects Z.}
+\item{beta_A0_A}{Numeric. Effect of baseline covariate A0 on process A.}
 
-\item{beta_A0_Z}{Specifies how L affects Z.}
+\item{beta_A0_Z}{Numeric. Effect of baseline covariate A0 on process Z.}
 
-\item{beta_A0_D}{Specifies how L affects D.}
+\item{beta_A0_D}{Numeric. Effect of baseline covariate A0 on process D.}
 
-\item{beta_A0_C}{Specifies how L affects C.}
+\item{beta_A0_C}{Numeric. Effect of baseline covariate A0 on process C.}
 
-\item{adherence}{Logical indication whether a Treatment process should be added.}
+\item{adherence}{Logical. Whether to include a treatment adherence process (default FALSE).}
 
-\item{lower}{Lower bound for the uniroot function used to find the inverse
-cumulative hazard.}
+\item{lower}{Numeric. Lower bound for the root-finding algorithm to invert cumulative hazard.}
 
-\item{upper}{Upper bound for the uniroot function used to find the inverse
-cumulative hazard.}
+\item{upper}{Numeric. Upper bound for the root-finding algorithm to invert cumulative hazard.}
 }
 \value{
-A list of proportions of dead and T2D patients by time \eqn{\tau}
-in the A0 = a0 group in respectively intervened data and non intervened data.
+A list containing:
+\describe{
+\item{effect_Z}{Proportion of subjects experiencing Drop In by time \eqn{\tau} with and without intervention.}
+\item{effect_death}{Proportion of subjects dying by time \eqn{\tau} with and without intervention.}
+}
 }
 \description{
-Function to calculate the effect of an intervention where the eta parameter of
-the Drop In process is multiplied by the factor alpha. We consider the outcome
-variable death and Drop In at time \eqn{\tau} - that is the output of the function is
-the proportion of dead and T2D diagnosed patients by time \eqn{\tau} in A0 = a0
-group in respectively intervened data and non intervened data.
+Calculate the effect of an intervention modifying the Drop In process intensity.
+}
+\details{
+This function simulates event history data from the Drop In scenario. This is a
+scenario with the events Censoring (C), Death (D), Drop In Initiation (Z),
+Change in Covariate Process (L) and optionally Treatment (A). It simulates
+under the intervnetion where \eqn{\eta} parameter of the Drop In process is multiplied
+by a factor \code{alpha}. It evaluates the proportion of death and Drop In events
+by time \eqn{\tau} within the subgroup defined by \code{A0 = a0}, comparing intervened
+and non-intervened scenarios.
 }
 \examples{
 intEffectAlphaDropIn()

@@ -1,4 +1,4 @@
-#' Simulate Data from a Type 2 Diabetes (T2D) Setting
+#' Simulate Data from a Disease Setting
 #'
 #' This function simulates event data representing three event types:
 #' Censoring (0), Death (1), and Change in Covariate Process (3). Death and Censoring are terminal events,
@@ -13,7 +13,7 @@
 #' The event intensities depend on covariates and previous events according to user-specified parameters.
 #' Time-varying effects can be included via \code{beta_L_D_t_prime} and \code{t_prime}.
 #'
-#' @title Simulate Data in a T2D Diabetes Setting
+#' @title Simulate Data in a Disease Setting
 #'
 #' @param N Numeric scalar. Number of individuals to simulate.
 #' @param eta Numeric vector of length 3. Shape parameters for Weibull intensities with parameterization \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 3)}.
@@ -40,10 +40,10 @@
 #'  \item{L}{Covariate indicating change in covariate process}
 #'
 #' @examples
-#' simT2D(10)
+#' simDisease(10)
 #'
 #' @export
-simT2D <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
+simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
                    beta_L0_D = 1, beta_L0_L = 1, beta_L_D = 1, beta_A0_D = 0,
                    beta_A0_L = 0, beta_L0_C = 0, beta_A0_C = 0, beta_L_C = 0,
                    followup = Inf, lower = 10^(-15), upper = 200,

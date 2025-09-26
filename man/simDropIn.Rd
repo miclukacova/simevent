@@ -90,20 +90,20 @@ simDropIn(
 
 \item{nu}{Numeric vector of length 4 (or 5). Scale parameters for the Weibull hazard.}
 
-\item{adherence}{Logical. Indicator of whether a Treatment process should be added.}
+\item{adherence}{Logical. Indicator of whether a Treatment process should be simulated.}
 
 \item{followup}{Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).}
 
 \item{cens}{Logical. Indicator of whether there should be a censoring process.}
 
+\item{generate.A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+
 \item{lower}{Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.}
 
 \item{upper}{Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.}
-
-\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
 }
 \value{
-Data frame containing the simulated survival data
+Data frame containing the simulated event history data
 }
 \description{
 Simulate Event Data from a "Drop In" Setting
@@ -111,7 +111,7 @@ Simulate Event Data from a "Drop In" Setting
 \details{
 \code{simDropIn} is a function that simulates data corresponding to \code{N} individuals
 that are at risk for 4 or 5 events. Censoring (C), Death (D), Drop In Initiation (Z),
-Change in Covariate Process (L) and potentially Treatment (A).
+Change in Covariate Process (L) and optionally Treatment (A).
 }
 \examples{
 simDropIn(10)

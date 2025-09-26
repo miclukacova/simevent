@@ -2,20 +2,21 @@
 % Please edit documentation in R/plotEventData.R
 \name{plotEventData}
 \alias{plotEventData}
-\title{Plot Event Data}
+\title{Plot Simulated Event History Data}
 \usage{
 plotEventData(data, title = "Event Data")
 }
 \arguments{
-\item{data}{Event data: a data frame containing an ID, Time, Delta, L0 and L column.}
+\item{data}{A \code{data.frame} or \code{data.table} containing at least the columns \code{ID}, \code{Time}, and \code{Delta}.}
 
-\item{title}{Title: a string that will be the title of the plot.}
+\item{title}{Character string specifying the plot title. Defaults to \code{"Event Data"}.}
 }
 \value{
-A plot of the event data
+A \code{ggplot} object representing the event data visualization.
 }
 \description{
-Function to visualize simulated event data.
+Visualizes event history data by plotting individual event times colored and shaped by event type.
+Each individual's timeline is displayed horizontally with events marked along it.
 }
 \examples{
 data <- simEventData(10)

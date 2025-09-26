@@ -2,27 +2,30 @@
 % Please edit documentation in R/IntFormatData.R
 \name{IntFormatData}
 \alias{IntFormatData}
-\title{Transformation of Event Data into Interval Format}
+\title{Transform Event Data into Interval Format for Classical Inference}
 \usage{
 IntFormatData(data, N_cols = 6:9, timeVar = FALSE, t_prime = NULL)
 }
 \arguments{
-\item{data}{Event data: a data frame containing an ID, Time, Delta, Covariates and Processes columns.}
+\item{data}{A \code{data.frame} or \code{data.table} containing event data with columns \code{ID}, \code{Time}, \code{Delta},
+and counting process columns specified by \code{N_cols}.}
 
-\item{N_cols}{The indices of the columns in data that belong to counting processes}
+\item{N_cols}{Integer vector. Column indices of \code{data} that correspond to counting process variables.
+Defaults to \code{6:9}.}
 
-\item{timeVar}{Logical indicating whether the effects are time varying}
+\item{timeVar}{Logical. If \code{TRUE}, the intervals are split at \code{t_prime} to allow time-varying covariate effects. Default is \code{FALSE}.}
 
-\item{t_prime}{The time where the effects change}
+\item{t_prime}{Numeric scalar. Time point at which to split intervals if \code{timeVar = TRUE}.}
 }
 \value{
-Event data in a tstart tstop format
+A \code{data.table} with columns \code{tstart}, \code{tstop}, \code{k}, and other original variables,
+formatted for survival analysis.
 }
 \description{
-The function transforms the simulated event data containing time dependent covariates
-into a format that can be used for classical inference. Three variables are added,
-called \code{tstart}, \code{tstop} and \code{k}. The two former are used in for example the coxph
-function, and the latter counts the number of events.
+Converts simulated event history data with time-dependent covariates into an interval (start-stop) format,
+suitable for classical survival analysis functions like \code{coxph}.
+Adds interval start and stop times (\code{tstart}, \code{tstop}) and a counting variable \code{k} indexing events.
+Optionally, the function can split intervals at a specified time point to accomadate estimation of time-varying effects.
 }
 \examples{
 data <- simEventData(10)

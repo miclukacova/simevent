@@ -2,7 +2,7 @@
 #'
 #' `simDropIn` is a function that simulates data corresponding to \code{N} individuals
 #' that are at risk for 4 or 5 events. Censoring (C), Death (D), Drop In Initiation (Z),
-#' Change in Covariate Process (L) and potentially Treatment (A).
+#' Change in Covariate Process (L) and optionally Treatment (A).
 #'
 #' @title `simDropIn`
 #'
@@ -32,14 +32,14 @@
 #' @param eta Numeric vector of length 4 (or 5). Shape parameters of the Weibull baseline intensity for each event type.
 #' \deqn{\eta \nu t^{\nu - 1}}.
 #' @param nu Numeric vector of length 4 (or 5). Scale parameters for the Weibull hazard.
-#' @param adherence Logical. Indicator of whether a Treatment process should be added.
+#' @param adherence Logical. Indicator of whether a Treatment process should be simulated.
 #' @param followup Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).
 #' @param cens Logical. Indicator of whether there should be a censoring process.
-#' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param generate.A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
 #' @param lower Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.
 #' @param upper Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.
 #'
-#' @return  Data frame containing the simulated survival data
+#' @return  Data frame containing the simulated event history data
 #' @export
 #'
 #' @examples

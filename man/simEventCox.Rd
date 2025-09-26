@@ -69,17 +69,17 @@ The function simulates individual event histories by:
 }
 \examples{
 # The observed data
-data_obs <- simT2D(N = 1000)
+data_obs <- simDisease(N = 1000)
 data_obs <- IntFormatData(data_obs, N_cols = 6)
 
 # Fit Cox models
 cox_death <- survival::coxph(survival::Surv(tstart, tstop, Delta == 1)
 ~ L0 + A0 + L, data = data_obs)
-cox_t2d <- survival::coxph(survival::Surv(tstart, tstop, Delta == 2)
+cox_Disease <- survival::coxph(survival::Surv(tstart, tstop, Delta == 2)
 ~ L0 + A0, data = data_obs[L == 0])
 
 # Then simulate new data:
-cox_fits <- list("D" = cox_death, "L" = cox_t2d)
+cox_fits <- list("D" = cox_death, "L" = cox_Disease)
 new_data <- simEventCox(100, cox_fits = cox_fits, L0_old = data_obs$L0, A0_old = data_obs$A0)
 
 }

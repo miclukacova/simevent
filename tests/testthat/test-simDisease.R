@@ -1,10 +1,10 @@
 library(survival)
 library(testthat)
 
-test_that("simT2D simulates data in the right way",{
+test_that("simDisease simulates data in the right way",{
   set.seed(857)
   # Generate data
-  data_test <- simT2D(1000)
+  data_test <- simDisease(1000)
 
   # Transform data into tstart tstop format
   data_int <- IntFormatData(data_test, N_cols = 6)

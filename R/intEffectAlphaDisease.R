@@ -1,41 +1,38 @@
-#' Function to calculate the effect of an intervention where the eta parameter of
-#' the T2D process is multiplied by the factor alpha. We consider the outcome
-#' variable death and T2D at time \eqn{\tau} - that is the output of the function is
-#' the proportion of dead and T2D diagnosed patients by time \eqn{\tau} in A0 = a0
-#' group in respectively intervened data and non intervened data.
+#' Estimate Effect of Intervention: Modifying Eta Parameter of Disease Process
 #'
-#' @title Perform intervention
+#' This function simulates competing risks data under two scenarios: an intervention
+#' where the shape parameter \eqn{\eta} of the disease process is multiplied by
+#' \code{alpha}, and a baseline (non-intervened) scenario. It computes the proportion
+#' of individuals who experience death or disease by a specified time \eqn{\tau}
+#' in the group \code{A0 = a0}, optionally returning xxx (RMST).
+#' The function can also plot a sample of the event data for each scenario for comparison.
 #'
-#' @param N A double of the number of individuals to simulate
-#' @param alpha Double corresponding to the factor to be multiplied onto eta
-#' parameter of the T2D process
-#' @param tau A double deciding the time we compare proportions.
-#' @param rmst Logical
-#' @param a0 A binary variable deciding whether we are comparing treatment group
-#' or placebo group.
-#' @param plot Logical indicating whether a plot should be outputed
-#' @param eta Vector of  length 3 of shape parameters for the Weibull hazard
-#' with parameterization
-#' \deqn{\eta \nu t^{\nu - 1}}.
-#' @param nu Vector of length 3 of scale parameters for the Weibull hazard.
-#' @param beta_L_D Specifies how change in the covariate process affects risk of death. Is by default set to 1.
-#' @param beta_L0_L Specifies how change in the covariate process affects risk of death. Is by default set to 1.
-#' @param beta_A0_D Specifies how baseline treatment affects risk of death. Is by default set to 0.
-#' @param beta_A0_L Specifies how baseline treatment affects risk of T2D. Is by default set to 0.
-#' @param beta_L0_D Specifies how baseline covariate affects risk of Death. Is by default set to 1.
-#' @param lower Lower bound for the uniroot function used to find the inverse
-#' cumulative hazard.
-#' @param upper Upper bound for the uniroot function used to find the inverse
-#' cumulative hazard.
+#' @param N Integer. Number of individuals to simulate. Default is 10,000.
+#' @param alpha Numeric scalar. Multiplicative factor applied to the disease process shape parameter \eqn{\eta}.
+#' @param tau Numeric scalar. Time horizon at which proportions are computed.
+#' @param rmst Logical. If \code{TRUE}, computes xxx instead of proportions.
+#' @param a0 Binary (0/1). Specifies the group for comparison.
+#' @param plot Logical. If \code{TRUE}, plots timelines for sample of intervention and non intervention data.
+#' @param eta Numeric vector of length 3. Shape parameters for Weibull hazards (default \code{rep(0.1, 3)}).
+#' @param nu Numeric vector of length 3. Scale parameters for Weibull hazards (default \code{rep(1.1, 3)}).
+#' @param beta_L0_D Numeric scalar. Effect of baseline covariate on death risk (default 0.5).
+#' @param beta_L0_L Numeric scalar. Effect of baseline covariate on covariate risk (default 2).
+#' @param beta_L_D Numeric scalar. Effect of covariate process on death risk (default 1).
+#' @param beta_A0_D Numeric scalar. Effect of baseline treatment on death risk (default -0.1).
+#' @param beta_A0_L Numeric scalar. Effect of baseline treatment on covariate risk (default -1).
+#' @param lower Numeric scalar. Lower bound for root-finding in hazard inversion (default 1e-30).
+#' @param upper Numeric scalar. Upper bound for root-finding in hazard inversion (default 200).
 #'
-#' @return   A list of proportions of dead and T2D patients by time \eqn{\tau}
-#' in the A0 = a0 group in respectively intervened data and non intervened data.
+#' @return A list with two components:
+#' \describe{
+#'   \item{\code{effect_L}}{Proportion (or RMST) of individuals diagnosed with disease by time \eqn{\tau} in group \code{A0 = a0}, under intervention (\code{G1}) and without intervention (\code{G2}).}
+#'   \item{\code{effect_death}}{Proportion (or RMST) of individuals who died by time \eqn{\tau} in group \code{A0 = a0}, under intervention (\code{G1}) and without intervention (\code{G2}).}
+#' }
 #' @export
 #'
 #' @examples
-#' intEffectAlphaT2D()
-
-intEffectAlphaT2D <- function(N = 1e4,
+#' intEffectAlphaDisease(N = 1000, alpha = 0.7, tau = 5, rmst = FALSE, a0 = 1)
+intEffectAlphaDisease <- function(N = 1e4,
                       alpha = 0.5,
                       tau = 5,
                       rmst = FALSE,
@@ -54,7 +51,7 @@ intEffectAlphaT2D <- function(N = 1e4,
   Delta <- Time <- A0 <- NULL
 
   # Generate large data set under the intervened intensity
-  data_G1 <- simT2D(N = N,
+  data_G1 <- simDisease(N = N,
                     cens = 0,
                     eta = c(eta[1:2],eta[3]*alpha),
                     nu = nu,
@@ -67,7 +64,7 @@ intEffectAlphaT2D <- function(N = 1e4,
                     lower = lower)
 
   # Generate large data set without intervened intensity
-  data_G2 <- simT2D(N = N,
+  data_G2 <- simDisease(N = N,
                     cens = 0,
                     eta = eta,
                     nu = nu,
@@ -85,7 +82,7 @@ intEffectAlphaT2D <- function(N = 1e4,
   #Proportion of subjects dying before some time $\tau$ in a0 group
   prop_G1 <- data_G1[A0 == a0 & Delta == 1, mean(Delta == 1 & Time < tau)] # with intervention
   prop_G2 <- data_G2[A0 == a0 & Delta == 1, mean(Delta == 1 & Time < tau)] # without intervention
-  #Proportion of subjects experiencing T2D before some time \tau in a0 group
+  #Proportion of subjects experiencing Disease before some time \tau in a0 group
   prop_G1_L <- mean(data_G1[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]]) # with intervention
   prop_G2_L <- mean(data_G2[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]]) # without intervention
 
