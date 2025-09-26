@@ -3,16 +3,16 @@
 #' This function simulates event history data from the Treatment scenario (see function simTreatment)
 #' under intervention and without intervention. We consider the intervention where
 #' the \eqn{\eta} parameter of the treatment process is multiplied by a factor \code{alpha}.
-#' It computes the proportion or RMST of death and treatment by time \eqn{\tau}
+#' It computes the proportion or years lost of death and treatment by time \eqn{\tau}
 #' comparing intervened and non-intervened data.
 #'
 #' @title Perform intervention on treatment process intensity
 #'
 #' @param N Integer. Number of individuals to simulate.
 #' @param alpha Numeric. Multiplicative factor applied to the \eqn{\eta} parameter of the treatment process.
-#' @param tau Numeric. Time point at which event proportions or RMST are compared.
-#' @param rmst Logical. If TRUE, compute RMST estimand instead of simple proportions.
-#' @param plot Logical. If TRUE, output plots of the first 250 events for respectively intervened and no invtervend data.
+#' @param tau Numeric. Time point at which event proportions or years lost are compared.
+#' @param years_lost Logical. If TRUE, compute years lost estimand instead of simple proportions.
+#' @param plot Logical. If TRUE, output plots of the first 250 events for respectively intervened and no invtervened data.
 #' @param eta Numeric vector of length 4. Shape parameters for Weibull hazards.
 #' @param nu Numeric vector of length 4. Scale parameters for Weibull hazards.
 #' @param beta_L_A Numeric. Effect of covariate L on treatment process A.
@@ -25,8 +25,8 @@
 #'
 #' @return A list containing:
 #' \describe{
-#'   \item{effect_A}{Proportion or RMST of treated patients with and without intervention.}
-#'   \item{effect_death}{Proportion or RMST of deaths with and without intervention.}
+#'   \item{effect_A}{Proportion or years lost of treated patients with and without intervention.}
+#'   \item{effect_death}{Proportion or years lost of deaths with and without intervention.}
 #' }
 #'
 #' @export
@@ -37,7 +37,7 @@
 intEffectAlphaTreat <- function(N = 1e4,
                                alpha = 0.5,
                                tau = 5,
-                               rmst = FALSE,
+                               years_lost = FALSE,
                                plot = FALSE,
                                nu = rep(1.1, 4),
                                eta = rep(0.1, 4),
@@ -79,7 +79,7 @@ intEffectAlphaTreat <- function(N = 1e4,
   prop_G1_A <- mean(data_G1[, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]]) # with intervention
   prop_G2_A <- mean(data_G2[, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]]) # without intervention
 
-  if (rmst) {
+  if (years_lost) {
     tgrid <- seq(0, tau, length = 100)
     prop_G1 <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
       data_G1[Delta == 1, mean(Delta == 1 & Time <= t)])) # with intervention

@@ -21,7 +21,8 @@ simDisease(
   lower = 10^(-15),
   upper = 200,
   beta_L_D_t_prime = NULL,
-  t_prime = NULL
+  t_prime = NULL,
+  gen_A0 = NULL
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ simDisease(
 \item{beta_L_D_t_prime}{Numeric scalar or NULL. Additional effect of covariate change on death risk after time \code{t_prime} (optional).}
 
 \item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
+
+\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
 }
 \value{
 A data frame containing the simulated data with columns:

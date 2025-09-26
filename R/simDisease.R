@@ -32,6 +32,8 @@
 #' @param upper Numeric scalar. Upper bound for root-finding (default 200).
 #' @param beta_L_D_t_prime Numeric scalar or NULL. Additional effect of covariate change on death risk after time \code{t_prime} (optional).
 #' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
+#' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#'
 #' @return A data frame containing the simulated data with columns:
 #'  \item{ID}{Individual identifier}
 #'  \item{Time}{Time of the event}
@@ -47,7 +49,7 @@ simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
                    beta_L0_D = 1, beta_L0_L = 1, beta_L_D = 1, beta_A0_D = 0,
                    beta_A0_L = 0, beta_L0_C = 0, beta_A0_C = 0, beta_L_C = 0,
                    followup = Inf, lower = 10^(-15), upper = 200,
-                   beta_L_D_t_prime = NULL, t_prime = NULL){
+                   beta_L_D_t_prime = NULL, t_prime = NULL, gen_A0 = NULL){
 
   at_risk <- function(events) {
     return(c(
@@ -75,11 +77,12 @@ simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
     tv_eff[5,2] <- beta_L_D_t_prime
     data <- simEventTV(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
                          max_cens = followup, lower = lower, upper = upper,
-                         t_prime = t_prime, tv_eff = tv_eff)
+                         t_prime = t_prime, tv_eff = tv_eff, gen_A0 = gen_A0)
   }
   else{
     data <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
-                         max_cens = followup, lower = lower, upper = upper)
+                         max_cens = followup, lower = lower, upper = upper,
+                         gen_A0 = gen_A0)
   }
 
   # We don't need columns for terminal events
