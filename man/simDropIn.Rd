@@ -35,7 +35,30 @@ simDropIn(
   cens = 1,
   generate.A0 = function(N, L0) stats::rbinom(N, 1, 0.5),
   lower = 1e-200,
-  upper = 1e+10
+  upper = 1e+10,
+  beta_L_A_prime = 0,
+  beta_L_Z_prime = 0,
+  beta_L_D_prime = 0,
+  beta_L_C_prime = 0,
+  beta_A_L_prime = 0,
+  beta_A_Z_prime = 0,
+  beta_A_D_prime = 0,
+  beta_A_C_prime = 0,
+  beta_Z_L_prime = 0,
+  beta_Z_A_prime = 0,
+  beta_Z_D_prime = 0,
+  beta_Z_C_prime = 0,
+  beta_L0_L_prime = 0,
+  beta_L0_A_prime = 0,
+  beta_L0_Z_prime = 0,
+  beta_L0_D_prime = 0,
+  beta_L0_C_prime = 0,
+  beta_A0_L_prime = 0,
+  beta_A0_A_prime = 0,
+  beta_A0_Z_prime = 0,
+  beta_A0_D_prime = 0,
+  beta_A0_C_prime = 0,
+  t_prime = NULL
 )
 }
 \arguments{
@@ -101,6 +124,52 @@ simDropIn(
 \item{lower}{Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.}
 
 \item{upper}{Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.}
+
+\item{beta_L_A_prime}{Numeric. Specifies how L additionally affects A after time t_prime.}
+
+\item{beta_L_Z_prime}{Numeric. Specifies how L additionally affects Z after time t_prime.}
+
+\item{beta_L_D_prime}{Numeric. Specifies how L additionally affects D after time t_prime.}
+
+\item{beta_L_C_prime}{Numeric. Specifies how L additionally affects C after time t_prime.}
+
+\item{beta_A_L_prime}{Numeric. Specifies how L additionally affects A after time t_prime.}
+
+\item{beta_A_Z_prime}{Numeric. Specifies how L additionally affects Z after time t_prime.}
+
+\item{beta_A_D_prime}{Numeric. Specifies how L additionally affects D after time t_prime.}
+
+\item{beta_A_C_prime}{Numeric. Specifies how L additionally affects C after time t_prime.}
+
+\item{beta_Z_L_prime}{Numeric. Specifies how L additionally affects A after time t_prime.}
+
+\item{beta_Z_A_prime}{Numeric. Specifies how L additionally affects Z after time t_prime.}
+
+\item{beta_Z_D_prime}{Numeric. Specifies how L additionally affects D after time t_prime.}
+
+\item{beta_Z_C_prime}{Numeric. Specifies how L additionally affects C after time t_prime.}
+
+\item{beta_L0_L_prime}{Numeric. Specifies how L additionally affects after time A.}
+
+\item{beta_L0_A_prime}{Numeric. Specifies how L additionally affects after time Z.}
+
+\item{beta_L0_Z_prime}{Numeric. Specifies how L additionally affects after time Z.}
+
+\item{beta_L0_D_prime}{Numeric. Specifies how L additionally affects after time D.}
+
+\item{beta_L0_C_prime}{Numeric. Specifies how L additionally affects after time C.}
+
+\item{beta_A0_L_prime}{Numeric. Specifies how L additionally affects after time A.}
+
+\item{beta_A0_A_prime}{Numeric. Specifies how L additionally affects after time Z.}
+
+\item{beta_A0_Z_prime}{Numeric. Specifies how L additionally affects after time Z.}
+
+\item{beta_A0_D_prime}{Numeric. Specifies how L additionally affects after time D.}
+
+\item{beta_A0_C_prime}{Numeric. Specifies how L additionally affects after time C.}
+
+\item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 }
 \value{
 Data frame containing the simulated event history data

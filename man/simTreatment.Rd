@@ -22,7 +22,18 @@ simTreatment(
   cens = 1,
   op = 1,
   lower = 10^(-15),
-  upper = 200
+  upper = 200,
+  beta_L_A_prime = 0,
+  beta_L_D_prime = 0,
+  beta_A_D_prime = 0,
+  beta_A_L_prime = 0,
+  beta_L0_A_prime = 0,
+  beta_L0_L_prime = 0,
+  beta_L0_D_prime = 0,
+  beta_L0_C_prime = 0,
+  beta_L_C_prime = 0,
+  beta_A_C_prime = 0,
+  t_prime = NULL
 )
 }
 \arguments{
@@ -61,6 +72,28 @@ simTreatment(
 \item{lower}{Numeric. Lower bound for root finding (inverse cumulative hazard). Default \code{1e-15}.}
 
 \item{upper}{Numeric. Upper bound for root finding (inverse cumulative hazard). Default 200.}
+
+\item{beta_L_A_prime}{Numeric. Additional effect of covariate \code{L = 1} on treatment hazard. Default 0.}
+
+\item{beta_L_D_prime}{Numeric. Additionalffect of covariate \code{L = 1} on death hazard. Default 0.}
+
+\item{beta_A_D_prime}{Numeric. Effect of treatment \code{A = 1} on death hazard. Default 0.}
+
+\item{beta_A_L_prime}{Numeric. Effect of treatment \code{A = 1} on covariate hazard. Default 0.}
+
+\item{beta_L0_A_prime}{Numeric. Effect of baseline covariate \code{L0} on treatment hazard. Default 0.}
+
+\item{beta_L0_L_prime}{Numeric. Effect of baseline covariate \code{L0} on covariate hazard. Default 0.}
+
+\item{beta_L0_D_prime}{Numeric. Effect of baseline covariate \code{L0} on death hazard. Default 0.}
+
+\item{beta_L0_C_prime}{Numeric. Effect of baseline covariate \code{L0} on censoring hazard. Default 0.}
+
+\item{beta_L_C_prime}{Numeric. Effect of covariate \code{L = 1} on censoring hazard. Default 0.}
+
+\item{beta_A_C_prime}{Numeric. Effect of treatment \code{A = 1} on censoring hazard. Default 0.}
+
+\item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 }
 \value{
 A \code{data.frame} with columns:

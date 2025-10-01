@@ -12,6 +12,13 @@ alphaSimDropIn(
   plot = FALSE,
   eta = rep(0.1, 4),
   nu = rep(1.1, 4),
+  adherence = FALSE,
+  lower = 10^(-30),
+  upper = 200,
+  cens = 0,
+  gen_A0 = NULL,
+  return_data = FALSE,
+  years_lost = FALSE,
   beta_L_A = 0,
   beta_L_Z = 1,
   beta_L_D = 0.5,
@@ -34,13 +41,29 @@ alphaSimDropIn(
   beta_A0_Z = 0,
   beta_A0_D = -0.5,
   beta_A0_C = 0,
-  adherence = FALSE,
-  lower = 10^(-30),
-  upper = 200,
-  cens = 0,
-  gen_A0 = NULL,
-  return_data = FALSE,
-  years_lost = FALSE
+  beta_L_A_prime = 0,
+  beta_L_Z_prime = 0,
+  beta_L_D_prime = 0,
+  beta_L_C_prime = 0,
+  beta_A_L_prime = 0,
+  beta_A_Z_prime = 0,
+  beta_A_D_prime = 0,
+  beta_A_C_prime = 0,
+  beta_Z_L_prime = 0,
+  beta_Z_A_prime = 0,
+  beta_Z_D_prime = 0,
+  beta_Z_C_prime = 0,
+  beta_L0_L_prime = 0,
+  beta_L0_A_prime = 0,
+  beta_L0_Z_prime = 0,
+  beta_L0_D_prime = 0,
+  beta_L0_C_prime = 0,
+  beta_A0_L_prime = 0,
+  beta_A0_A_prime = 0,
+  beta_A0_Z_prime = 0,
+  beta_A0_D_prime = 0,
+  beta_A0_C_prime = 0,
+  t_prime = NULL
 )
 }
 \arguments{
@@ -57,6 +80,20 @@ alphaSimDropIn(
 \item{eta}{Numeric vector of length 4. Shape parameters for the Weibull hazards (default length 4 for 4 processes).}
 
 \item{nu}{Numeric vector of length 4. Scale parameters for the Weibull hazards.}
+
+\item{adherence}{Logical. Whether to include a treatment adherence process (default FALSE).}
+
+\item{lower}{Numeric. Lower bound for the root-finding algorithm to invert cumulative hazard.}
+
+\item{upper}{Numeric. Upper bound for the root-finding algorithm to invert cumulative hazard.}
+
+\item{cens}{Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).}
+
+\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+
+\item{return_data}{Logical. If \code{TRUE} the simulated data is returned.}
+
+\item{years_lost}{Logical. If \code{TRUE}, computes years lost instead of proportions.}
 
 \item{beta_L_A}{Numeric. Effect of process L on process A.}
 
@@ -102,19 +139,51 @@ alphaSimDropIn(
 
 \item{beta_A0_C}{Numeric. Effect of baseline covariate A0 on process C.}
 
-\item{adherence}{Logical. Whether to include a treatment adherence process (default FALSE).}
+\item{beta_L_A_prime}{Numeric. Specifies how L additionally affects A after time t_prime.}
 
-\item{lower}{Numeric. Lower bound for the root-finding algorithm to invert cumulative hazard.}
+\item{beta_L_Z_prime}{Numeric. Specifies how L additionally affects Z after time t_prime.}
 
-\item{upper}{Numeric. Upper bound for the root-finding algorithm to invert cumulative hazard.}
+\item{beta_L_D_prime}{Numeric. Specifies how L additionally affects D after time t_prime.}
 
-\item{cens}{Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).}
+\item{beta_L_C_prime}{Numeric. Specifies how L additionally affects C after time t_prime.}
 
-\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+\item{beta_A_L_prime}{Numeric. Specifies how L additionally affects A after time t_prime.}
 
-\item{return_data}{Logical. If \code{TRUE} the simulated data is returned.}
+\item{beta_A_Z_prime}{Numeric. Specifies how L additionally affects Z after time t_prime.}
 
-\item{years_lost}{Logical. If \code{TRUE}, computes years lost instead of proportions.}
+\item{beta_A_D_prime}{Numeric. Specifies how L additionally affects D after time t_prime.}
+
+\item{beta_A_C_prime}{Numeric. Specifies how L additionally affects C after time t_prime.}
+
+\item{beta_Z_L_prime}{Numeric. Specifies how L additionally affects A after time t_prime.}
+
+\item{beta_Z_A_prime}{Numeric. Specifies how L additionally affects Z after time t_prime.}
+
+\item{beta_Z_D_prime}{Numeric. Specifies how L additionally affects D after time t_prime.}
+
+\item{beta_Z_C_prime}{Numeric. Specifies how L additionally affects C after time t_prime.}
+
+\item{beta_L0_L_prime}{Numeric. Specifies how L0 additionally affects after time L.}
+
+\item{beta_L0_A_prime}{Numeric. Specifies how L0 additionally affects after time A.}
+
+\item{beta_L0_Z_prime}{Numeric. Specifies how L0 additionally affects after time Z.}
+
+\item{beta_L0_D_prime}{Numeric. Specifies how L0 additionally affects after time D.}
+
+\item{beta_L0_C_prime}{Numeric. Specifies how L0 additionally affects after time C.}
+
+\item{beta_A0_L_prime}{Numeric. Specifies how A0 additionally affects after time L.}
+
+\item{beta_A0_A_prime}{Numeric. Specifies how A0 additionally affects after time A.}
+
+\item{beta_A0_Z_prime}{Numeric. Specifies how A0 additionally affects after time Z.}
+
+\item{beta_A0_D_prime}{Numeric. Specifies how A0 additionally affects after time D.}
+
+\item{beta_A0_C_prime}{Numeric. Specifies how A0 additionally affects after time C.}
+
+\item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 }
 \value{
 A list containing:

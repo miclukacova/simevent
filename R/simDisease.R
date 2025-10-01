@@ -72,7 +72,7 @@ simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
   # The effect of L on C, D, L
   beta[5,] <- c(beta_L_C, beta_L_D, 0)
 
-  if(!is.null(beta_L_D_t_prime) & !is.null(t_prime)) {
+  if(!is.null(beta_L_D_t_prime) & !is.null(t_prime)){
     tv_eff <- matrix(0, ncol = 3, nrow = 5)
     tv_eff[5,2] <- beta_L_D_t_prime
     data <- simEventTV(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,

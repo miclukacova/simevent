@@ -22,7 +22,9 @@ alphaSimDisease(
   upper = 200,
   cens = 1,
   gen_A0 = NULL,
-  return_data = FALSE
+  return_data = FALSE,
+  beta_L_D_t_prime = 0,
+  t_prime = NULL
 )
 }
 \arguments{
@@ -61,6 +63,10 @@ alphaSimDisease(
 \item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
 
 \item{return_data}{Logical. If \code{TRUE} the simulated data is returned.}
+
+\item{beta_L_D_t_prime}{Numeric scalar or NULL. Additional effect of covariate change on death risk after time \code{t_prime} (optional).}
+
+\item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 }
 \value{
 A list with two components:

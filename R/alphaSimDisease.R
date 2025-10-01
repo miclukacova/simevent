@@ -25,6 +25,8 @@
 #' @param cens Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).
 #' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
 #' @param return_data Logical. If \code{TRUE} the simulated data is returned.
+#' @param beta_L_D_t_prime Numeric scalar or NULL. Additional effect of covariate change on death risk after time \code{t_prime} (optional).
+#' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
 #'
 #' @return A list with two components:
 #' \describe{
@@ -53,9 +55,11 @@ alphaSimDisease <- function(N = 1e4,
                             upper = 200,
                             cens = 1,
                             gen_A0 = NULL,
-                            return_data = FALSE){
+                            return_data = FALSE,
+                            beta_L_D_t_prime = 0,
+                            t_prime = NULL){
 
-  Delta <- Time <- A0 <- NULL
+  Delta <- Time <- A0 <- tmp <- V1 <- NULL
 
   # Generate large data set under the intervened intensity
   data <- simDisease(N = N,
@@ -69,7 +73,9 @@ alphaSimDisease <- function(N = 1e4,
                      beta_A0_L = beta_A0_L,
                      upper = upper,
                      lower = lower,
-                     gen_A0 = gen_A0)
+                     gen_A0 = gen_A0,
+                     beta_L_D_t_prime = beta_L_D_t_prime,
+                     t_prime = t_prime)
 
   if (plot) plotEventData(data[1:250])
 
@@ -81,12 +87,10 @@ alphaSimDisease <- function(N = 1e4,
   prop_L <- mean(data[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]])
 
   if (years_lost) {
-    tgrid <- seq(0, tau, length = 100)
-    prop_D <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
-      data[A0 == a0 & Delta == 1, mean(Delta == 1 & Time <= t)]))
-    prop_L <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
-      mean(data[A0 == a0, any(Delta == 2 & Time <= t)[1], by = "ID"][[2]]))) # with intervention
-
+    data[, tmp := cumsum((Delta == 1)*(tau - pmin(tau, Time))), by = "ID"]
+    prop_D <- data[, tmp[.N], by = "ID"][, mean(V1)]
+    data[, tmp := cumsum((Delta == 2)*(tau - pmin(tau, Time))), by = "ID"]
+    prop_L <- data[, tmp[.N], by = "ID"][, mean(V1)]
   }
 
   return(list(effect_D = prop_D,

@@ -20,7 +20,18 @@ alphaSimTreat(
   upper = 300,
   cens = 0,
   return_data = FALSE,
-  years_lost = FALSE
+  years_lost = FALSE,
+  beta_L_A_prime = 0,
+  beta_L_D_prime = 0,
+  beta_A_D_prime = 0,
+  beta_L0_A_prime = 0,
+  beta_A_L_prime = 0,
+  beta_L0_L_prime = 0,
+  beta_L0_D_prime = 0,
+  beta_L0_C_prime = 0,
+  beta_L_C_prime = 0,
+  beta_A_C_prime = 0,
+  t_prime = 0
 )
 }
 \arguments{
@@ -55,6 +66,28 @@ alphaSimTreat(
 \item{return_data}{Logical. If \code{TRUE} the simulated data is returned.}
 
 \item{years_lost}{Logical. If \code{TRUE}, computes years lost instead of proportions.}
+
+\item{beta_L_A_prime}{Numeric. Additional effect of covariate \code{L = 1} on treatment hazard. Default 0.}
+
+\item{beta_L_D_prime}{Numeric. Additionalffect of covariate \code{L = 1} on death hazard. Default 0.}
+
+\item{beta_A_D_prime}{Numeric. Effect of treatment \code{A = 1} on death hazard. Default 0.}
+
+\item{beta_L0_A_prime}{Numeric. Effect of baseline covariate \code{L0} on treatment hazard. Default 0.}
+
+\item{beta_A_L_prime}{Numeric. Effect of treatment \code{A = 1} on covariate hazard. Default 0.}
+
+\item{beta_L0_L_prime}{Numeric. Effect of baseline covariate \code{L0} on covariate hazard. Default 0.}
+
+\item{beta_L0_D_prime}{Numeric. Effect of baseline covariate \code{L0} on death hazard. Default 0.}
+
+\item{beta_L0_C_prime}{Numeric. Effect of baseline covariate \code{L0} on censoring hazard. Default 0.}
+
+\item{beta_L_C_prime}{Numeric. Effect of covariate \code{L = 1} on censoring hazard. Default 0.}
+
+\item{beta_A_C_prime}{Numeric. Effect of treatment \code{A = 1} on censoring hazard. Default 0.}
+
+\item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 }
 \value{
 A list containing:

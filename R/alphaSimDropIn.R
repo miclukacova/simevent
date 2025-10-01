@@ -16,6 +16,14 @@
 #' @param plot Logical. If TRUE, plots of the first 250 events in each group are displayed.
 #' @param eta Numeric vector of length 4. Shape parameters for the Weibull hazards (default length 4 for 4 processes).
 #' @param nu Numeric vector of length 4. Scale parameters for the Weibull hazards.
+#' @param adherence Logical. Whether to include a treatment adherence process (default FALSE).
+#' @param lower Numeric. Lower bound for the root-finding algorithm to invert cumulative hazard.
+#' @param upper Numeric. Upper bound for the root-finding algorithm to invert cumulative hazard.
+#' @param cens Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).
+#' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param return_data Logical. If \code{TRUE} the simulated data is returned.
+#' @param years_lost Logical. If \code{TRUE}, computes years lost instead of proportions.
+#' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
 #' @param beta_L_A Numeric. Effect of process L on process A.
 #' @param beta_L_Z Numeric. Effect of process L on process Z.
 #' @param beta_L_D Numeric. Effect of process L on process D.
@@ -38,13 +46,29 @@
 #' @param beta_A0_Z Numeric. Effect of baseline covariate A0 on process Z.
 #' @param beta_A0_D Numeric. Effect of baseline covariate A0 on process D.
 #' @param beta_A0_C Numeric. Effect of baseline covariate A0 on process C.
-#' @param adherence Logical. Whether to include a treatment adherence process (default FALSE).
-#' @param lower Numeric. Lower bound for the root-finding algorithm to invert cumulative hazard.
-#' @param upper Numeric. Upper bound for the root-finding algorithm to invert cumulative hazard.
-#' @param cens Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).
-#' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
-#' @param return_data Logical. If \code{TRUE} the simulated data is returned.
-#' @param years_lost Logical. If \code{TRUE}, computes years lost instead of proportions.
+#' @param beta_L_A_prime Numeric. Specifies how L additionally affects A after time t_prime.
+#' @param beta_L_Z_prime Numeric. Specifies how L additionally affects Z after time t_prime.
+#' @param beta_L_D_prime Numeric. Specifies how L additionally affects D after time t_prime.
+#' @param beta_L_C_prime Numeric. Specifies how L additionally affects C after time t_prime.
+#' @param beta_A_L_prime Numeric. Specifies how L additionally affects A after time t_prime.
+#' @param beta_A_Z_prime Numeric. Specifies how L additionally affects Z after time t_prime.
+#' @param beta_A_D_prime Numeric. Specifies how L additionally affects D after time t_prime.
+#' @param beta_A_C_prime Numeric. Specifies how L additionally affects C after time t_prime.
+#' @param beta_Z_L_prime Numeric. Specifies how L additionally affects A after time t_prime.
+#' @param beta_Z_A_prime Numeric. Specifies how L additionally affects Z after time t_prime.
+#' @param beta_Z_D_prime Numeric. Specifies how L additionally affects D after time t_prime.
+#' @param beta_Z_C_prime Numeric. Specifies how L additionally affects C after time t_prime.
+#' @param beta_L0_L_prime Numeric. Specifies how L0 additionally affects after time L.
+#' @param beta_L0_A_prime Numeric. Specifies how L0 additionally affects after time A.
+#' @param beta_L0_Z_prime Numeric. Specifies how L0 additionally affects after time Z.
+#' @param beta_L0_D_prime Numeric. Specifies how L0 additionally affects after time D.
+#' @param beta_L0_C_prime Numeric. Specifies how L0 additionally affects after time C.
+#' @param beta_A0_L_prime Numeric. Specifies how A0 additionally affects after time L.
+#' @param beta_A0_A_prime Numeric. Specifies how A0 additionally affects after time A.
+#' @param beta_A0_Z_prime Numeric. Specifies how A0 additionally affects after time Z.
+#' @param beta_A0_D_prime Numeric. Specifies how A0 additionally affects after time D.
+#' @param beta_A0_C_prime Numeric. Specifies how A0 additionally affects after time C.
+#' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
 #'
 #' @return A list containing:
 #' \describe{
@@ -64,18 +88,26 @@ alphaSimDropIn <- function(N = 1e4,
                            plot = FALSE,
                            eta = rep(0.1, 4),
                            nu = rep(1.1, 4),
-                           beta_L_A = 0, beta_L_Z = 1, beta_L_D = 0.5, beta_L_C = 0,
-                           beta_A_L = -0.5,  beta_A_Z = -0.5, beta_A_D = -1, beta_A_C = 0,
-                           beta_Z_L = -1, beta_Z_A = 0, beta_Z_D = -1, beta_Z_C = 0,
-                           beta_L0_L = 1, beta_L0_A = 1, beta_L0_Z = 0.1, beta_L0_D = 1, beta_L0_C = 0,
-                           beta_A0_L = -1, beta_A0_A = 0, beta_A0_Z = 0, beta_A0_D = -0.5, beta_A0_C = 0,
                            adherence = FALSE,
                            lower = 10^(-30),
                            upper = 200,
                            cens = 0,
                            gen_A0 = NULL,
                            return_data = FALSE,
-                           years_lost = FALSE){
+                           years_lost = FALSE,
+                           beta_L_A = 0, beta_L_Z = 1, beta_L_D = 0.5, beta_L_C = 0,
+                           beta_A_L = -0.5,  beta_A_Z = -0.5, beta_A_D = -1, beta_A_C = 0,
+                           beta_Z_L = -1, beta_Z_A = 0, beta_Z_D = -1, beta_Z_C = 0,
+                           beta_L0_L = 1, beta_L0_A = 1, beta_L0_Z = 0.1, beta_L0_D = 1, beta_L0_C = 0,
+                           beta_A0_L = -1, beta_A0_A = 0, beta_A0_Z = 0, beta_A0_D = -0.5, beta_A0_C = 0,
+                           beta_L_A_prime = 0, beta_L_Z_prime = 0, beta_L_D_prime = 0,
+                           beta_L_C_prime = 0, beta_A_L_prime = 0, beta_A_Z_prime = 0,
+                           beta_A_D_prime = 0, beta_A_C_prime = 0, beta_Z_L_prime = 0,
+                           beta_Z_A_prime = 0, beta_Z_D_prime = 0, beta_Z_C_prime = 0,
+                           beta_L0_L_prime = 0,beta_L0_A_prime = 0,beta_L0_Z_prime = 0,
+                           beta_L0_D_prime = 0,beta_L0_C_prime = 0,beta_A0_L_prime = 0,
+                           beta_A0_A_prime = 0,beta_A0_Z_prime = 0,beta_A0_D_prime = 0,
+                           beta_A0_C_prime = 0, t_prime = NULL){
 
   Delta <- Time <- A0 <- NULL
 
@@ -91,6 +123,10 @@ alphaSimDropIn <- function(N = 1e4,
                     beta_Z_L = beta_Z_L, beta_Z_A = beta_Z_A, beta_Z_D = beta_Z_D, beta_Z_C = beta_Z_C,
                     beta_L0_L = beta_L0_L, beta_L0_A = beta_L0_A, beta_L0_Z = beta_L0_Z, beta_L0_D = beta_L0_D, beta_L0_C = beta_L0_C,
                     beta_A0_L = beta_A0_L, beta_A0_A = beta_A0_A, beta_A0_Z = beta_A0_Z, beta_A0_D = beta_A0_D, beta_A0_C = beta_A0_C,
+                    beta_L_A_prime = beta_L_A_prime, beta_L_Z_prime = beta_L_Z_prime, beta_L_D_prime = beta_L_D_prime,
+                    beta_L_C_prime = beta_L_C_prime, beta_A_L_prime = beta_A_L_prime, beta_A_Z_prime = beta_A_Z_prime,
+                    beta_A_D_prime = beta_A_D_prime, beta_A_C_prime = beta_A_C_prime, beta_Z_L_prime = beta_Z_L_prime,
+                    beta_Z_A_prime = beta_Z_A_prime, beta_Z_D_prime = beta_Z_D_prime, beta_Z_C_prime = beta_Z_C_prime,
                     lower = lower, upper = upper)
 
   if (plot) plotEventData(data[1:250])

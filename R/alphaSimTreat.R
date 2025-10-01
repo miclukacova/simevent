@@ -22,6 +22,17 @@
 #' @param cens Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).
 #' @param return_data Logical. If \code{TRUE} the simulated data is returned.
 #' @param years_lost Logical. If \code{TRUE}, computes years lost instead of proportions.
+#' @param beta_L_A_prime Numeric. Additional effect of covariate \code{L = 1} on treatment hazard. Default 0.
+#' @param beta_L_D_prime Numeric. Additionalffect of covariate \code{L = 1} on death hazard. Default 0.
+#' @param beta_A_D_prime Numeric. Effect of treatment \code{A = 1} on death hazard. Default 0.
+#' @param beta_L0_A_prime Numeric. Effect of baseline covariate \code{L0} on treatment hazard. Default 0.
+#' @param beta_A_L_prime Numeric. Effect of treatment \code{A = 1} on covariate hazard. Default 0.
+#' @param beta_L0_L_prime Numeric. Effect of baseline covariate \code{L0} on covariate hazard. Default 0.
+#' @param beta_L0_D_prime Numeric. Effect of baseline covariate \code{L0} on death hazard. Default 0.
+#' @param beta_L0_C_prime Numeric. Effect of baseline covariate \code{L0} on censoring hazard. Default 0.
+#' @param beta_L_C_prime Numeric. Effect of covariate \code{L = 1} on censoring hazard. Default 0.
+#' @param beta_A_C_prime Numeric. Effect of treatment \code{A = 1} on censoring hazard. Default 0.
+#' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
 #'
 #' @return A list containing:
 #' \describe{
@@ -34,33 +45,25 @@
 #'
 #' @examples
 #' alphaSimTreat()
-alphaSimTreat <- function(N = 1e4,
-                          alpha = 0.5,
-                          tau = 5,
-                          plot = FALSE,
-                          nu = rep(1.1, 4),
-                          eta = rep(0.1, 4),
-                          beta_L_A = 1,
-                          beta_L_D = 1,
-                          beta_A_D = -0.5,
-                          beta_A_L = -1,
-                          beta_L0_A = 1,
-                          lower = 10^(-300),
-                          upper = 300,
-                          cens = 0,
-                          return_data = FALSE,
-                          years_lost = FALSE){
+alphaSimTreat <- function(N = 1e4,alpha = 0.5, tau = 5, plot = FALSE,
+                          nu = rep(1.1, 4), eta = rep(0.1, 4), beta_L_A = 1,
+                          beta_L_D = 1, beta_A_D = -0.5, beta_A_L = -1,
+                          beta_L0_A = 1, lower = 10^(-300), upper = 300,
+                          cens = 0, return_data = FALSE, years_lost = FALSE,
+                          beta_L_A_prime = 0, beta_L_D_prime = 0, beta_A_D_prime = 0,
+                          beta_L0_A_prime = 0, beta_A_L_prime = 0, beta_L0_L_prime = 0,
+                          beta_L0_D_prime = 0, beta_L0_C_prime = 0, beta_L_C_prime = 0,
+                          beta_A_C_prime = 0, t_prime = 0){
 
-  Delta <- Time <- A0 <- NULL
+  Delta <- Time <- A0 <- V1 <- tmp <- NULL
   # Generate large data
-  data <- simTreatment(N = N,
-                       cens = cens,
-                       eta = c(eta[1:2],eta[3]*alpha, eta[4]),
-                       nu = nu,
-                       beta_L_A = beta_L_A, beta_L_D = beta_L_D,
-                       beta_A_D = beta_A_D, beta_A_L = beta_A_L,
-                       beta_L0_A = beta_L0_A,
-                       lower = lower, upper = upper)
+  data <- simTreatment(N = N, cens = cens, eta = c(eta[1:2],eta[3]*alpha, eta[4]),
+                       nu = nu, beta_L_A = beta_L_A, beta_L_D = beta_L_D,
+                       beta_A_D = beta_A_D, beta_A_L = beta_A_L, beta_L0_A = beta_L0_A,
+                       lower = lower, upper = upper, beta_L_A_prime = 0, beta_L_D_prime = 0,
+                       beta_A_D_prime = 0, beta_L0_A_prime = 0, beta_A_L_prime = 0,
+                       beta_L0_L_prime = 0, beta_L0_D_prime = 0, beta_L0_C_prime = 0,
+                       beta_L_C_prime = 0, beta_A_C_prime = 0, t_prime = NULL)
 
   if (plot) plotEventData(data[1:250])
   if(return_data) return(data)
@@ -71,12 +74,10 @@ alphaSimTreat <- function(N = 1e4,
   prop_A <- mean(data[, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]])
 
   if (years_lost) {
-    tgrid <- seq(0, tau, length = 100)
-    prop_D <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
-      data[Delta == 1, mean(Delta == 1 & Time <= t)]))
-
-    prop_A <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
-      mean(data[, any(Delta == 2 & Time <= t)[1], by = "ID"][[2]])))
+    data[, tmp := cumsum((Delta == 1)*(tau - pmin(tau, Time))), by = "ID"]
+    prop_D <- data[, tmp[.N], by = "ID"][, mean(V1)]
+    data[, tmp := cumsum((Delta == 2)*(tau - pmin(tau, Time))), by = "ID"]
+    prop_A <- data[, tmp[.N], by = "ID"][, mean(V1)]
   }
 
   return(list(effect_A = prop_A,
