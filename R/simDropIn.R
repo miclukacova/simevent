@@ -113,79 +113,53 @@ simDropIn <- function(N,
   }
 
   beta <- matrix(ncol = length(eta), nrow = 2+length(eta))
+  # The effect of L0 on the processes C, D, Z, L
+  beta[1,] <- c(beta_L0_C, beta_L0_D, beta_L0_Z, beta_L0_L)
+  # The effect of A0 on the processes C, D, Z, L
+  beta[2,] <- c(beta_A0_C, beta_A0_D, beta_A0_Z, beta_A0_L)
+  # The processes C and D are terminal
+  beta[c(3,4),] <- 0
+  # The effect of Z on the processes C, D, Z, L
+  beta[5,] <- c(beta_Z_C, beta_Z_D, 0, beta_Z_L)
+  # The effect of L on the processes C, D, Z, L
+  beta[6,] <- c(beta_L_C, beta_L_D, beta_L_Z, 0)
 
-  if (length(eta) == 4) {
-    # The effect of L0 on the processes C, D, Z, L
-    beta[1,] <- c(beta_L0_C, beta_L0_D, beta_L0_Z, beta_L0_L)
-    # The effect of A0 on the processes C, D, Z, L
-    beta[2,] <- c(beta_A0_C, beta_A0_D, beta_A0_Z, beta_A0_L)
-    # The processes C and D are terminal
-    beta[c(3,4),] <- 0
-    # The effect of Z on the processes C, D, Z, L
-    beta[5,] <- c(beta_Z_C, beta_Z_D, 0, beta_Z_L)
-    # The effect of L on the processes C, D, Z, L
-    beta[6,] <- c(beta_L_C, beta_L_D, beta_L_Z, 0)
-  } else {
-    # The effect of L0 on the processes C, D, Z, L, A
-    beta[1,] <- c(beta_L0_C, beta_L0_D, beta_L0_Z, beta_L0_L, beta_L0_A)
-    # The effect of A0 on the processes C, D, Z, L, A
-    beta[2,] <- c(beta_A0_C, beta_A0_D, beta_A0_Z, beta_A0_L, beta_A0_A)
-    # The processes C and D are terminal
-    beta[c(3,4),] <- 0
-    # The effect of Z on the processes C, D, Z, L, A
-    beta[5,] <- c(beta_Z_C, beta_Z_D, 0, beta_Z_L, beta_Z_A)
-    # The effect of L on the processes C, D, Z, L, A
-    beta[6,] <- c(beta_L_C, beta_L_D, beta_L_Z, 0, beta_L_A)
-    # The effect of A on the processes C, D, Z, L, A
-    beta[7,] <- c(beta_A_C, beta_A_D, beta_A_Z, beta_A_L, 0)
+  if (length(eta) == 5) {
+    beta <- rbind(beta, c(beta_A_C, beta_A_D, beta_A_Z, beta_A_L))
+    beta <- cbind(beta, c(beta_L0_A, beta_A0_A, 0, 0, beta_Z_A, beta_L_A, 0))
   }
+
 
   if(!is.null(t_prime)){
     beta_prime <- matrix(ncol = length(eta), nrow = 2 + length(eta))
-    if (length(eta) == 4) {
-      # The effect of L0 on the processes C, D, Z, L
-      beta_prime[1,] <- c(beta_L0_C_prime, beta_L0_D_prime, beta_L0_Z_prime, beta_L0_L_prime)
-      # The effect of A0 on the processes C, D, Z, L
-      beta_prime[2,] <- c(beta_A0_C_prime, beta_A0_D_prime, beta_A0_Z_prime, beta_A0_L_prime)
-      # The processes C and D are terminal
-      beta_prime[c(3,4),] <- 0
-      # The effect of Z on the processes C, D, Z, L
-      beta_prime[5,] <- c(beta_Z_C_prime, beta_Z_D_prime, 0, beta_Z_L_prime)
-      # The effect of L on the processes C, D, Z, L
-      beta_prime[6,] <- c(beta_L_C_prime, beta_L_D_prime, beta_L_Z_prime, 0)
-    } else {
-      # The effect of L0 on the processes C, D, Z, L, A
-      beta_prime[1,] <- c(beta_L0_C_prime, beta_L0_D_prime, beta_L0_Z_prime, beta_L0_L_prime, beta_L0_A_prime)
-      # The effect of A0 on the processes C, D, Z, L, A
-      beta_prime[2,] <- c(beta_A0_C_prime, beta_A0_D_prime, beta_A0_Z_prime, beta_A0_L_prime, beta_A0_A_prime)
-      # The processes C and D are terminal
-      beta_prime[c(3,4),] <- 0
-      # The effect of Z on the processes C, D, Z, L, A
-      beta_prime[5,] <- c(beta_Z_C_prime, beta_Z_D_prime, 0, beta_Z_L_prime, beta_Z_A_prime)
-      # The effect of L on the processes C, D, Z, L, A
-      beta_prime[6,] <- c(beta_L_C_prime, beta_L_D_prime, beta_L_Z_prime, 0, beta_L_A_prime)
-      # The effect of A on the processes C, D, Z, L, A
-      beta_prime[7,] <- c(beta_A_C_prime, beta_A_D_prime, beta_A_Z_prime, beta_A_L_prime, 0)
+    # The additional effect of L0 on the processes C, D, Z, L after t_prime
+    beta_prime[1,] <- c(beta_L0_C_prime, beta_L0_D_prime, beta_L0_Z_prime, beta_L0_L_prime)
+    # The additional effect of A0 on the processes C, D, Z, L after t_prime
+    beta_prime[2,] <- c(beta_A0_C_prime, beta_A0_D_prime, beta_A0_Z_prime, beta_A0_L_prime)
+    # The processes C and D are terminal
+    beta_prime[c(3,4),] <- 0
+    # The additional effect of Z on the processes C, D, Z, L after t_prime
+    beta_prime[5,] <- c(beta_Z_C_prime, beta_Z_D_prime, 0, beta_Z_L_prime)
+    # The additional effect of L on the processes C, D, Z, L after t_prime
+    beta_prime[6,] <- c(beta_L_C_prime, beta_L_D_prime, beta_L_Z_prime, 0)
+    if (length(eta) == 5) {
+      beta_prime <- rbind(beta_prime, c(beta_A_C_prime, beta_A_D_prime, beta_A_Z_prime, beta_A_L_prime))
+      beta_prime <- cbind(beta_prime, c(beta_L0_A_prime, beta_A0_A_prime, 0, 0, beta_Z_A_prime, beta_L_A_prime, 0))
     }
 
-    data <- simEventTV(N,
-                       beta = beta,
-                       eta = eta,
-                       nu = nu,
-                       max_cens = followup,
-                       at_risk = at_risk,
-                       gen_A0 = generate.A0,
-                       lower = lower,
-                       upper = upper,
-                       tv_eff = beta_prime,
-                       t_prime = t_prime)
+  data <- simEventTV(N,
+                     beta = beta,
+                     eta = eta,
+                     nu = nu,
+                     max_cens = followup,
+                     at_risk = at_risk,
+                     gen_A0 = generate.A0,
+                     lower = lower,
+                     upper = upper,
+                     tv_eff = beta_prime,
+                     t_prime = t_prime)
   }
   else{
-    beta_L_A_prime <- beta_L_Z_prime <- beta_L_D_prime <- NULL
-    beta_L_C_prime <- beta_A_L_prime <- beta_A_Z_prime <- NULL
-    beta_A_D_prime <- beta_A_C_prime <- beta_Z_L_prime <- NULL
-    beta_Z_A_prime <- beta_Z_D_prime <- beta_Z_C_prime <- NULL
-
     data <- simEventData(N,
                          beta = beta,
                          eta = eta,

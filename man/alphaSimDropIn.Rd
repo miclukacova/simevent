@@ -163,25 +163,25 @@ alphaSimDropIn(
 
 \item{beta_Z_C_prime}{Numeric. Specifies how L additionally affects C after time t_prime.}
 
-\item{beta_L0_L_prime}{Numeric. Specifies how L0 additionally affects after time L.}
+\item{beta_L0_L_prime}{Numeric. Specifies how L0 additionally affects L after time t_prime.}
 
-\item{beta_L0_A_prime}{Numeric. Specifies how L0 additionally affects after time A.}
+\item{beta_L0_A_prime}{Numeric. Specifies how L0 additionally affects A after time t_prime.}
 
-\item{beta_L0_Z_prime}{Numeric. Specifies how L0 additionally affects after time Z.}
+\item{beta_L0_Z_prime}{Numeric. Specifies how L0 additionally affects Z after time t_prime.}
 
-\item{beta_L0_D_prime}{Numeric. Specifies how L0 additionally affects after time D.}
+\item{beta_L0_D_prime}{Numeric. Specifies how L0 additionally affects D after time t_prime.}
 
-\item{beta_L0_C_prime}{Numeric. Specifies how L0 additionally affects after time C.}
+\item{beta_L0_C_prime}{Numeric. Specifies how L0 additionally affects C after time t_prime.}
 
-\item{beta_A0_L_prime}{Numeric. Specifies how A0 additionally affects after time L.}
+\item{beta_A0_L_prime}{Numeric. Specifies how A0 additionally affects L after time t_prime.}
 
-\item{beta_A0_A_prime}{Numeric. Specifies how A0 additionally affects after time A.}
+\item{beta_A0_A_prime}{Numeric. Specifies how A0 additionally affects A after time t_prime.}
 
-\item{beta_A0_Z_prime}{Numeric. Specifies how A0 additionally affects after time Z.}
+\item{beta_A0_Z_prime}{Numeric. Specifies how A0 additionally affects Z after time t_prime.}
 
-\item{beta_A0_D_prime}{Numeric. Specifies how A0 additionally affects after time D.}
+\item{beta_A0_D_prime}{Numeric. Specifies how A0 additionally affects D after time t_prime.}
 
-\item{beta_A0_C_prime}{Numeric. Specifies how A0 additionally affects after time C.}
+\item{beta_A0_C_prime}{Numeric. Specifies how A0 additionally affects C after time t_prime.}
 
 \item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 }

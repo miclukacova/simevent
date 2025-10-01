@@ -8,13 +8,6 @@
 #' the effect of covariate \code{L = 1} on the hazard of treatment.
 #'
 #' @param N Integer. Number of individuals to simulate.
-#' @param eta Numeric vector of length 4. Shape parameters for Weibull intensities, parameterized as \eqn{\eta \nu t^{\nu - 1}}. Default is \code{rep(0.1, 4)}.
-#' @param nu Numeric vector of length 4. Scale parameters for Weibull hazards. Default is \code{rep(1.1, 4)}.
-#' @param followup Numeric. Maximum censoring time. Defaults to \code{Inf} (no censoring).
-#' @param cens Integer (0 or 1). Indicates if censoring is possible. Default 1.
-#' @param op Integer (0 or 1). Indicates if treatment (operation) is possible. Default 1.
-#' @param lower Numeric. Lower bound for root finding (inverse cumulative hazard). Default \code{1e-15}.
-#' @param upper Numeric. Upper bound for root finding (inverse cumulative hazard). Default 200.
 #' @param beta_L_A Numeric. Effect of covariate \code{L = 1} on treatment hazard. Default 1.
 #' @param beta_L_D Numeric. Effect of covariate \code{L = 1} on death hazard. Default 1.
 #' @param beta_A_D Numeric. Effect of treatment \code{A = 1} on death hazard. Default -1.
@@ -25,13 +18,20 @@
 #' @param beta_L0_C Numeric. Effect of baseline covariate \code{L0} on censoring hazard. Default 0.
 #' @param beta_L_C Numeric. Effect of covariate \code{L = 1} on censoring hazard. Default 0.
 #' @param beta_A_C Numeric. Effect of treatment \code{A = 1} on censoring hazard. Default 0.
-#' @param beta_L_A_prime Numeric. Additional effect of covariate \code{L = 1} on treatment hazard. Default 1.
-#' @param beta_L_D_prime Numeric. Additionalffect of covariate \code{L = 1} on death hazard. Default 1.
-#' @param beta_A_D_prime Numeric. Effect of treatment \code{A = 1} on death hazard. Default -1.
-#' @param beta_L0_A_prime Numeric. Effect of baseline covariate \code{L0} on treatment hazard. Default 1.
-#' @param beta_A_L_prime Numeric. Effect of treatment \code{A = 1} on covariate hazard. Default -0.5.
-#' @param beta_L0_L_prime Numeric. Effect of baseline covariate \code{L0} on covariate hazard. Default 1.
-#' @param beta_L0_D_prime Numeric. Effect of baseline covariate \code{L0} on death hazard. Default 1.
+#' @param eta Numeric vector of length 4. Shape parameters for Weibull intensities, parameterized as \eqn{\eta \nu t^{\nu - 1}}. Default is \code{rep(0.1, 4)}.
+#' @param nu Numeric vector of length 4. Scale parameters for Weibull hazards. Default is \code{rep(1.1, 4)}.
+#' @param followup Numeric. Maximum censoring time. Defaults to \code{Inf} (no censoring).
+#' @param cens Integer (0 or 1). Indicates if censoring is possible. Default 1.
+#' @param op Integer (0 or 1). Indicates if treatment (operation) is possible. Default 1.
+#' @param lower Numeric. Lower bound for root finding (inverse cumulative hazard). Default \code{1e-15}.
+#' @param upper Numeric. Upper bound for root finding (inverse cumulative hazard). Default 200.
+#' @param beta_L_A_prime Numeric. Additional effect of covariate \code{L = 1} on treatment hazard. Default 0.
+#' @param beta_L_D_prime Numeric. Additionalffect of covariate \code{L = 1} on death hazard. Default 0.
+#' @param beta_A_D_prime Numeric. Effect of treatment \code{A = 1} on death hazard. Default 0.
+#' @param beta_L0_A_prime Numeric. Effect of baseline covariate \code{L0} on treatment hazard. Default 0.
+#' @param beta_A_L_prime Numeric. Effect of treatment \code{A = 1} on covariate hazard. Default 0.
+#' @param beta_L0_L_prime Numeric. Effect of baseline covariate \code{L0} on covariate hazard. Default 0.
+#' @param beta_L0_D_prime Numeric. Effect of baseline covariate \code{L0} on death hazard. Default 0.
 #' @param beta_L0_C_prime Numeric. Effect of baseline covariate \code{L0} on censoring hazard. Default 0.
 #' @param beta_L_C_prime Numeric. Effect of covariate \code{L = 1} on censoring hazard. Default 0.
 #' @param beta_A_C_prime Numeric. Effect of treatment \code{A = 1} on censoring hazard. Default 0.
@@ -52,12 +52,15 @@
 #'
 #' @examples
 #' simTreatment(10)
-simTreatment <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1, beta_A_L = -0.5,
-                           beta_L0_A = 1, beta_L0_L = 1, beta_L0_D = 1,
-                           beta_L0_C = 0, beta_L_C = 0, beta_A_C = 0,
-                           eta = rep(0.1,4), nu = rep(1.1,4),
-                           followup = Inf, cens = 1, op = 1,
-                           lower = 10^(-15), upper = 200){
+simTreatment <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1,
+                         beta_A_L = -0.5,beta_L0_A = 1, beta_L0_L = 1,
+                         beta_L0_D = 1, beta_L0_C = 0, beta_L_C = 0,
+                         beta_A_C = 0, eta = rep(0.1,4), nu = rep(1.1,4),
+                         followup = Inf, cens = 1, op = 1, lower = 10^(-15), upper = 200,
+                         beta_L_A_prime = 0, beta_L_D_prime = 0, beta_A_D_prime = 0,
+                         beta_A_L_prime = 0, beta_L0_A_prime = 0, beta_L0_L_prime = 0,
+                         beta_L0_D_prime = 0, beta_L0_C_prime = 0, beta_L_C_prime = 0,
+                         beta_A_C_prime = 0, t_prime = NULL){
 
   Time <- A0 <- N0 <- N1 <- ID <- NULL
 
@@ -81,7 +84,6 @@ simTreatment <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1, beta_A_L 
   }
 
   beta <- matrix(ncol = 4, nrow = 6)
-
   # The effect of L0 on the processes C, D, A, L
   beta[1,] <- c(beta_L0_C, beta_L0_D, beta_L0_A, beta_L0_L)
   # A0 is 0
@@ -94,8 +96,28 @@ simTreatment <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1, beta_A_L 
   beta[6,] <- c(beta_L_C, beta_L_D, beta_L_A, 0)
 
 
-  data <- simEventData(N, beta = beta, eta = eta, nu = nu, max_cens = followup,
+  if(!is.null(t_prime)){
+    tv_eff <- matrix(ncol = 4, nrow = 6)
+    # The change in effect of L0 on the processes C, D, A, L
+    tv_eff[1,] <- c(beta_L0_C_prime, beta_L0_D_prime, beta_L0_A_prime, beta_L0_L_prime)
+    # A0 is 0
+    tv_eff[2,] <- 0
+    # The processes C and D are terminal
+    tv_eff[c(3,4),] <- 0
+    # The change in effect of A on the processes C, D, A, L
+    tv_eff[5,] <- c(beta_A_C_prime, beta_A_D_prime, 0, beta_A_L_prime)
+    # The change in effect of L on the processes C, D, A, L
+    tv_eff[6,] <- c(beta_L_C_prime, beta_L_D_prime, beta_L_A_prime, 0)
+
+    data <- simEventTV(N, beta = beta, eta = eta, nu = nu, max_cens = followup,
+                       at_risk = at_risk, t_prime = t_prime, tv_eff = tv_eff)
+  }
+  else{
+    data <- simEventData(N, beta = beta, eta = eta, nu = nu, max_cens = followup,
                          at_risk = at_risk)
+  }
+
+
   data[, c("N0", "N1", "A0") := NULL]
   colnames(data)[c(5,6)] <- c("A", "L")
 
