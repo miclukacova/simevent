@@ -79,10 +79,12 @@ Or the simulated data.
 \description{
 This function simulates event history data from the Disease setting (see simDisease)
 where the shape parameter \eqn{\eta} of the disease process is multiplied by
-\code{alpha}. The function either computes the proportion of individuals who experience
-death or disease by a specified time \eqn{\tau} in the group \code{A0 = a0}, computes
-years lost of death and disease or simply returns simulated data. The function can also
-plot a sample of the event data.
+\code{alpha}. The function either
+\itemize{
+\item returns proportion of individuals who experience death or disease by a specified time \eqn{\tau} in group \code{A0 = a0}
+\item returns number of years lost before \eqn{\tau} of death and disease
+\item returns simulated data.
+}
 }
 \examples{
 alphaSimDisease(N = 1000, alpha = 0.7, tau = 5, years_lost = FALSE, a0 = 1)

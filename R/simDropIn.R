@@ -67,17 +67,13 @@
 #'
 #' @examples
 #' simDropIn(10)
-simDropIn <- function(N,
-                      beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 0,
+simDropIn <- function(N, beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 0,
                       beta_A_L = -0.5,  beta_A_Z = -0.5, beta_A_D = -1, beta_A_C = 0,
                       beta_Z_L = -1, beta_Z_A = 0, beta_Z_D = -1, beta_Z_C = 0,
                       beta_L0_L = 1, beta_L0_A = 1, beta_L0_Z = 1, beta_L0_D = 1, beta_L0_C = 0,
                       beta_A0_L = -1.5, beta_A0_A = 0, beta_A0_Z = 0, beta_A0_D = -2, beta_A0_C = 0,
-                      eta = c(0.5, 0.5, 0.1, 0.25),
-                      nu = c(1.1, 1.1, 1.1, 1.1),
-                      adherence = FALSE,
-                      followup = Inf,
-                      cens = 1,
+                      eta = c(0.5, 0.5, 0.1, 0.25),  nu = c(1.1, 1.1, 1.1, 1.1),
+                      adherence = FALSE, followup = Inf, cens = 1,
                       generate.A0 = function(N, L0) stats::rbinom(N, 1, 0.5),
                       lower = 1e-200, upper = 1e10,
                       beta_L_A_prime = 0, beta_L_Z_prime = 0, beta_L_D_prime = 0,

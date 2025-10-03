@@ -19,7 +19,8 @@ simEventTV(
   max_events = 10,
   lower = 10^(-15),
   upper = 200,
-  gen_A0 = NULL
+  gen_A0 = NULL,
+  at_risk_cov = NULL
 )
 }
 \arguments{
@@ -28,9 +29,9 @@ simEventTV(
 \item{beta}{Matrix. Coefficients for covariates and processes. Columns correspond to events (\code{N0}, \code{N1}, ...),
 rows correspond to covariates (\code{L0}, \code{A0}, ..., and past event counts).}
 
-\item{tv_eff}{Matrix of the same dimensions as beta, specifying the}
+\item{tv_eff}{Matrix. Time-varying changes to \code{beta}, applied at time \code{t_prime}. Must have same dimensions as \code{beta}.}
 
-\item{t_prime}{Numeric. Time at which \code{tv_eff} is applied to \code{beta}.}
+\item{t_prime}{Numeric. Time at which \code{tv_eff} is added to \code{beta}.}
 
 \item{eta}{Numeric vector. Shape parameters of Weibull intensities for each event.}
 
@@ -55,6 +56,8 @@ Each function takes one argument \code{N} and returns a vector of length \code{N
 \item{upper}{Numeric. Upper bound for the root-finding algorithm used in inverse cumulative hazard computation.}
 
 \item{gen_A0}{Function. Generates baseline treatment assignment. Takes arguments \code{N} and \code{L0}.}
+
+\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
 }
 \value{
 A \code{data.table} with columns:

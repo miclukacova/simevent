@@ -14,10 +14,10 @@ The simevent package
     `simSurvData`](#example-2-survival-data-with-simsurvdata)
   - [Example 3: Competing Risk Data with
     `simCRdata`](#example-3-competing-risk-data-with-simcrdata)
-  - [Example 4: Type 2 Diabetes Data with
-    `simT2D`](#example-4-type-2-diabetes-data-with-simt2d)
-  - [Example 5: Unobserved Covariate with
-    `simConfounding`](#example-5-unobserved-covariate-with-simconfounding)
+  - [Example 4: Health Care Data with
+    `simDisease`](#example-4-health-care-data-with-simdisease)
+  - [Example 5: Health Care Data with
+    `simTreatment`](#example-5-health-care-data-with-simtreatment)
   - [Example 5: Time Varying Effects with
     `simEventTV`](#example-5-time-varying-effects-with-simeventtv)
 
@@ -40,7 +40,7 @@ In addition, the package offers several wrapper functions for common
 settings (e.g., survival data, competing risks) built on top of
 `simEventData.` It also includes functions for plotting
 (`plotEventData`), formatting (`IntFormatData`), and simulating
-interventions (e.g., `intEffectAlphaT2D`).
+interventions (e.g., `intEffectAlphaDisease`).
 
 ## Installation
 
@@ -287,24 +287,24 @@ plotEventData(data, title = "Competing Risk Data")
 
 <img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
 
-## Example 4: Type 2 Diabetes Data with `simT2D`
+## Example 4: Health Care Data with `simDisease`
 
-The function `simT2D` simulates health care data from a setting where
-patients can experience $3$ different events: \* **Censoring** (coded as
-0) \* **Death** (coded as 1), and \* **Type-2-Diabetes** (coded as 2).
+The function `simDisease` simulates health care data from a setting
+where patients can experience $3$ different events: \* **Censoring**
+(coded as 0) \* **Death** (coded as 1), and \* **Disease** (coded as 2).
 
 You can customize the simulation scenarios by adjusting the function
 arguments. For detailed information about the parameters, see the help
 page:
 
 ``` r
-?simT2D
+?simDisease
 ```
 
 Example simulation
 
 ``` r
-data <- simT2D(N = 100,
+data <- simDisease(N = 100,
                cens = 1,
                eta = c(0.1,0.3,0.1), 
                nu = c(1.1,1.3,1.1),
@@ -313,29 +313,29 @@ data <- simT2D(N = 100,
                beta_L_D = 1, 
                beta_L0_D = 0)
 
-plotEventData(data, title = "T2D data")
+plotEventData(data, title = "Disease data")
 ```
 
 <img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
-## Example 5: Unobserved Covariate with `simConfounding`
+## Example 5: Health Care Data with `simTreatment`
 
-Simulate data with an unobserved confounding process:
+Simulate data with a covariate process and treatment process:
 
 ``` r
-?simConfounding
+?simTreatment
 ```
 
 Default simulation:
 
 ``` r
-data <- simConfounding(100)
+data <- simTreatment(100)
 ```
 
 Custom scenario:
 
 ``` r
-data <- simConfounding(N = 100,
+data <- simTreatment(N = 100,
                        beta_L_A = 1,
                        beta_L_D = 1,
                        beta_A_D = -1,
@@ -351,7 +351,7 @@ data <- simConfounding(N = 100,
 Plot
 
 ``` r
-plotEventData(data, title = "Confounding setting")
+plotEventData(data, title = "Treatment setting")
 ```
 
 <img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />

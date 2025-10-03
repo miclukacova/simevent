@@ -82,14 +82,27 @@ at_risk <- function(events) {
     as.numeric(events[3] < 2),   # Event 2 can occur twice
     as.numeric(events[4] < 1),   # Event 3 can occur once
     as.numeric(events[5] < 2)))  # Event 4 can occur twice
-  }
+}
+```
+
+Optionally one can define an \code{at_risk_cov} function to specify risk windows as a function of covariates:
+
+```{r}
+# at risk function
+at_risk_cov <- function(covariates) {
+  return(c(
+    1,1,                               # The covariates do not change the risk of event 1 and 2
+    as.numeric(covariates[1] < 0.5),   # Only at risk of event 3 if L0 < 0.5
+    as.numeric(covariates[2] == 1),    # Only at risk of event 4 if A0 = 1
+    1))                                # The covariates do not change the risk of event 4
+}
 ```
 
 Simulate data for 5000 individuals:
 
 ```{r}
 set.seed(973)
-data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk)
+data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk, at_risk_cov = at_risk_cov)
 ```
 
 Preview the simulated data:
@@ -117,22 +130,22 @@ survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + Z1 + Z2 + N2 + N3 
                   data = data_int)
 
 # Process 4
-survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4, 
-                  data = data_int[N4 < 2])
+survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + Z1 + Z2 + N2 + N3 + N4, 
+                  data = data_int[(N4 < 2) & (A0 == 1)])
 ```
 
 Visualize estimated coefficients alongside true values:
 
 ```{r}
 CIs <- cbind("Par" = c(paste0(rownames(confint(survfit0)), "_N0"), 
-                       paste0(rownames(confint(survfit0)), "_N4")), 
+                       paste0(rownames(confint(survfit4)), "_N4")), 
              rbind(confint(survfit0), confint(survfit4)))
 
 rownames(CIs) <- NULL
 colnames(CIs) <- c("Par", "Lower", "Upper")
 CIs <- data.table(CIs)
 CIs[, True_val := c(beta[-c(5,6),1],
-                    beta[-c(5,6),5])]
+                    beta[-c(2,5,6),5])]
 
 CIs$Lower <- as.numeric(CIs$Lower)
 CIs$Upper <- as.numeric(CIs$Upper)
@@ -169,6 +182,13 @@ You can also specify non-linear effects, e.g., effect of \code{N2} on \code{N1} 
 ```{r}
 data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
                      override_beta = list("N2 > 1" = c("N1" = 2)))
+```
+
+Additionally the argument can be used to specify interaction effects, e.g., if we want an interaction effect of 1 between L0 and N1 on N2 we can specify the argument:
+
+```{r}
+data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     override_beta =list("L0 * N1" = c("N2" = 1)))
 ```
 
 ## Example 2: Survival Data with `simSurvData`

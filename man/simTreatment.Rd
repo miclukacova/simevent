@@ -33,7 +33,8 @@ simTreatment(
   beta_L0_C_prime = 0,
   beta_L_C_prime = 0,
   beta_A_C_prime = 0,
-  t_prime = NULL
+  t_prime = NULL,
+  at_risk_cov = NULL
 )
 }
 \arguments{
@@ -94,6 +95,8 @@ simTreatment(
 \item{beta_A_C_prime}{Numeric. Effect of treatment \code{A = 1} on censoring hazard. Default 0.}
 
 \item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
+
+\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
 }
 \value{
 A \code{data.frame} with columns:

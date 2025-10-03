@@ -17,7 +17,8 @@ simEventData(
   max_events = 10,
   lower = 10^(-15),
   upper = 200,
-  gen_A0 = NULL
+  gen_A0 = NULL,
+  at_risk_cov = NULL
 )
 }
 \arguments{
@@ -29,7 +30,7 @@ simEventData(
 
 \item{nu}{Numeric vector. Scale parameters of the Weibull baseline intensity for each event type. Default is 1.1 for all events.}
 
-\item{at_risk}{Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector and returns a binary vector. Default returns 1 for all events.}
+\item{at_risk}{Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector events and returns a binary vector. Default returns 1 for all events.}
 
 \item{term_deltas}{Integer vector. Event types considered terminal (after which no further events occur). Default is c(0, 1).}
 
@@ -46,6 +47,8 @@ simEventData(
 \item{upper}{Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.}
 
 \item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+
+\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
 }
 \value{
 A \code{data.table} with columns:

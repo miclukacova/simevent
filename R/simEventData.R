@@ -22,7 +22,7 @@
 #' @param beta Numeric matrix. Regression coefficients matrix where columns correspond to event types (N0, N1, ...) and rows correspond to covariates (L0, A0, L1, L2, ...) and event counts (N0, N1, ...). Default is a zero matrix.
 #' @param eta Numeric vector. Shape parameters of the Weibull baseline intensity for each event type. Default is 0.1 for all events.
 #' @param nu Numeric vector. Scale parameters of the Weibull baseline intensity for each event type. Default is 1.1 for all events.
-#' @param at_risk Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector and returns a binary vector. Default returns 1 for all events.
+#' @param at_risk Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector events and returns a binary vector. Default returns 1 for all events.
 #' @param term_deltas Integer vector. Event types considered terminal (after which no further events occur). Default is c(0, 1).
 #' @param max_cens Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no maximal censoring).
 #' @param add_cov Named list of functions. Functions generating additional baseline covariates. Each function takes integer N and returns a numeric vector of length N. Default is NULL.
@@ -31,6 +31,7 @@
 #' @param lower Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.
 #' @param upper Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.
 #' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param at_risk_cov Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
 #'
 #' @return A \code{data.table} with columns:
 #' \item{ID}{Individual identifier}
@@ -52,7 +53,7 @@ simEventData <- function(N,                      # Number of individuals
                          beta = NULL,            # Effects
                          eta = NULL,             # Shape parameters
                          nu = NULL,              # Scale parameters
-                         at_risk = NULL,         # Function defining the setting
+                         at_risk = NULL,         # At risk indicator as function of events
                          term_deltas = c(0,1),   # Terminal events
                          max_cens = Inf,         # Followup time
                          add_cov = NULL,         # Additional baseline covariates
@@ -60,7 +61,8 @@ simEventData <- function(N,                      # Number of individuals
                          max_events = 10,        # Maximal events per individual
                          lower = 10^(-15),       # Lower bound for ICH
                          upper = 200,            # Upper bound for ICH
-                         gen_A0 = NULL           # Generation of A0
+                         gen_A0 = NULL,          # Generation of A0
+                         at_risk_cov = NULL      # At risk indicator as function of covariates
 ){
   ID <- NULL
 
@@ -104,8 +106,9 @@ simEventData <- function(N,                      # Number of individuals
   # Default at_risk
   if(is.null(at_risk)){
     riskss <- rep(1, num_events)
-    at_risk <- function(events) return(riskss)
+    at_risk <- function(events, covariates) return(riskss)
   }
+
   # Default A0 generation
   if(is.null(gen_A0)){
     gen_A0 <- function(N, L0) stats::rbinom(N, 1, 0.5)
@@ -113,11 +116,6 @@ simEventData <- function(N,                      # Number of individuals
 
   # Matrix for storing values
   simmatrix <- matrix(0, nrow = N, ncol = (2 + num_events + num_add_cov))
-
-  # Generate additional covariates if distributions are specified
-  if (num_add_cov != 0) {
-    simmatrix[,3:(2+length(add_cov))] <- sapply(add_cov, function(f) f(N))
-  }
 
   # Naming of matrices
   if (is.null(names(add_cov)) && num_add_cov != 0) {
@@ -157,21 +155,23 @@ simEventData <- function(N,                      # Number of individuals
 
   # Intensities
   lambda <- function(t, i) {
-    risk_vec <- at_risk(simmatrix[i, N_start:N_stop])
+    risk_vec <- at_risk_cov[,i] * at_risk(simmatrix[i, N_start:N_stop])
     risk_vec * eta * nu * t^(nu - 1) * phi[i,]
   }
 
   # If all events have the same parameter, the inverse of the cumulative hazard simplifies
   if(all(nu[1] == nu) && all(eta[1] == eta)){
     inverse_sc_haz <- function(p, t, i) {
-      denom <- sum(at_risk(simmatrix[i, N_start:N_stop]) * eta * phi[i,])
+      riskss <- at_risk(simmatrix[i, N_start:N_stop]) * at_risk_cov[,i]
+      denom <- sum(riskss * eta * phi[i,])
       (p / denom + t^nu[1])^(1 / nu[1]) - t
     }
   # Otherwise we use a numerical inverse coded in rcpp
   } else{
     inverse_sc_haz <- function(p, t, i) {
-      inverseScHaz(p, t, lower = lower, upper = upper, eta = eta, nu = nu,
-                     phi = phi[i,], at_risk = at_risk(simmatrix[i, N_start:N_stop]))
+      riskss <- at_risk(simmatrix[i, N_start:N_stop]) * at_risk_cov[,i]
+      inverseScHaz(p, t, lower = lower, upper = upper, eta = eta, nu = nu, phi = phi[i,],
+                   at_risk = riskss)
 
     }
   }
@@ -189,6 +189,18 @@ simEventData <- function(N,                      # Number of individuals
   # Draw baseline covariates
   simmatrix[,1] <- stats::runif(N)                   # L0
   simmatrix[,2] <- gen_A0(N, simmatrix[,1])          # A0
+
+  # Generate additional covariates if distributions are specified
+  if (num_add_cov != 0) {
+    simmatrix[,3:(2+length(add_cov))] <- sapply(add_cov, function(f) f(N))
+  }
+
+  # Covariate dependent at_risk
+  if(is.null(at_risk_cov)){
+    at_risk_cov <- matrix(1, nrow = num_events, ncol = N)
+  } else{
+    at_risk_cov <- apply(simmatrix[,1:(N_start - 1)], 1, at_risk_cov)
+  }
 
   # Initialize
   T_k <- rep(0,N)                                    # Time 0

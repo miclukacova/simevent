@@ -2,10 +2,10 @@
 #'
 #' This function simulates event history data from the Disease setting (see simDisease)
 #' where the shape parameter \eqn{\eta} of the disease process is multiplied by
-#' \code{alpha}. The function either computes the proportion of individuals who experience
-#' death or disease by a specified time \eqn{\tau} in the group \code{A0 = a0}, computes
-#' years lost of death and disease or simply returns simulated data. The function can also
-#' plot a sample of the event data.
+#' \code{alpha}. The function either
+#' * returns proportion of individuals who experience death or disease by a specified time \eqn{\tau} in group \code{A0 = a0}
+#' * returns number of years lost before \eqn{\tau} of death and disease
+#' * returns simulated data.
 #'
 #' @param N Integer. Number of individuals to simulate. Default is 10,000.
 #' @param alpha Numeric scalar. Multiplicative factor applied to the disease process shape parameter \eqn{\eta}.
