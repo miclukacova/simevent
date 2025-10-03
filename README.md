@@ -101,14 +101,28 @@ at_risk <- function(events) {
     as.numeric(events[3] < 2),   # Event 2 can occur twice
     as.numeric(events[4] < 1),   # Event 3 can occur once
     as.numeric(events[5] < 2)))  # Event 4 can occur twice
-  }
+}
+```
+
+Optionally one can define an function to specify risk windows as a
+function of covariates:
+
+``` r
+# at risk function
+at_risk_cov <- function(covariates) {
+  return(c(
+    1,1,                               # The covariates do not change the risk of event 1 and 2
+    as.numeric(covariates[1] < 0.5),   # Only at risk of event 3 if L0 < 0.5
+    as.numeric(covariates[2] == 1),    # Only at risk of event 4 if A0 = 1
+    1))                                # The covariates do not change the risk of event 4
+}
 ```
 
 Simulate data for 5000 individuals:
 
 ``` r
 set.seed(973)
-data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk)
+data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk, at_risk_cov = at_risk_cov)
 ```
 
 Preview the simulated data:
@@ -118,12 +132,12 @@ head(data)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0    Z1         Z2    N0    N1    N2
 #>    <int>     <num> <int>     <num> <num> <num>      <num> <num> <num> <num>
-#> 1:     1 1.2416160     4 0.8169060     1     0  0.2555876     0     0     0
-#> 2:     1 1.9263014     1 0.8169060     1     0  0.2555876     0     1     0
-#> 3:     2 0.8667134     1 0.7893660     1     0 -0.6972059     0     1     0
-#> 4:     3 0.7956896     0 0.8561421     1     0  0.7786811     1     0     0
-#> 5:     4 1.0532263     2 0.2246642     0     0 -0.7287170     0     0     1
-#> 6:     4 2.2914281     1 0.2246642     0     0 -0.7287170     0     1     1
+#> 1:     1 0.5067418     4 0.0482511     1     0  0.9036369     0     0     0
+#> 2:     1 0.7741479     0 0.0482511     1     0  0.9036369     1     0     0
+#> 3:     2 0.7952969     1 0.2186699     0     0  1.0631460     0     1     0
+#> 4:     3 4.3490086     1 0.5021846     0     0 -0.2266280     0     1     0
+#> 5:     4 0.1689083     0 0.4053148     1     0  1.2534397     1     0     0
+#> 6:     5 1.5183445     3 0.3986500     1     0 -0.9204445     0     0     0
 #>       N3    N4
 #>    <num> <num>
 #> 1:     0     1
@@ -131,7 +145,7 @@ head(data)
 #> 3:     0     0
 #> 4:     0     0
 #> 5:     0     0
-#> 6:     0     0
+#> 6:     1     0
 ```
 
 ### Formatting Data for Cox Regression
@@ -144,20 +158,20 @@ data_int <- IntFormatData(data, N_cols = 8:12)
 head(data_int)
 #>       ID      Time Delta        L0    A0    Z1         Z2    N0    N1    N2
 #>    <int>     <num> <int>     <num> <num> <num>      <num> <num> <num> <num>
-#> 1:     1 1.2416160     4 0.8169060     1     0  0.2555876     0     0     0
-#> 2:     1 1.9263014     1 0.8169060     1     0  0.2555876     0     0     0
-#> 3:     2 0.8667134     1 0.7893660     1     0 -0.6972059     0     0     0
-#> 4:     3 0.7956896     0 0.8561421     1     0  0.7786811     0     0     0
-#> 5:     4 1.0532263     2 0.2246642     0     0 -0.7287170     0     0     0
-#> 6:     4 2.2914281     1 0.2246642     0     0 -0.7287170     0     0     1
-#>       N3    N4     k   tstart     tstop
-#>    <num> <num> <int>    <num>     <num>
-#> 1:     0     0     1 0.000000 1.2416160
-#> 2:     0     1     2 1.241616 1.9263014
-#> 3:     0     0     1 0.000000 0.8667134
-#> 4:     0     0     1 0.000000 0.7956896
-#> 5:     0     0     1 0.000000 1.0532263
-#> 6:     0     0     2 1.053226 2.2914281
+#> 1:     1 0.5067418     4 0.0482511     1     0  0.9036369     0     0     0
+#> 2:     1 0.7741479     0 0.0482511     1     0  0.9036369     0     0     0
+#> 3:     2 0.7952969     1 0.2186699     0     0  1.0631460     0     0     0
+#> 4:     3 4.3490086     1 0.5021846     0     0 -0.2266280     0     0     0
+#> 5:     4 0.1689083     0 0.4053148     1     0  1.2534397     0     0     0
+#> 6:     5 1.5183445     3 0.3986500     1     0 -0.9204445     0     0     0
+#>       N3    N4     k    tstart     tstop
+#>    <num> <num> <int>     <num>     <num>
+#> 1:     0     0     1 0.0000000 0.5067418
+#> 2:     0     1     2 0.5067418 0.7741479
+#> 3:     0     0     1 0.0000000 0.7952969
+#> 4:     0     0     1 0.0000000 4.3490086
+#> 5:     0     0     1 0.0000000 0.1689083
+#> 6:     0     0     1 0.0000000 1.5183445
 ```
 
 Fit Cox models for processes 0 and 4:
@@ -170,22 +184,22 @@ survfit0 <- coxph(Surv(tstart, tstop, Delta == 0) ~ L0 + A0 + Z1 + Z2 + N2 + N3 
                   data = data_int)
 
 # Process 4
-survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4, 
-                  data = data_int[N4 < 2])
+survfit4 <- coxph(Surv(tstart, tstop, Delta == 4) ~ L0 + Z1 + Z2 + N2 + N3 + N4, 
+                  data = data_int[(N4 < 2) & (A0 == 1)])
 ```
 
 Visualize estimated coefficients alongside true values:
 
 ``` r
 CIs <- cbind("Par" = c(paste0(rownames(confint(survfit0)), "_N0"), 
-                       paste0(rownames(confint(survfit0)), "_N4")), 
+                       paste0(rownames(confint(survfit4)), "_N4")), 
              rbind(confint(survfit0), confint(survfit4)))
 
 rownames(CIs) <- NULL
 colnames(CIs) <- c("Par", "Lower", "Upper")
 CIs <- data.table(CIs)
 CIs[, True_val := c(beta[-c(5,6),1],
-                    beta[-c(5,6),5])]
+                    beta[-c(2,5,6),5])]
 
 CIs$Lower <- as.numeric(CIs$Lower)
 CIs$Upper <- as.numeric(CIs$Upper)
@@ -200,7 +214,7 @@ pp <- ggplot(data = CIs)+
 pp
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 ### Visualize Event Histories
 
@@ -210,7 +224,7 @@ Plot the first 100 individuals’ event histories:
 plotEventData(data[1:100,])
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
 
 ### Using override_beta
 
@@ -230,6 +244,15 @@ data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk
                      override_beta = list("N2 > 1" = c("N1" = 2)))
 ```
 
+Additionally the argument can be used to specify interaction effects,
+e.g., if we want an interaction effect of 1 between L0 and N1 on N2 we
+can specify the argument:
+
+``` r
+data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     override_beta =list("L0 * N1" = c("N2" = 1)))
+```
+
 ## Example 2: Survival Data with `simSurvData`
 
 The function simSurvData allows you to simulate survival data for
@@ -243,7 +266,7 @@ data <- simSurvData(100)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
 
 You can specify how baseline covariates and affect the risk of censoring
 and death through the matrix. For example:
@@ -274,7 +297,7 @@ data <- simSurvData(100, beta = beta, eta = eta, nu = nu)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
 
 ## Example 3: Competing Risk Data with `simCRdata`
 
@@ -285,7 +308,7 @@ data <- simCRdata(100)
 plotEventData(data, title = "Competing Risk Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
 ## Example 4: Health Care Data with `simDisease`
 
@@ -316,7 +339,7 @@ data <- simDisease(N = 100,
 plotEventData(data, title = "Disease data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-23-1.png" width="100%" />
 
 ## Example 5: Health Care Data with `simTreatment`
 
@@ -354,7 +377,7 @@ Plot
 plotEventData(data, title = "Treatment setting")
 ```
 
-<img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-27-1.png" width="100%" />
 
 ## Example 5: Time Varying Effects with `simEventTV`
 
@@ -377,4 +400,4 @@ data <- simEventTV(N = 1000, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
 plotEventData(data)
 ```
 
-<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-28-1.png" width="100%" />
