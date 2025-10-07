@@ -110,7 +110,8 @@ simTreatment <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1,
     tv_eff[6,] <- c(beta_L_C_prime, beta_L_D_prime, beta_L_A_prime, 0)
 
     data <- simEventTV(N, beta = beta, eta = eta, nu = nu, max_cens = followup,
-                       at_risk = at_risk, t_prime = t_prime, tv_eff = tv_eff)
+                       at_risk = at_risk, t_prime = t_prime, tv_eff = tv_eff,
+                       at_risk_cov = at_risk_cov)
   }
   else{
     data <- simEventData(N, beta = beta, eta = eta, nu = nu, max_cens = followup,

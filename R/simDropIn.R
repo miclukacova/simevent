@@ -61,6 +61,7 @@
 #' @param beta_A0_D_prime Numeric. Specifies how L additionally affects after time D.
 #' @param beta_A0_C_prime Numeric. Specifies how L additionally affects after time C.
 #' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
+#' @param at_risk_cov Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
 #'
 #' @return  Data frame containing the simulated event history data
 #' @export
@@ -83,7 +84,7 @@ simDropIn <- function(N, beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 
                       beta_L0_L_prime = 0,beta_L0_A_prime = 0,beta_L0_Z_prime = 0,
                       beta_L0_D_prime = 0,beta_L0_C_prime = 0,beta_A0_L_prime = 0,
                       beta_A0_A_prime = 0,beta_A0_Z_prime = 0,beta_A0_D_prime = 0,
-                      beta_A0_C_prime = 0, t_prime = NULL){
+                      beta_A0_C_prime = 0, t_prime = NULL, at_risk_cov = NULL){
 
   N0 <- N1 <- ID <- NULL
 
@@ -153,7 +154,8 @@ simDropIn <- function(N, beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 
                      lower = lower,
                      upper = upper,
                      tv_eff = beta_prime,
-                     t_prime = t_prime)
+                     t_prime = t_prime,
+                     at_risk_cov = at_risk_cov)
   }
   else{
     data <- simEventData(N,
@@ -164,7 +166,8 @@ simDropIn <- function(N, beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 
                          at_risk = at_risk,
                          gen_A0 = generate.A0,
                          lower = lower,
-                         upper = upper)
+                         upper = upper,
+                         at_risk_cov = at_risk_cov)
   }
 
   setnames(data, c("N2", "N3"), c("Z", "L"))

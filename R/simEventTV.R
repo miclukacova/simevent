@@ -197,6 +197,9 @@ simEventTV <- function(N,                      # Number of individuals
     at_risk_cov <- matrix(1, nrow = num_events, ncol = N)
   } else{
     at_risk_cov <- apply(simmatrix[,1:(N_start - 1)], 1, at_risk_cov)
+    if(length(at_risk_cov) != num_events){
+      stop("at_risk_cov needs to return a vector of length number of events")
+    }
   }
 
   # Initialize

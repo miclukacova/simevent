@@ -22,7 +22,8 @@ simDisease(
   upper = 200,
   beta_L_D_t_prime = NULL,
   t_prime = NULL,
-  gen_A0 = NULL
+  gen_A0 = NULL,
+  at_risk_cov = NULL
 )
 }
 \arguments{
@@ -61,12 +62,14 @@ simDisease(
 \item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 
 \item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+
+\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
 }
 \value{
 A data frame containing the simulated data with columns:
 \item{ID}{Individual identifier}
 \item{Time}{Time of the event}
-\item{Delta}{Event type (0 = censoring, 1 = death, 3 = covariate change)}
+\item{Delta}{Event type (0 = censoring, 1 = death, 2 = covariate change)}
 \item{L0}{Baseline covariate}
 \item{L}{Covariate indicating change in covariate process}
 }
@@ -75,7 +78,7 @@ Simulate Data from a Disease Setting
 }
 \details{
 This function simulates event data representing three event types:
-Censoring (0), Death (1), and Change in Covariate Process (3). Death and Censoring are terminal events,
+Censoring (0), Death (1), and Change in Covariate Process (2). Death and Censoring are terminal events,
 while Change in Covariate Process can occur only once.
 
 Event intensities depend on previous events and predefined parameters \eqn{\nu} and \eqn{\eta}.

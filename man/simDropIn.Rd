@@ -58,7 +58,8 @@ simDropIn(
   beta_A0_Z_prime = 0,
   beta_A0_D_prime = 0,
   beta_A0_C_prime = 0,
-  t_prime = NULL
+  t_prime = NULL,
+  at_risk_cov = NULL
 )
 }
 \arguments{
@@ -170,6 +171,8 @@ simDropIn(
 \item{beta_A0_C_prime}{Numeric. Specifies how L additionally affects after time C.}
 
 \item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
+
+\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
 }
 \value{
 Data frame containing the simulated event history data

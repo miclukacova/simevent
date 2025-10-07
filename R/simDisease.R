@@ -1,7 +1,7 @@
 #' Simulate Data from a Disease Setting
 #'
 #' This function simulates event data representing three event types:
-#' Censoring (0), Death (1), and Change in Covariate Process (3). Death and Censoring are terminal events,
+#' Censoring (0), Death (1), and Change in Covariate Process (2). Death and Censoring are terminal events,
 #' while Change in Covariate Process can occur only once.
 #'
 #' Event intensities depend on previous events and predefined parameters \eqn{\nu} and \eqn{\eta}.
@@ -33,11 +33,12 @@
 #' @param beta_L_D_t_prime Numeric scalar or NULL. Additional effect of covariate change on death risk after time \code{t_prime} (optional).
 #' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
 #' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param at_risk_cov Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
 #'
 #' @return A data frame containing the simulated data with columns:
 #'  \item{ID}{Individual identifier}
 #'  \item{Time}{Time of the event}
-#'  \item{Delta}{Event type (0 = censoring, 1 = death, 3 = covariate change)}
+#'  \item{Delta}{Event type (0 = censoring, 1 = death, 2 = covariate change)}
 #'  \item{L0}{Baseline covariate}
 #'  \item{L}{Covariate indicating change in covariate process}
 #'
@@ -49,7 +50,8 @@ simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
                    beta_L0_D = 1, beta_L0_L = 1, beta_L_D = 1, beta_A0_D = 0,
                    beta_A0_L = 0, beta_L0_C = 0, beta_A0_C = 0, beta_L_C = 0,
                    followup = Inf, lower = 10^(-15), upper = 200,
-                   beta_L_D_t_prime = NULL, t_prime = NULL, gen_A0 = NULL){
+                   beta_L_D_t_prime = NULL, t_prime = NULL, gen_A0 = NULL,
+                   at_risk_cov = NULL){
 
   at_risk <- function(events) {
     return(c(
@@ -82,7 +84,7 @@ simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
   else{
     data <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
                          max_cens = followup, lower = lower, upper = upper,
-                         gen_A0 = gen_A0)
+                         gen_A0 = gen_A0, at_risk_cov = at_risk_cov)
   }
 
   # We don't need columns for terminal events
