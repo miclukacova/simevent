@@ -9,7 +9,6 @@ simEventCox(
   cox_fits,
   L0_old,
   A0_old,
-  max_events = 5,
   n_event_max = c(1, 1),
   term_events = 1,
   intervention1 = NULL,
@@ -27,8 +26,6 @@ used for resampling baseline covariates.}
 
 \item{A0_old}{A vector of previously observed baseline covariate values for A0,
 used for resampling baseline covariates.}
-
-\item{max_events}{Integer. The maximum number of events to simulate per individual.}
 
 \item{n_event_max}{Integer vector. Maximum number of times each event type can occur
 per individual.}
@@ -62,7 +59,7 @@ The function simulates individual event histories by:
 \enumerate{
 \item Sampling initial baseline covariates (\code{L0}, \code{A0}) by resampling observed values.
 \item Extracting baseline cumulative hazard functions from the Cox models.
-\item Iteratively sampling event times using inverse transform sampling based on hazards.
+\item Iteratively sampling event times..
 \item Updating covariate histories and event counts.
 \item Stopping simulation per individual after a terminal event or maximum events reached.
 }

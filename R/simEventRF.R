@@ -1,12 +1,12 @@
-#' Simulate Event History Data Based on Cox Models
+#' Simulate Event History Data Based on fitted RF
 #'
-#' Simulates recurrent and terminal event data for a cohort of individuals based on a list
-#' of fitted Cox proportional hazards models. Each event type is governed by its own model,
-#' and simulation proceeds by iteratively sampling event times until a terminal event occurs.
+#' Simulates recurrent and terminal event data for a cohort of individuals based
+#' on a random forest fitted using the `randomForestSRC` package. Simulation proceeds
+#' by iteratively sampling event times until a terminal event occurs.
 #'
 #' @param N Integer. The number of individuals to simulate.
-#' @param cox_fits A named list of fitted Cox proportional hazards models (`coxph` objects),
-#'   one for each event type. The names are used as event type labels.
+#' @param RF_fit A rfsrc object. The object contains estimates of the cumulative hazard of each of the processes.
+#' @param event_names A character vector. Containing the names of the various processes. The argument is optional.
 #' @param L0_old A vector of previously observed baseline covariate values for L0,
 #'   used for resampling baseline covariates.
 #' @param A0_old A vector of previously observed baseline covariate values for A0,
@@ -15,17 +15,15 @@
 #'   per individual.
 #' @param term_events Integer or integer vector. Indices of event types that are terminal,
 #'   i.e., events that stop further simulation for an individual.
-#' @param intervention1 Optional function. Takes arguments `(j, sim_matrix)` and returns
-#'   an updated simulation matrix. Used to modify covariates dynamically at each event iteration.
-#' @param intervention2 Optional function. Takes arguments `(j, H_j)` and returns a modified
-#'   baseline cumulative hazard vector for event type `j`. Allows dynamic hazard modification.
+#' @param intervention1 Optional function. Not implemented.
+#' @param intervention2 Optional function. Not implemented.
 #'
 #' @details
 #' The function simulates individual event histories by:
 #' \enumerate{
 #'   \item Sampling initial baseline covariates (`L0`, `A0`) by resampling observed values.
-#'   \item Extracting baseline cumulative hazard functions from the Cox models.
-#'   \item Iteratively sampling event times..
+#'   \item Extracting cumulative hazard functions from the RF model.
+#'   \item Iteratively sampling event times.
 #'   \item Updating covariate histories and event counts.
 #'   \item Stopping simulation per individual after a terminal event or maximum events reached.
 #' }
@@ -39,38 +37,27 @@
 #'   \item Columns for each event type indicating cumulative event counts.
 #' }
 #'
-#' @import survival
+#' @import randomForestSRC
 #' @import data.table
 #'
 #' @examples
 #' # The observed data
-#' data_obs <- simDisease(N = 1000)
-#' data_obs <- IntFormatData(data_obs, N_cols = 6)
-#'
-#' # Fit Cox models
-#' cox_death <- survival::coxph(survival::Surv(tstart, tstop, Delta == 1)
-#' ~ L0 + A0 + L, data = data_obs)
-#' cox_Disease <- survival::coxph(survival::Surv(tstart, tstop, Delta == 2)
-#' ~ L0 + A0, data = data_obs[L == 0])
-#'
-#' # Then simulate new data:
-#' cox_fits <- list("D" = cox_death, "L" = cox_Disease)
-#' new_data <- simEventCox(100, cox_fits = cox_fits, L0_old = data_obs$L0, A0_old = data_obs$A0)
+#' # Yet to be implemented.
 #'
 #' @export
-simEventCox <- function(N,
-                        cox_fits,
-                        L0_old,
-                        A0_old,
-                        n_event_max = c(1,1),
-                        term_events = 1,
-                        intervention1 = NULL,
-                        intervention2 = NULL) {
+simEventRF <- function(N,
+                       RF_fit,
+                       event_names = NULL,
+                       L0_old,
+                       A0_old,
+                       n_event_max = c(1,1),
+                       term_events = 1,
+                       intervention1 = NULL,
+                       intervention2 = NULL) {
 
   ID <- NULL
 
   # Initialize
-  num_events <- length(cox_fits)                          # Number of events
   alive <- 1:N                                            # Vector for keeping track of who is alive
   num_alive <- N                                          # Number of alive individuals
   T_k <- rep(0, N)                                        # Last event time
@@ -78,57 +65,57 @@ simEventCox <- function(N,
   # Data frame for storing data
   sim_data <- data.frame(L0 = sample(L0_old, N, TRUE),
                          A0 = sample(A0_old, N, TRUE))
-  for (name in names(cox_fits)) sim_data[[name]] <- 0
+  if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0
 
   # List for results
   res_list <- vector("list", sum(n_event_max))            # For results
   idx <- 1                                                # Index
 
-  # Base hazard
-  basehazz_list <- lapply(cox_fits, function(model) basehaz(model, centered = FALSE))
-
   # The cumulative hazard and inverse cumulative hazard
-  cumhaz_fn <- vector("list", num_events)
-  invhaz_fn <- vector("list", num_events)
+  y.pred <- predict(RF_fit, sim_data)                     # Cumulative hazard for simulated data
+  times <-  c(0,y.pred$time.interest)                     # Time points
+
+  num_events <- if(is.na(dim(y.pred$chf)[3])) 1 else dim(y.pred$chf)[3]         # Number of events
+  if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0 else
+    for (name in paste0("N", 1:num_events)) sim_data[[name]] <- 0
+
+  # Defining the cumulativ hazard and the inverse cumulative hazard
+  cumhaz_fn <- array(vector("list", N * num_events), dim = c(N, num_events))
+  invhaz_fn <- array(vector("list", N * num_events), dim = c(N, num_events))
+
   for(j in seq_len(num_events)) {
-    H_j <- c(0, basehazz_list[[j]][["hazard"]])
-    t_j <- c(0, basehazz_list[[j]][["time"]])
-    if(!is.null(intervention2)) H_j <- intervention2(j, H_j)
-    cumhaz_fn[[j]] <- stats::approxfun(t_j,       H_j,
-                                       method="linear", yright = Inf)
-    # We choose ties = max to ensure that event times are strictly increasing
-    invhaz_fn[[j]] <- stats::approxfun(H_j,       t_j,
-                                       method="linear", rule=2, ties = max)
+    cumhazz <-  if(num_events == 1) y.pred$chf else y.pred$chf[,,j]
+    if(num_events)
+    for(i in alive){
+      cumhaz_fn[[i,j]] <- stats::approxfun(times, c(0, cumhazz[i,]),
+                                         method="linear", yright = Inf)
+      # We choose ties = max to ensure that event times are strictly increasing
+      invhaz_fn[[i,j]] <- stats::approxfun(c(0,cumhazz[i,]), times,
+                                         method="linear", rule=2, ties = max)
+    }
   }
 
   # Loop
   while(num_alive != 0){
-    # Intervention Cox term
-    if(!is.null(intervention1)){
-      cox_term <- list()
-      for(j in seq_len(num_events)){
-        sim_data_cox <- intervention1(j, sim_data)
-        cox_term[[j]] <- exp(stats::predict(cox_fits[[j]], newdata = sim_data_cox, type="lp", reference = "zero"))
-        }
-      # Calculate the non intervention Cox term
-      } else{
-      cox_term <- lapply(cox_fits, function(model)
-        exp(stats::predict(model, newdata = sim_data, type="lp", reference = "zero")))
-    }
-
     # Calculate the cumulative intensity per individual per event
-    cum_int_Tk <- sapply(seq_len(num_events), function(j) {
-      cumhaz_fn[[j]](T_k) * cox_term[[j]]
-    })
+    cum_int_Tk <- matrix(nrow = num_alive, ncol = num_events)
+    for(j in seq_len(num_events)) {
+      for(i in seq_len(num_alive)){
+      cum_int_Tk[i,j] <- cumhaz_fn[[alive[i],j]](T_k[i])
+      }
+    }
 
     # Simulate the uniform random variable
     U <- matrix(-log(stats::runif(num_alive * num_events)), ncol = num_events)  # matrix for the random draws
     V <- U + cum_int_Tk
 
     # Find the event times
-    event_times <- sapply(seq_len(num_events), function(j) {
-      invhaz_fn[[j]](V[,j] / cox_term[[j]])
-    })
+    event_times <- matrix(nrow = num_alive, ncol = num_events)
+    for(j in seq_len(num_events)) {
+      for(i in seq_len(num_alive)){
+        event_times[i,j] <- invhaz_fn[[alive[i],j]](V[i,j])
+      }
+    }
 
     # How many times can you experience the various events?
     for(j in seq_len(num_events)){
