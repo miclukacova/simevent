@@ -59,7 +59,7 @@ The function simulates individual event histories by:
 \enumerate{
 \item Sampling initial baseline covariates (\code{L0}, \code{A0}) by resampling observed values.
 \item Extracting baseline cumulative hazard functions from the Cox models.
-\item Iteratively sampling event times..
+\item Iteratively sampling event times.
 \item Updating covariate histories and event counts.
 \item Stopping simulation per individual after a terminal event or maximum events reached.
 }
