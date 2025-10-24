@@ -128,9 +128,9 @@ Optionally one can define an \code{at_risk_cov} function to specify risk windows
 # at risk function
 at_risk_cov <- function(covariates) {
   return(c(
-    1,1,                               # The covariates do not change the risk of event 1 and 2
-    as.numeric(covariates[1] < 0.5),   # Only at risk of event 3 if L0 < 0.5
-    as.numeric(covariates[2] == 1),    # Only at risk of event 4 if A0 = 1
+    1,1,                               # The covariates do not change the risk of event 0 and 1
+    as.numeric(covariates[1] < 0.5),   # Only at risk of event 2 if L0 < 0.5
+    as.numeric(covariates[2] == 1),    # Only at risk of event 3 if A0 = 1
     1))                                # The covariates do not change the risk of event 4
 }
 ```
@@ -139,7 +139,8 @@ Simulate data for 5000 individuals:
 
 ```{r}
 set.seed(973)
-data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk, at_risk_cov = at_risk_cov)
+data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     at_risk_cov = at_risk_cov)
 ```
 
 Preview the simulated data:
