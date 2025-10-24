@@ -24,6 +24,7 @@ The simevent package
     data](#example-7-simulating-data-from-data)
     - [Using `simEventCox`](#using-simeventcox)
     - [Using `simEventRF`](#using-simeventrf)
+  - [Example 8: Interventions](#example-8-interventions)
 
 # simevent
 
@@ -81,15 +82,16 @@ functions. Each function in the package is described and
 
 **Functions relating to simulating from data**
 
-| Function         | Description            | Key Arguments  | Example            |
-|------------------|------------------------|----------------|--------------------|
-| `plot_summary()` | Creates summary plots. | `data`, `type` | `plot_summary(df)` |
+| Function | Description | Key Arguments | Example |
+|----|----|----|----|
+| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `L0_old`, `A0_old` | `simEventCox(N, cox_fits, L0_old, A0_old)` |
+| `simEventRF()` | Simulates new data using a random forest fitted using the `randomForestSRC` package | `N`, `RF_fit` | `plot_summary(df)` |
 
 **Functions for performing interventions**
 
-| Function         | Description            | Key Arguments  | Example            |
-|------------------|------------------------|----------------|--------------------|
-| `plot_summary()` | Creates summary plots. | `data`, `type` | `plot_summary(df)` |
+| Function            | Description | Key Arguments | Example               |
+|---------------------|-------------|---------------|-----------------------|
+| `alphaSimDisease()` | xxx         | `xx`, `xx`    | `alphaSimDisease(xx)` |
 
 ## Installation
 
@@ -160,9 +162,9 @@ function of covariates:
 # at risk function
 at_risk_cov <- function(covariates) {
   return(c(
-    1,1,                               # The covariates do not change the risk of event 1 and 2
-    as.numeric(covariates[1] < 0.5),   # Only at risk of event 3 if L0 < 0.5
-    as.numeric(covariates[2] == 1),    # Only at risk of event 4 if A0 = 1
+    1,1,                               # The covariates do not change the risk of event 0 and 1
+    as.numeric(covariates[1] < 0.5),   # Only at risk of event 2 if L0 < 0.5
+    as.numeric(covariates[2] == 1),    # Only at risk of event 3 if A0 = 1
     1))                                # The covariates do not change the risk of event 4
 }
 ```
@@ -171,7 +173,8 @@ Simulate data for 5000 individuals:
 
 ``` r
 set.seed(973)
-data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk, at_risk_cov = at_risk_cov)
+data <- simEventData(N = 5000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     at_risk_cov = at_risk_cov)
 ```
 
 Preview the simulated data:
@@ -436,7 +439,7 @@ tv_eff <- matrix(0.5, ncol = 4, nrow = 6)
 beta <- matrix(nrow = 6, ncol = 4, 0.5)
 t_prime <- 1
 
-data <- simEventTV(N = 1000, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
+data <- simEventTV(N = 100, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
                    term_deltas = term_deltas, beta = beta, lower = 10^(-15), upper = 10^2,
                    max_events = 5)
 
@@ -447,6 +450,79 @@ plotEventData(data)
 
 ## Example 7: Simulating data from data
 
+Imagine we have observed data:
+
+``` r
+set.seed(373)
+beta = matrix(c(0.5,-1,-0.5,0.5,0,0.5), ncol = 3, nrow = 2)
+data <- simCRdata(N = 1000, beta = beta)
+```
+
 ### Using `simEventCox`
 
+If we want to use `simEventCox` for simulating new data from the
+observed data, we first need to fit Cox models:
+
+``` r
+cox1 <- coxph(Surv(Time, Delta == 1) ~ L0 + A0, data = data)
+cox2 <- coxph(Surv(Time, Delta == 2) ~ L0 + A0, data = data)
+```
+
+Then we can call the function `simEventCox` providing the fitted Cox
+models as arguments:
+
+``` r
+cox_fits <- list("Process 1" = cox1, "Process 2" = cox2)
+new_data <- simEventCox(100, cox_fits, L0_old = data$L0, A0_old = data$A0)
+```
+
+The new simulated data looks like:
+
+``` r
+head(new_data)
+#> Key: <ID>
+#>       ID      Time Delta        L0    A0 Process 1 Process 2
+#>    <int>     <num> <int>     <num> <num>     <num>     <num>
+#> 1:     1  2.175382     1 0.5363954     0         1         0
+#> 2:     2  7.139631     1 0.3144497     0         1         0
+#> 3:     3  2.766344     1 0.9335247     1         1         0
+#> 4:     4  3.570241     2 0.2502356     0         0         1
+#> 5:     4 12.695609     1 0.2502356     0         1         1
+#> 6:     5  5.055418     1 0.5462261     1         1         0
+```
+
 ### Using `simEventRF`
+
+If we want to use `simEventRF` for simulating new data from the observed
+data, we need to fit a random forest model using `rfsrc` from the
+`randomForestSRC` package:
+
+``` r
+RF_fit <- randomForestSRC::rfsrc(Surv(Time, Delta) ~ L0 + A0, data = data)
+```
+
+Then we can call the function `simEventRF` providing the fitted Random
+Forest as argument:
+
+``` r
+new_data <- simEventRF(100, RF_fit, L0_old = data$L0, A0_old = data$A0, term_events = c(1,2))
+```
+
+The new simulated data looks like:
+
+``` r
+head(new_data)
+#> Key: <ID>
+#>       ID      Time Delta         L0    A0    N1    N2
+#>    <int>     <num> <int>      <num> <num> <num> <num>
+#> 1:     1 1.1913258     1 0.40253050     1     1     0
+#> 2:     2 1.4620976     2 0.80094849     0     0     1
+#> 3:     3 7.3221851     2 0.03707728     0     0     1
+#> 4:     4 0.3824161     1 0.84810211     1     1     0
+#> 5:     5 1.6035695     2 0.99071345     1     0     1
+#> 6:     6 5.4367335     2 0.98173073     1     0     1
+```
+
+## Example 8: Interventions
+
+Yet to be written…

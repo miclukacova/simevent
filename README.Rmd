@@ -58,13 +58,14 @@ Below is a table attempting to provide an overview of the package functions. Eac
 
 | Function | Description | Key Arguments | Example |
 |-----------|--------------|----------------|----------|
-| `plot_summary()` | Creates summary plots. | `data`, `type` | `plot_summary(df)` |
+| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `L0_old`, `A0_old` | `simEventCox(N, cox_fits, L0_old, A0_old)` |
+| `simEventRF()` | Simulates new data using a random forest fitted using the `randomForestSRC` package | `N`, `RF_fit` | `plot_summary(df)` |
 
 **Functions for performing interventions**
 
 | Function | Description | Key Arguments | Example |
 |-----------|--------------|----------------|----------|
-| `plot_summary()` | Creates summary plots. | `data`, `type` | `plot_summary(df)` |
+| `alphaSimDisease()` | xxx | `xx`, `xx` | `alphaSimDisease(xx)` |
 
 
 ## Installation
@@ -347,7 +348,7 @@ tv_eff <- matrix(0.5, ncol = 4, nrow = 6)
 beta <- matrix(nrow = 6, ncol = 4, 0.5)
 t_prime <- 1
 
-data <- simEventTV(N = 1000, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
+data <- simEventTV(N = 100, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
                    term_deltas = term_deltas, beta = beta, lower = 10^(-15), upper = 10^2,
                    max_events = 5)
 
