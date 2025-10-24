@@ -1,5 +1,3 @@
-#' Simulate Data from a Disease Setting
-#'
 #' This function simulates event data representing three event types:
 #' Censoring (0), Death (1), and Change in Covariate Process (2). Death and Censoring are terminal events,
 #' while Change in Covariate Process can occur only once.

@@ -1,6 +1,6 @@
-#' Simulate Event History Data Based on fitted RF
+#' Simulate Survival and Competing Risk Data Based on a fitted RF
 #'
-#' Simulates recurrent and terminal event data for a cohort of individuals based
+#' Simulates survival or competing risk data for a cohort of individuals based
 #' on a random forest fitted using the `randomForestSRC` package. Simulation proceeds
 #' by iteratively sampling event times until a terminal event occurs.
 #'
@@ -42,7 +42,10 @@
 #'
 #' @examples
 #' # The observed data
-#' # Yet to be implemented.
+#' beta = matrix(c(0.5,-1,-0.5,0.5,0,0.5), ncol = 3, nrow = 2)
+#' data <- simCRdata(N = 100, beta = beta)
+#' RF_fit <- randomForestSRC::rfsrc(Surv(Time, Delta) ~ L0 + A0, data = data)
+#' new_data <- simEventRF(100, RF_fit, L0_old = data$L0, A0_old = data$A0, term_events = c(1,2))
 #'
 #' @export
 simEventRF <- function(N,

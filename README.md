@@ -4,8 +4,8 @@ The simevent package
 - [simevent](#simevent)
   - [Installation](#installation)
   - [Usage](#usage)
-    - [Example 1: General Event History Simulation with
-      `simEventData`](#example-1-general-event-history-simulation-with-simeventdata)
+  - [Example 1: General Event History Simulation with
+    `simEventData`](#example-1-general-event-history-simulation-with-simeventdata)
     - [Formatting Data for Cox
       Regression](#formatting-data-for-cox-regression)
     - [Visualize Event Histories](#visualize-event-histories)
@@ -18,8 +18,12 @@ The simevent package
     `simDisease`](#example-4-health-care-data-with-simdisease)
   - [Example 5: Health Care Data with
     `simTreatment`](#example-5-health-care-data-with-simtreatment)
-  - [Example 5: Time Varying Effects with
-    `simEventTV`](#example-5-time-varying-effects-with-simeventtv)
+  - [Example 6: Time Varying Effects with
+    `simEventTV`](#example-6-time-varying-effects-with-simeventtv)
+  - [Example 7: Simulating data from
+    data](#example-7-simulating-data-from-data)
+    - [Using `simEventCox`](#using-simeventcox)
+    - [Using `simEventRF`](#using-simeventrf)
 
 # simevent
 
@@ -32,15 +36,60 @@ complex continuous-time health care data.The simulated data includes
 variables that can be interpreted as treatment decisions, disease
 progression, and health factors.
 
-At its core is the flexible function `simEventData`, which simulates
-from a Cox proportional hazards model with Weibull hazards. Users can
-specify parameters and covariate effects to create custom scenarios.
+One of the core functions is the flexible function `simEventData`, which
+simulates from a Cox proportional hazards model with Weibull hazards.
+Users can specify parameters and covariate effects to create custom
+scenarios. In addition, the package offers several wrapper functions for
+common settings (e.g., survival data, competing risks) built on top of
+`simEventData.` The function `simEventTV` is an adaptation of the
+function `simEventData`. It allows for time varying effects. This
+feature results in a slightly slower simulation procedure, so when
+possible `simEventData` is recommended.
 
-In addition, the package offers several wrapper functions for common
-settings (e.g., survival data, competing risks) built on top of
-`simEventData.` It also includes functions for plotting
-(`plotEventData`), formatting (`IntFormatData`), and simulating
-interventions (e.g., `intEffectAlphaDisease`).
+Another branch of the package concerns simulating data from data. For
+this the package has two functions, respectively `simEventCox` and
+`simEventRF`. The first function takes as input Cox regressions and
+simulates data using these, while the latter takes as input a fitted
+random forest.
+
+Once data is simulated the package includes functions for plotting
+(`plotEventData`) and formatting (`IntFormatData`).
+
+One can perform interventions using the function `alphaSimDisease` and
+calculate the effect of interventions using `intEffectAlphaDisease`.
+
+Below is a table attempting to provide an overview of the package
+functions. Each function in the package is described and
+
+**Functions relating to `simEventData`**
+
+| Function | Description | Example | Example |
+|----|----|----|----|
+| `simEventData()` | Simulates event history data in the most general setting using Cox proportional hazard model and Weibull hazards. | `N`, `beta`, `eta`, `nu` | `simEventData(N = 5000)` |
+| `simSurvData()` | Simulates survival data. | `N`, `beta`, `eta`, `nu`, `cens` | `simSurvData(N)` |
+| `simCRdata()` | Simulates data from a competing risk setting with two competing causes. | `N`, `beta`, `eta`, `nu`, `cens` | `simCRdata(N)` |
+| `simDisease()` | The function simulates health care data from a setting where patients can experience different events: Censoring, Death, Disease. The effects of the various process on one another can be specified by the arguments `beta_X_Y`. | `N`, `beta_L0_L` | `simDisease(N = 100, beta_L0_L = 1)` |
+| `simTreatment()` | Simulates event history data with four types of events representing censoring (0), death (1), treatment (2), and covariate change (3). The effects of the various process on one another can be specified by the arguments `beta_X_Y`. | `N`, `beta_L_A` | `simTreatment(N = 100, beta_L_A = 1)` |
+| `simEventTV()` | Simulates general event history data in a setting with time-varying effects. | `N`, `beta`, `tv_eff`, `t_prime` | `simTreatment(N = 100, beta, tv_eff, t_prime)` |
+
+**Functions for treating simulated data**
+
+| Function | Description | Key Arguments | Example |
+|----|----|----|----|
+| `IntFormatData()` | Transforms data into a so called tstart-tstop format, used when fitting Cox proportional hazards using the `survival` package. | `data`, `N_cols` | `IntFormatData(data, N_cols = 8:12)` |
+| `plotEventData()` | Plots the event histories. | `data`, `title` | `plotEventData(data)` |
+
+**Functions relating to simulating from data**
+
+| Function         | Description            | Key Arguments  | Example            |
+|------------------|------------------------|----------------|--------------------|
+| `plot_summary()` | Creates summary plots. | `data`, `type` | `plot_summary(df)` |
+
+**Functions for performing interventions**
+
+| Function         | Description            | Key Arguments  | Example            |
+|------------------|------------------------|----------------|--------------------|
+| `plot_summary()` | Creates summary plots. | `data`, `type` | `plot_summary(df)` |
 
 ## Installation
 
@@ -60,7 +109,7 @@ The package is loaded with the command
 library(simevent)
 ```
 
-### Example 1: General Event History Simulation with `simEventData`
+## Example 1: General Event History Simulation with `simEventData`
 
 This is an example of simulating data using
 `simEventData`.`simEventData` is a function for general event history
@@ -313,16 +362,15 @@ plotEventData(data, title = "Competing Risk Data")
 ## Example 4: Health Care Data with `simDisease`
 
 The function `simDisease` simulates health care data from a setting
-where patients can experience $3$ different events: \* **Censoring**
-(coded as 0) \* **Death** (coded as 1), and \* **Disease** (coded as 2).
+where patients can experience $3$ different events:
+
+- **Censoring** (coded as 0)
+- **Death** (coded as 1), and
+- **Disease** (coded as 2).
 
 You can customize the simulation scenarios by adjusting the function
 arguments. For detailed information about the parameters, see the help
-page:
-
-``` r
-?simDisease
-```
+page.
 
 Example simulation
 
@@ -339,17 +387,12 @@ data <- simDisease(N = 100,
 plotEventData(data, title = "Disease data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-23-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />
 
 ## Example 5: Health Care Data with `simTreatment`
 
-Simulate data with a covariate process and treatment process:
-
-``` r
-?simTreatment
-```
-
-Default simulation:
+Simulate data with a covariate process and treatment process. Default
+simulation:
 
 ``` r
 data <- simTreatment(100)
@@ -377,9 +420,9 @@ Plot
 plotEventData(data, title = "Treatment setting")
 ```
 
-<img src="man/figures/README-unnamed-chunk-27-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />
 
-## Example 5: Time Varying Effects with `simEventTV`
+## Example 6: Time Varying Effects with `simEventTV`
 
 One can simulate a setting with time-varying effects with the function
 `simEventTV`. After the time an additional effect of is added to the
@@ -400,4 +443,10 @@ data <- simEventTV(N = 1000, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
 plotEventData(data)
 ```
 
-<img src="man/figures/README-unnamed-chunk-28-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
+
+## Example 7: Simulating data from data
+
+### Using `simEventCox`
+
+### Using `simEventRF`
