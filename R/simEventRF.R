@@ -85,19 +85,22 @@ simEventRF <- function(N,
     for (name in paste0("N", 1:num_events)) sim_data[[name]] <- 0
 
   # Defining the cumulativ hazard and the inverse cumulative hazard
-  cumhaz_fn <- array(vector("list", N * num_events), dim = c(N, num_events))
-  invhaz_fn <- array(vector("list", N * num_events), dim = c(N, num_events))
-
-  for(j in seq_len(num_events)) {
+  cumhaz_fn <- function(t, i, j){
     cumhazz <-  if(num_events == 1) y.pred$chf else y.pred$chf[,,j]
-    if(num_events)
-    for(i in alive){
-      cumhaz_fn[[i,j]] <- stats::approxfun(times, c(0, cumhazz[i,]),
-                                         method="linear", yright = Inf)
-      # We choose ties = max to ensure that event times are strictly increasing
-      invhaz_fn[[i,j]] <- stats::approxfun(c(0,cumhazz[i,]), times,
-                                         method="linear", rule=2, ties = max)
-    }
+    idx <- findInterval(t, times, checkSorted = F)
+    t1 <- times[idx]; t2 <- times[idx + 1]
+    y1 <- cumhazz[cbind(i,idx)]; y2 <- cumhazz[cbind(i,(idx + 1))]
+    y1 + (t - t1) * (y2 - y1) / (t2 - t1)
+  }
+
+  invcumhaz_fn <- function(p, i, j){
+    cumhazz <-  if(num_events == 1) y.pred$chf else y.pred$chf[,,j]
+    idx <- sapply(1:length(i), FUN = function(k) findInterval(p[k], cumhazz[i[k],], checkSorted = F))
+    idx[idx == ncol(cumhazz)] <- ncol(cumhazz) - 1
+    p1 <- cumhazz[cbind(i, idx)]; p2 <- cumhazz[cbind(i,idx + 1)]
+    y1 <- times[idx]; y2 <- times[idx + 1]
+    # If the cumulative hazard flattens, we choose the smallest time
+    y1 + ifelse(p1 == p2, 0, (p - p1) * (y2 - y1) / (p2 - p1))
   }
 
   # Loop
@@ -105,9 +108,7 @@ simEventRF <- function(N,
     # Calculate the cumulative intensity per individual per event
     cum_int_Tk <- matrix(nrow = num_alive, ncol = num_events)
     for(j in seq_len(num_events)) {
-      for(i in seq_len(num_alive)){
-      cum_int_Tk[i,j] <- cumhaz_fn[[alive[i],j]](T_k[i])
-      }
+      cum_int_Tk[,j] <- cumhaz_fn(T_k, alive, j)
     }
 
     # Simulate the uniform random variable
@@ -117,9 +118,7 @@ simEventRF <- function(N,
     # Find the event times
     event_times <- matrix(nrow = num_alive, ncol = num_events)
     for(j in seq_len(num_events)) {
-      for(i in seq_len(num_alive)){
-        event_times[i,j] <- invhaz_fn[[alive[i],j]](V[i,j])
-      }
+      event_times[,j] <- invcumhaz_fn(V[,j], alive, j)
     }
 
     # How many times can you experience the various events?

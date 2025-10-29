@@ -74,13 +74,11 @@ A data frame containing the simulated data with columns:
 \item{L}{Covariate indicating change in covariate process}
 }
 \description{
-Simulate Data from a Disease Setting
-}
-\details{
 This function simulates event data representing three event types:
 Censoring (0), Death (1), and Change in Covariate Process (2). Death and Censoring are terminal events,
 while Change in Covariate Process can occur only once.
-
+}
+\details{
 Event intensities depend on previous events and predefined parameters \eqn{\nu} and \eqn{\eta}.
 
 The arguments \code{beta_X_Y} control how the X affects Y. A positive value means that a higher value of X
