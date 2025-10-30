@@ -1,7 +1,7 @@
 #' Estimate Effect of Intervention: Modifying Eta Parameter of Disease Process
 #'
-#' This function simulates competing risks data under two scenarios: an intervention
-#' where the shape parameter \eqn{\eta} of the disease process is multiplied by
+#' This function simulates data from the disease setting in two scenarios. Under
+#' intervention on the shape parameter \eqn{\eta} of the disease process is multiplied by
 #' \code{alpha}, and a baseline (non-intervened) scenario. It computes the proportion
 #' of individuals who experience death or disease by a specified time \eqn{\tau}
 #' in the group \code{A0 = a0}, optionally returning years_lost.

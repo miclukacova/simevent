@@ -42,7 +42,7 @@ simulates from a Cox proportional hazards model with Weibull hazards.
 Users can specify parameters and covariate effects to create custom
 scenarios. In addition, the package offers several wrapper functions for
 common settings (e.g., survival data, competing risks) built on top of
-`simEventData.` The function `simEventTV` is an adaptation of the
+`simEventData`. The function `simEventTV` is an adaptation of the
 function `simEventData`. It allows for time varying effects. This
 feature results in a slightly slower simulation procedure, so when
 possible `simEventData` is recommended.
@@ -71,6 +71,7 @@ functions. Each function in the package is described and
 | `simCRdata()` | Simulates data from a competing risk setting with two competing causes. | `N`, `beta`, `eta`, `nu`, `cens` | `simCRdata(N)` |
 | `simDisease()` | The function simulates health care data from a setting where patients can experience different events: Censoring, Death, Disease. The effects of the various process on one another can be specified by the arguments `beta_X_Y`. | `N`, `beta_L0_L` | `simDisease(N = 100, beta_L0_L = 1)` |
 | `simTreatment()` | Simulates event history data with four types of events representing censoring (0), death (1), treatment (2), and covariate change (3). The effects of the various process on one another can be specified by the arguments `beta_X_Y`. | `N`, `beta_L_A` | `simTreatment(N = 100, beta_L_A = 1)` |
+| `simDropIn()` | Simulates data corresponding to N individuals that are at risk for 4 or 5 events. Censoring (C), Death (D), Drop In Initiation (Z), Change in Covariate Process (L) and optionally Treatment (A). | `N`, `beta_L_A` | `simDropIn(N = 100, beta_L_A = 1)` |
 | `simEventTV()` | Simulates general event history data in a setting with time-varying effects. | `N`, `beta`, `tv_eff`, `t_prime` | `simTreatment(N = 100, beta, tv_eff, t_prime)` |
 
 **Functions for treating simulated data**
@@ -89,9 +90,14 @@ functions. Each function in the package is described and
 
 **Functions for performing interventions**
 
-| Function            | Description | Key Arguments | Example               |
-|---------------------|-------------|---------------|-----------------------|
-| `alphaSimDisease()` | xxx         | `xx`, `xx`    | `alphaSimDisease(xx)` |
+| Function | Description | Key Arguments | Example |
+|----|----|----|----|
+| `alphaSimDisease()` | Simulation and estimation of event history data from disease setting with shape parameter of disease process multiplied by alpha. | `N`, `alpha`, `tau`, `years_lost` | `alphaSimDisease(N = 10^4, alpha = 0.5, tau = 5, years_lost = FALSE)` |
+| `alphaSimDropIn()` | Simulation and estimation of event history data from Drop In setting with shape parameter of Drop In process multiplied by alpha. | `N`, `alpha`, `tau`, `years_lost` | `alphaSimDropIn(N = 10, alpha = 0.5, tau = 5, years_lost = F)` |
+| `alphaSimTreat()` | Simulation and estimation in treatment setting with modified shape parameter of treatment Process | `N`, `alpha`, `tau`, `years_lost` | `alphaSimTreat(N = 10, alpha = 0.5, tau = 5, years_lost = F)` |
+| `intEffectAlphaDisease()` | Simulates data from the disease setting in two scenarios. Under intervention on the shape parameter  of the disease process is multiplied by , and a baseline (non-intervened) scenario.It computes the proportion of individuals who experience death or disease by a specified time  in the group , optionally returning years_lost. | `N`, `alpha`, `tau`, `years_lost` | `intEffectAlphaDisease(N = 10, alpha = 0.5, tau = 5, years_lost = F)` |
+| `intEffectAlphaDropIn()` | Does the same as above, just in the Drop In setting. | `N`, `alpha`, `tau` | `intEffectAlphaDropIn(N = 10, alpha = 0.5, tau = 5)` |
+| `intEffectAlphaTreat()` | Does the same as above, just in the Treatment setting. | `N`, `alpha`, `tau`, `years_lost` | `intEffectAlphaTreat(N = 10, alpha = 0.5, tau = 5, years_lost = F)` |
 
 ## Installation
 

@@ -1,4 +1,4 @@
-#' Simulation and Estimation in Setting Disease with Modified Eta Parameter of Disease Process
+#' Simulation and Estimation in Setting Disease with Modified Shape Parameter of Disease Process
 #'
 #' This function simulates event history data from the Disease setting (see simDisease)
 #' where the shape parameter \eqn{\eta} of the disease process is multiplied by

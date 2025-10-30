@@ -2,7 +2,7 @@
 % Please edit documentation in R/alphaSimDisease.R
 \name{alphaSimDisease}
 \alias{alphaSimDisease}
-\title{Simulation and Estimation in Setting Disease with Modified Eta Parameter of Disease Process}
+\title{Simulation and Estimation in Setting Disease with Modified Shape Parameter of Disease Process}
 \usage{
 alphaSimDisease(
   N = 10000,

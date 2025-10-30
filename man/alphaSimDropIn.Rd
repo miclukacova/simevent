@@ -194,13 +194,13 @@ A list containing:
 Or the simulated data.
 }
 \description{
-Simulation and Estimation in Drop In Setting with Modified Eta Parameter of Drop In Process
+Simulation and Estimation in Drop In Setting with Modified Shape Parameter of Drop In Process
 }
 \details{
 This function simulates event history data from the Drop In scenario. This is a
 scenario with the events Censoring (C), Death (D), Drop In Initiation (Z),
 Change in Covariate Process (L) and optionally Treatment (A). It simulates
-under where \eqn{\eta} parameter of the Drop In process is multiplied by a factor \code{alpha}.
+under where the shape parameter \eqn{\eta} of the Drop In process is multiplied by a factor \code{alpha}.
 It evaluates the proportion of death and Drop In events by time \eqn{\tau} within
 the subgroup defined by \code{A0 = a0}.
 }

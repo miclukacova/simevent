@@ -1,4 +1,4 @@
-#' Simulation and Estimation in Treatment Setting with Modified Eta Parameter of Treatment Process
+#' Simulation and Estimation in Treatment Setting with Modified Shape Parameter of Treatment Process
 #'
 #' This function simulates event history data from the Treatment scenario (see function simTreatment).
 #' The \eqn{\eta} parameter of the treatment process is multiplied by a factor \code{alpha}.

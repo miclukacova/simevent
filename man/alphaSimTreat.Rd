@@ -98,7 +98,7 @@ A list containing:
 Or the simulated data.
 }
 \description{
-Simulation and Estimation in Treatment Setting with Modified Eta Parameter of Treatment Process
+Simulation and Estimation in Treatment Setting with Modified Shape Parameter of Treatment Process
 }
 \details{
 This function simulates event history data from the Treatment scenario (see function simTreatment).
