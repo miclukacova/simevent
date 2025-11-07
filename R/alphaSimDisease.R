@@ -3,6 +3,7 @@
 #' This function simulates event history data from the Disease setting (see simDisease)
 #' where the shape parameter \eqn{\eta} of the disease process is multiplied by
 #' \code{alpha}. The function either
+#' * returns the proportion of individuals who experience death and the proportion of individuals who experience disease by a specified time \eqn{\tau} in group \code{A0 = a0}
 #' * returns number of years lost before \eqn{\tau} of death and disease
 #' * returns simulated data.
 #'
