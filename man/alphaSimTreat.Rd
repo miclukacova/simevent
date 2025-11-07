@@ -8,7 +8,6 @@ alphaSimTreat(
   N = 10000,
   alpha = 0.5,
   tau = 5,
-  plot = FALSE,
   nu = rep(1.1, 4),
   eta = rep(0.1, 4),
   beta_L_A = 1,
@@ -40,8 +39,6 @@ alphaSimTreat(
 \item{alpha}{Numeric. Multiplicative factor applied to the \eqn{\eta} parameter of the treatment process.}
 
 \item{tau}{Numeric. Time point at which event proportions or years lost are compared.}
-
-\item{plot}{Logical. If TRUE, output plots of the first 250 events for respectively intervened and no invtervend data.}
 
 \item{nu}{Numeric vector of length 4. Scale parameters for Weibull hazards.}
 

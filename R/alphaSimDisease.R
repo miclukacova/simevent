@@ -3,7 +3,6 @@
 #' This function simulates event history data from the Disease setting (see simDisease)
 #' where the shape parameter \eqn{\eta} of the disease process is multiplied by
 #' \code{alpha}. The function either
-#' * returns proportion of individuals who experience death or disease by a specified time \eqn{\tau} in group \code{A0 = a0}
 #' * returns number of years lost before \eqn{\tau} of death and disease
 #' * returns simulated data.
 #'
@@ -12,7 +11,6 @@
 #' @param tau Numeric scalar. Time horizon at which proportions are computed.
 #' @param years_lost Logical. If \code{TRUE}, computes years lost instead of proportions.
 #' @param a0 Binary (0/1). Specifies the group for comparison.
-#' @param plot Logical. If \code{TRUE}, plots timelines for sample of intervention and non intervention data.
 #' @param eta Numeric vector of length 3. Shape parameters for Weibull hazards (default \code{rep(0.1, 3)}).
 #' @param nu Numeric vector of length 3. Scale parameters for Weibull hazards (default \code{rep(1.1, 3)}).
 #' @param beta_L0_D Numeric scalar. Effect of baseline covariate on death risk (default 0.5).
@@ -43,7 +41,6 @@ alphaSimDisease <- function(N = 1e4,
                             tau = 5,
                             years_lost = FALSE,
                             a0 = 1,
-                            plot = FALSE,
                             eta = rep(0.1, 3),
                             nu = rep(1.1, 3),
                             beta_L0_D = 0.5,
@@ -76,8 +73,6 @@ alphaSimDisease <- function(N = 1e4,
                      gen_A0 = gen_A0,
                      beta_L_D_t_prime = beta_L_D_t_prime,
                      t_prime = t_prime)
-
-  if (plot) plotEventData(data[1:250])
 
   if(return_data) return(data)
 

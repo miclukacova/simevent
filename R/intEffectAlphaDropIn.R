@@ -99,8 +99,10 @@ intEffectAlphaDropIn <- function(N = 1e4,
                        beta_A0_L = beta_A0_L, beta_A0_A = beta_A0_A, beta_A0_Z = beta_A0_Z, beta_A0_D = beta_A0_D, beta_A0_C = beta_A0_C,
                        lower = lower, upper = upper)
 
-  if (plot) gridExtra::grid.arrange(plotEventData(data_G1[1:250]),
-                         plotEventData(data_G2[1:250]), nrow = 1)
+  if(plot) gridExtra::grid.arrange(plotEventData(data_G1[1:250],
+                                                 title = "Under Intervention"),
+                                   plotEventData(data_G2[1:250],
+                                                 title = "Without Intervention"), nrow = 1)
 
   #Proportion of subjects dying before some time $\tau$ in a0 group
   prop_G1 <- data_G1[A0 == a0 & Delta == 1, mean(Delta == 1 & Time < tau)] # with intervention

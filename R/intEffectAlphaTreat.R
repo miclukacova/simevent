@@ -69,8 +69,10 @@ intEffectAlphaTreat <- function(N = 1e4,
                             beta_L0_A = beta_L0_A,
                             lower = lower, upper = upper)
 
-  if (plot) gridExtra::grid.arrange(plotEventData(data_G1[1:250]),
-                       plotEventData(data_G2[1:250]), nrow = 1)
+  if(plot) gridExtra::grid.arrange(plotEventData(data_G1[1:250],
+                                                 title = "Under Intervention"),
+                                   plotEventData(data_G2[1:250],
+                                                 title = "Without Intervention"), nrow = 1)
 
   #Proportion of subjects dying before some time $\tau$ in treatment group
   prop_G1 <- data_G1[Delta == 1, mean(Delta == 1 & Time < tau)] # with intervention

@@ -9,7 +9,6 @@ alphaSimDropIn(
   alpha = 0.5,
   tau = 5,
   a0 = 1,
-  plot = FALSE,
   eta = rep(0.1, 4),
   nu = rep(1.1, 4),
   adherence = FALSE,
@@ -74,8 +73,6 @@ alphaSimDropIn(
 \item{tau}{Numeric. Time point at which event proportions are compared.}
 
 \item{a0}{Binary (0 or 1). Group indicator to subset results.}
-
-\item{plot}{Logical. If TRUE, plots of the first 250 events in each group are displayed.}
 
 \item{eta}{Numeric vector of length 4. Shape parameters for the Weibull hazards (default length 4 for 4 processes).}
 
@@ -201,7 +198,7 @@ This function simulates event history data from the Drop In scenario. This is a
 scenario with the events Censoring (C), Death (D), Drop In Initiation (Z),
 Change in Covariate Process (L) and optionally Treatment (A). It simulates
 under where the shape parameter \eqn{\eta} of the Drop In process is multiplied by a factor \code{alpha}.
-It evaluates the proportion of death and Drop In events by time \eqn{\tau} within
+It evaluates the proportion of death and the proportion of Drop In events by time \eqn{\tau} within
 the subgroup defined by \code{A0 = a0}.
 }
 \examples{

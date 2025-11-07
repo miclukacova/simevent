@@ -9,7 +9,6 @@
 #' @param N Integer. Number of individuals to simulate.
 #' @param alpha Numeric. Multiplicative factor applied to the \eqn{\eta} parameter of the treatment process.
 #' @param tau Numeric. Time point at which event proportions or years lost are compared.
-#' @param plot Logical. If TRUE, output plots of the first 250 events for respectively intervened and no invtervend data.
 #' @param eta Numeric vector of length 4. Shape parameters for Weibull hazards.
 #' @param nu Numeric vector of length 4. Scale parameters for Weibull hazards.
 #' @param beta_L_A Numeric. Effect of covariate L on treatment process A.
@@ -45,7 +44,7 @@
 #'
 #' @examples
 #' alphaSimTreat()
-alphaSimTreat <- function(N = 1e4,alpha = 0.5, tau = 5, plot = FALSE,
+alphaSimTreat <- function(N = 1e4,alpha = 0.5, tau = 5,
                           nu = rep(1.1, 4), eta = rep(0.1, 4), beta_L_A = 1,
                           beta_L_D = 1, beta_A_D = -0.5, beta_A_L = -1,
                           beta_L0_A = 1, lower = 10^(-300), upper = 300,
@@ -65,7 +64,6 @@ alphaSimTreat <- function(N = 1e4,alpha = 0.5, tau = 5, plot = FALSE,
                        beta_L0_L_prime = 0, beta_L0_D_prime = 0, beta_L0_C_prime = 0,
                        beta_L_C_prime = 0, beta_A_C_prime = 0, t_prime = NULL)
 
-  if (plot) plotEventData(data[1:250])
   if(return_data) return(data)
 
   #Proportion of subjects dying before some time $\tau$ in treatment group

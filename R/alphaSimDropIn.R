@@ -4,7 +4,7 @@
 #' scenario with the events Censoring (C), Death (D), Drop In Initiation (Z),
 #' Change in Covariate Process (L) and optionally Treatment (A). It simulates
 #' under where the shape parameter \eqn{\eta} of the Drop In process is multiplied by a factor \code{alpha}.
-#' It evaluates the proportion of death and Drop In events by time \eqn{\tau} within
+#' It evaluates the proportion of death and the proportion of Drop In events by time \eqn{\tau} within
 #' the subgroup defined by \code{A0 = a0}.
 #'
 #' @title Simulation and Estimation in Drop In Setting with Modified Eta Parameter of Drop In Process
@@ -13,7 +13,6 @@
 #' @param alpha Numeric. Multiplicative factor applied to the \eqn{\eta} parameter of the Drop In process under intervention.
 #' @param tau Numeric. Time point at which event proportions are compared.
 #' @param a0 Binary (0 or 1). Group indicator to subset results.
-#' @param plot Logical. If TRUE, plots of the first 250 events in each group are displayed.
 #' @param eta Numeric vector of length 4. Shape parameters for the Weibull hazards (default length 4 for 4 processes).
 #' @param nu Numeric vector of length 4. Scale parameters for the Weibull hazards.
 #' @param adherence Logical. Whether to include a treatment adherence process (default FALSE).
@@ -81,7 +80,7 @@
 #'
 #' @examples
 #' alphaSimDropIn()
-alphaSimDropIn <- function(N = 1e4, alpha = 0.5, tau = 5, a0 = 1, plot = FALSE,
+alphaSimDropIn <- function(N = 1e4, alpha = 0.5, tau = 5, a0 = 1,
                            eta = rep(0.1, 4), nu = rep(1.1, 4), adherence = FALSE,
                            lower = 10^(-30), upper = 200, cens = 0, gen_A0 = NULL,
                            return_data = FALSE, years_lost = FALSE,
@@ -118,7 +117,6 @@ alphaSimDropIn <- function(N = 1e4, alpha = 0.5, tau = 5, a0 = 1, plot = FALSE,
                     beta_Z_A_prime = beta_Z_A_prime, beta_Z_D_prime = beta_Z_D_prime, beta_Z_C_prime = beta_Z_C_prime,
                     lower = lower, upper = upper, t_prime = t_prime)
 
-  if (plot) plotEventData(data[1:250])
   if(return_data) return(data)
 
   #Proportion of subjects dying before some time $\tau$ in a0 group

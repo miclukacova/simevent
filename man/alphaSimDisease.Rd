@@ -10,7 +10,6 @@ alphaSimDisease(
   tau = 5,
   years_lost = FALSE,
   a0 = 1,
-  plot = FALSE,
   eta = rep(0.1, 3),
   nu = rep(1.1, 3),
   beta_L0_D = 0.5,
@@ -37,8 +36,6 @@ alphaSimDisease(
 \item{years_lost}{Logical. If \code{TRUE}, computes years lost instead of proportions.}
 
 \item{a0}{Binary (0/1). Specifies the group for comparison.}
-
-\item{plot}{Logical. If \code{TRUE}, plots timelines for sample of intervention and non intervention data.}
 
 \item{eta}{Numeric vector of length 3. Shape parameters for Weibull hazards (default \code{rep(0.1, 3)}).}
 
@@ -81,7 +78,7 @@ This function simulates event history data from the Disease setting (see simDise
 where the shape parameter \eqn{\eta} of the disease process is multiplied by
 \code{alpha}. The function either
 \itemize{
-\item returns proportion of individuals who experience death or disease by a specified time \eqn{\tau} in group \code{A0 = a0}
+\item returns the proportion of individuals who experience death and the proportion of individuals who experience disease by a specified time \eqn{\tau} in group \code{A0 = a0}
 \item returns number of years lost before \eqn{\tau} of death and disease
 \item returns simulated data.
 }
