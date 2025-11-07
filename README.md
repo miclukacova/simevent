@@ -519,16 +519,58 @@ The new simulated data looks like:
 ``` r
 head(new_data)
 #> Key: <ID>
-#>       ID      Time Delta         L0    A0    N1    N2
-#>    <int>     <num> <int>      <num> <num> <num> <num>
-#> 1:     1 1.1913258     1 0.40253050     1     1     0
-#> 2:     2 1.4620976     2 0.80094849     0     0     1
-#> 3:     3 7.3221851     2 0.03707728     0     0     1
-#> 4:     4 0.3824161     1 0.84810211     1     1     0
-#> 5:     5 1.6035695     2 0.99071345     1     0     1
-#> 6:     6 5.4367335     2 0.98173073     1     0     1
+#>       ID     Time Delta         L0    A0    N1    N2
+#>    <int>    <num> <int>      <num> <num> <num> <num>
+#> 1:     1 1.169271     1 0.40253050     1     1     0
+#> 2:     2 1.433632     2 0.80094849     0     0     1
+#> 3:     3 6.062924     2 0.03707728     0     0     1
+#> 4:     4 0.310825     1 0.84810211     1     1     0
+#> 5:     5 1.465128     2 0.99071345     1     0     1
+#> 6:     6 5.116592     2 0.98173073     1     0     1
 ```
 
 ## Example 8: Interventions
 
-Yet to be written…
+Say you want to perform an intervention in the disease setting by
+scaling the intensity of one of your counting processes. Data without
+intervention can be simulated by scaling with the factor 1:
+
+``` r
+alphaSimDisease(N = 10^3, alpha = 1,  tau = 5)
+#> $effect_D
+#> [1] 0.6223092
+#> 
+#> $effect_L
+#> [1] 0.3424658
+```
+
+By default the function returns the proportion of individuals who
+experience death and the proportion of individuals who experience
+disease by a specified time in group . The user can specify what gets
+returned by the function call with use of the arguments `years_lost` and
+`return_data`. If the former is set to TRUE the function returns number
+of years lost before of death and disease. If the latter is set to TRUE
+the function call returns the simulated data.
+
+To compare a non intervened scenario with a non intervened scenario, the
+function `intEffectAlphaTreat` can be used. This function simulates data
+from the disease setting in two scenarios. Under the intervention on the
+shape parameter of the disease process, which is multiplied by , and a
+baseline (non-intervened) scenario. It computes the proportion of
+individuals who experience death or disease by a specified time in the
+group , optionally returning years lost. The function can also plot a
+sample of the event data for each scenario for comparison.
+
+``` r
+intEffectAlphaDisease(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot = TRUE)
+```
+
+<img src="man/figures/README-unnamed-chunk-35-1.png" width="100%" />
+
+    #> $effect_L
+    #>        G1        G2 
+    #> 0.8363509 0.9271643 
+    #> 
+    #> $effect_death
+    #>       G1       G2 
+    #> 1.466341 1.476193
