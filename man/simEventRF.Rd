@@ -10,10 +10,7 @@ simEventRF(
   event_names = NULL,
   list_old_vars,
   n_event_max = c(1, 1),
-  term_events = 1,
-  intervention1 = NULL,
-  intervention2 = NULL,
-  parallel = FALSE
+  term_events = 1
 )
 }
 \arguments{
@@ -30,12 +27,6 @@ per individual.}
 
 \item{term_events}{Integer or integer vector. Indices of event types that are terminal,
 i.e., events that stop further simulation for an individual.}
-
-\item{intervention1}{Optional function. Not implemented.}
-
-\item{intervention2}{Optional function. Not implemented.}
-
-\item{parallel}{Whether to parallelize}
 }
 \value{
 A \code{data.table} with one row per event per individual containing:
