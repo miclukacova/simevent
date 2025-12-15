@@ -34,6 +34,8 @@ i.e., events that stop further simulation for an individual.}
 \item{intervention1}{Optional function. Not implemented.}
 
 \item{intervention2}{Optional function. Not implemented.}
+
+\item{parallel}{Whether to parallelize}
 }
 \value{
 A \code{data.table} with one row per event per individual containing:

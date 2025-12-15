@@ -12,9 +12,6 @@
 #'   per individual.
 #' @param term_events Integer or integer vector. Indices of event types that are terminal,
 #'   i.e., events that stop further simulation for an individual.
-#' @param intervention1 Optional function. Not implemented.
-#' @param intervention2 Optional function. Not implemented.
-#' @param parallel Whether to parallelize
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -54,17 +51,14 @@ simEventRF <- function(N,
                        event_names = NULL,
                        list_old_vars,
                        n_event_max = c(1,1),
-                       term_events = 1,
-                       intervention1 = NULL,
-                       intervention2 = NULL,
-                       parallel = FALSE) {
+                       term_events = 1) {
 
   ID <- chf_mat <- NULL
 
   # Initialize
-  alive <- 1:N                                            # Vector for keeping track of who is alive
-  num_alive <- N                                          # Number of alive individuals
-  T_k <- rep(0, N)                                        # Last event time
+  alive <- 1:N                                                                  # Vector for keeping track of who is alive
+  num_alive <- N                                                                # Number of alive individuals
+  T_k <- rep(0, N)                                                              # Last event time
 
   # Sampling new covariates
   if(is.null(names(list_old_vars))) warning("list_old_vars must be named list")
@@ -76,42 +70,15 @@ simEventRF <- function(N,
   colnames(sim_data) <- names(list_old_vars)
   sim_data <- data.frame(sim_data)
 
+  # Naming columns
   if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0
 
-  # List for results
-  res_list <- vector("list", sum(n_event_max))            # For results
-  idx <- 1                                                # Index
+  # The cumulative hazard and inverse cumulative hazard
+  y.pred <- stats::predict(RF_fit, sim_data)                                    # Predictions
+  times <-  c(0,y.pred$time.interest)                                           # Time points
+  chf_mat <- y.pred$chf                                                         # Cumulative hazard for simulated data
 
-  if(parallel == TRUE){
-    # Number of cores to use
-    n_cores <- parallel::detectCores() - 1   # Leave one core free
-
-    # Split sim_data into roughly equal chunks
-    split_data <- split(sim_data, cut(1:nrow(sim_data), n_cores, labels = FALSE))
-
-    # Cluster setup
-    cl <- parallel::makeCluster(n_cores)
-    parallel::clusterExport(cl, varlist = c("RF_fit"))  # Export the model to the cluster
-    parallel::clusterEvalQ(cl, library(randomForestSRC))  # Load required packages on each worker
-
-    # Predict in parallel
-    pred_list <- parallel::parLapply(cl, split_data, function(chunk) {
-      predict(RF_fit, chunk)
-    })
-
-    parallel::stopCluster(cl)
-
-    # Combine results
-    chf_mat <- do.call(rbind, lapply(pred_list, function(x) x$chf))
-    times <-  c(0,pred_list[[1]]$time.interest)                                   # Time points
-
-  } else {
-    # The cumulative hazard and inverse cumulative hazard
-    y.pred <- predict(RF_fit, sim_data)                     # Cumulative hazard for simulated data
-    times <-  c(0,y.pred$time.interest)                     # Time points
-    chf_mat <- y.pred$chf                                   # Cumulative hazard for simulated data
-  }
-
+  # Creating columns for event counts
   num_events <- if(is.na(dim(chf_mat)[3])) 1 else dim(chf_mat)[3]               # Number of events
   if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0 else
     for (name in paste0("N", 1:num_events)) sim_data[[name]] <- 0
@@ -134,6 +101,10 @@ simEventRF <- function(N,
     # If the cumulative hazard flattens, we choose the smallest time
     y1 + ifelse(p1 == p2, 0, (p - p1) * (y2 - y1) / (p2 - p1))
   }
+
+  # List for results
+  res_list <- vector("list", sum(n_event_max))            # For results
+  idx <- 1                                                # Index
 
   # Loop
   while(num_alive != 0){
