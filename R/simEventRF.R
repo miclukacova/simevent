@@ -7,16 +7,14 @@
 #' @param N Integer. The number of individuals to simulate.
 #' @param RF_fit A rfsrc object. The object contains estimates of the cumulative hazard of each of the processes.
 #' @param event_names A character vector. Containing the names of the various processes. The argument is optional.
-#' @param L0_old A vector of previously observed baseline covariate values for L0,
-#'   used for resampling baseline covariates.
-#' @param A0_old A vector of previously observed baseline covariate values for A0,
-#'   used for resampling baseline covariates.
+#' @param list_old_vars A named list containing the old covariates
 #' @param n_event_max Integer vector. Maximum number of times each event type can occur
 #'   per individual.
 #' @param term_events Integer or integer vector. Indices of event types that are terminal,
 #'   i.e., events that stop further simulation for an individual.
 #' @param intervention1 Optional function. Not implemented.
 #' @param intervention2 Optional function. Not implemented.
+#' @param parallel Whether to parallelize
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -47,46 +45,80 @@
 #' # Random forest model
 #' RF_fit <- randomForestSRC::rfsrc(Surv(Time, Delta) ~ L0 + A0, data = data)
 #' # New data
-#' new_data <- simEventRF(100, RF_fit, L0_old = data$L0, A0_old = data$A0, term_events = c(1,2))
+#' list_old_vars <- list(L0 = data$L0, A0 = data$A0)
+#' new_data <- simEventRF(100, RF_fit, list_old_vars = list_old_vars, term_events = c(1,2))
 #'
 #' @export
 simEventRF <- function(N,
                        RF_fit,
                        event_names = NULL,
-                       L0_old,
-                       A0_old,
+                       list_old_vars,
                        n_event_max = c(1,1),
                        term_events = 1,
                        intervention1 = NULL,
-                       intervention2 = NULL) {
+                       intervention2 = NULL,
+                       parallel = FALSE) {
 
-  ID <- NULL
+  ID <- chf_mat <- NULL
 
   # Initialize
   alive <- 1:N                                            # Vector for keeping track of who is alive
   num_alive <- N                                          # Number of alive individuals
   T_k <- rep(0, N)                                        # Last event time
 
-  # Data frame for storing data
-  sim_data <- data.frame(L0 = sample(L0_old, N, TRUE),
-                         A0 = sample(A0_old, N, TRUE))
+  # Sampling new covariates
+  if(is.null(names(list_old_vars))) warning("list_old_vars must be named list")
+  num_cov <- length(list_old_vars)
+  sim_data <- matrix(ncol = num_cov, nrow = N)
+  for(j in 1:num_cov){
+    sim_data[,j] <- sample(list_old_vars[[j]], N, TRUE)
+  }
+  colnames(sim_data) <- names(list_old_vars)
+  sim_data <- data.frame(sim_data)
+
   if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0
 
   # List for results
   res_list <- vector("list", sum(n_event_max))            # For results
   idx <- 1                                                # Index
 
-  # The cumulative hazard and inverse cumulative hazard
-  y.pred <- predict(RF_fit, sim_data)                     # Cumulative hazard for simulated data
-  times <-  c(0,y.pred$time.interest)                     # Time points
+  if(parallel == TRUE){
+    # Number of cores to use
+    n_cores <- parallel::detectCores() - 1   # Leave one core free
 
-  num_events <- if(is.na(dim(y.pred$chf)[3])) 1 else dim(y.pred$chf)[3]         # Number of events
+    # Split sim_data into roughly equal chunks
+    split_data <- split(sim_data, cut(1:nrow(sim_data), n_cores, labels = FALSE))
+
+    # Cluster setup
+    cl <- parallel::makeCluster(n_cores)
+    parallel::clusterExport(cl, varlist = c("RF_fit"))  # Export the model to the cluster
+    parallel::clusterEvalQ(cl, library(randomForestSRC))  # Load required packages on each worker
+
+    # Predict in parallel
+    pred_list <- parallel::parLapply(cl, split_data, function(chunk) {
+      predict(RF_fit, chunk)
+    })
+
+    parallel::stopCluster(cl)
+
+    # Combine results
+    chf_mat <- do.call(rbind, lapply(pred_list, function(x) x$chf))
+    times <-  c(0,pred_list[[1]]$time.interest)                                   # Time points
+
+  } else {
+    # The cumulative hazard and inverse cumulative hazard
+    y.pred <- predict(RF_fit, sim_data)                     # Cumulative hazard for simulated data
+    times <-  c(0,y.pred$time.interest)                     # Time points
+    chf_mat <- y.pred$chf                                   # Cumulative hazard for simulated data
+  }
+
+  num_events <- if(is.na(dim(chf_mat)[3])) 1 else dim(chf_mat)[3]               # Number of events
   if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0 else
     for (name in paste0("N", 1:num_events)) sim_data[[name]] <- 0
 
   # Defining the cumulativ hazard and the inverse cumulative hazard
   cumhaz_fn <- function(t, i, j){
-    cumhazz <-  if(num_events == 1) y.pred$chf else y.pred$chf[,,j]
+    cumhazz <-  if(num_events == 1) chf_mat else chf_mat[,,j]
     idx <- findInterval(t, times, checkSorted = F)
     t1 <- times[idx]; t2 <- times[idx + 1]
     y1 <- cumhazz[cbind(i,idx)]; y2 <- cumhazz[cbind(i,(idx + 1))]
@@ -94,7 +126,7 @@ simEventRF <- function(N,
   }
 
   invcumhaz_fn <- function(p, i, j){
-    cumhazz <-  if(num_events == 1) y.pred$chf else y.pred$chf[,,j]
+    cumhazz <-  if(num_events == 1) chf_mat else chf_mat[,,j]
     idx <- sapply(1:length(i), FUN = function(k) findInterval(p[k], cumhazz[i[k],], checkSorted = F))
     idx[idx == ncol(cumhazz)] <- ncol(cumhazz) - 1
     p1 <- cumhazz[cbind(i, idx)]; p2 <- cumhazz[cbind(i,idx + 1)]
@@ -150,6 +182,6 @@ simEventRF <- function(N,
   }
 
   res <- data.table::rbindlist(res_list)
-  setkey(res, ID)
+  data.table::setkey(res, ID)
   return(res)
 }
