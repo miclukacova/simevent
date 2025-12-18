@@ -26,6 +26,25 @@ library(ggplot2)
 
 The `simevent` package provides tools for simulating and analyzing complex continuous-time health care data.The simulated data includes variables that can be interpreted as treatment decisions, disease progression, and health factors. 
 
+## Installation
+
+You can install the development version of `simevent` from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("miclukacova/simevent")
+```
+
+## Usage
+
+The package is loaded with the command
+
+```{r library}
+library(simevent)
+```
+
+## Description
+
 One of the core functions is the flexible function `simEventData`, which simulates from a Cox proportional hazards model with Weibull hazards. Users can specify parameters and covariate effects to create custom scenarios. In addition, the package offers several wrapper functions for common settings (e.g., survival data, competing risks) built on top of `simEventData`. The function `simEventTV` is an adaptation of the function `simEventData`. It allows for time varying effects. This feature results in a slightly slower simulation procedure, so when possible `simEventData` is recommended. 
 
 Another branch of the package concerns simulating data from data. For this the package has two functions, respectively `simEventCox` and `simEventRF`. The first function takes as input Cox regressions and simulates data using these, while the latter takes as input a fitted random forest. 
@@ -34,7 +53,7 @@ Once data is simulated the package includes functions for plotting (`plotEventDa
 
 One can perform interventions using the function `alphaSimDisease` and calculate the effect of interventions using `intEffectAlphaDisease`.
 
-Below is a table attempting to provide an overview of the package functions. Each function in the package is described and 
+Below is a table attempting to provide an overview of the package functions. Each function in the package is described and an example is provided.
 
 **Functions relating to `simEventData`**
 
@@ -60,7 +79,7 @@ Below is a table attempting to provide an overview of the package functions. Eac
 | Function | Description | Key Arguments | Example |
 |-----------|--------------|----------------|----------|
 | `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `L0_old`, `A0_old` | `simEventCox(N, cox_fits, L0_old, A0_old)` |
-| `simEventRF()` | Simulates new data using a random forest fitted using the `randomForestSRC` package | `N`, `RF_fit` | `plot_summary(df)` |
+| `simEventRF()` | Simulates new data using a random forest fitted using the `randomForestSRC` package | `N`, `RF_fit`, `list_old_vars` | `simEventRF(100, RF_fit, list_old_vars = list_old_vars, term_events = c(1,2))` |
 
 **Functions for performing interventions**
 
@@ -72,23 +91,6 @@ Below is a table attempting to provide an overview of the package functions. Eac
 | `intEffectAlphaDisease()` | Simulates data from the disease setting in two scenarios. Under intervention on the shape parameter \eqn{\eta} of the disease process is multiplied by \code{alpha}, and a baseline (non-intervened) scenario.It computes the proportion of individuals who experience death or disease by a specified time \eqn{\tau} in the group \code{A0 = a0}, optionally returning years_lost. |  `N`, `alpha`, `tau`, `years_lost` | `intEffectAlphaDisease(N = 10, alpha = 0.5, tau = 5, years_lost = F)` |
 | `intEffectAlphaDropIn()` | Does the same as above, just in the Drop In setting. | `N`, `alpha`, `tau` | `intEffectAlphaDropIn(N = 10, alpha = 0.5, tau = 5)` |
 | `intEffectAlphaTreat()` | Does the same as above, just in the Treatment setting. | `N`, `alpha`, `tau`, `years_lost` | `intEffectAlphaTreat(N = 10, alpha = 0.5, tau = 5, years_lost = F)` |
-
-## Installation
-
-You can install the development version of `simevent` from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("pak")
-pak::pak("miclukacova/simevent")
-```
-
-## Usage
-
-The package is loaded with the command
-
-```{r library}
-library(simevent)
-```
 
 ## Example 1: General Event History Simulation with `simEventData`
 
@@ -404,7 +406,8 @@ RF_fit <- randomForestSRC::rfsrc(Surv(Time, Delta) ~ L0 + A0, data = data)
 Then we can call the function `simEventRF` providing the fitted Random Forest as argument:
 
 ```{r}
-new_data <- simEventRF(100, RF_fit, L0_old = data$L0, A0_old = data$A0, term_events = c(1,2))
+list_old_vars = list(L0 = data$L0, A0 = data$A0)
+new_data <- simEventRF(100, RF_fit, list_old_vars = list_old_vars, term_events = c(1,2))
 ```
 
 The new simulated data looks like:
