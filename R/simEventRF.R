@@ -49,11 +49,11 @@
 simEventRF <- function(N,
                        RF_fit,
                        event_names = NULL,
-                       list_old_vars,
+                       list_old_vars = NULL,
                        n_event_max = c(1,1),
-                       term_events = 1) {
+                       term_events = c(1,1)) {
 
-  ID <- chf_mat <- NULL
+  ID <- NULL
 
   # Initialize
   alive <- 1:N                                                                  # Vector for keeping track of who is alive
@@ -126,7 +126,7 @@ simEventRF <- function(N,
 
     # How many times can you experience the various events?
     for(j in seq_len(num_events)){
-      event_times[sim_data[, (2+j)] == n_event_max[j], j] <- Inf
+      event_times[sim_data[, (num_cov+j)] == n_event_max[j], j] <- Inf
     }
 
     # The next event is the minimum of these events

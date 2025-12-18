@@ -8,9 +8,9 @@ simEventRF(
   N,
   RF_fit,
   event_names = NULL,
-  list_old_vars,
+  list_old_vars = NULL,
   n_event_max = c(1, 1),
-  term_events = 1
+  term_events = c(1, 1)
 )
 }
 \arguments{
