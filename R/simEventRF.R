@@ -86,7 +86,7 @@ simEventRF <- function(N,
   # Defining the cumulativ hazard and the inverse cumulative hazard
   cumhaz_fn <- function(t, i, j){
     cumhazz <-  if(num_events == 1) chf_mat else chf_mat[,,j]
-    idx <- findInterval(t, times, checkSorted = F)
+    idx <- findInterval(t, times)
     t1 <- times[idx]; t2 <- times[idx + 1]
     y1 <- cumhazz[cbind(i,idx)]; y2 <- cumhazz[cbind(i,(idx + 1))]
     y1 + (t - t1) * (y2 - y1) / (t2 - t1)
