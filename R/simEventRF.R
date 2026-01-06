@@ -1,18 +1,27 @@
 #' Simulate Survival and Competing Risk Data Based on a fitted RF
 #'
-#' Simulates survival or competing risk data for a cohort of individuals based
-#' on a random forest fitted using the `randomForestSRC` package. Simulation proceeds
-#' by sampling from the uniform distribution and obtaining event times with use of
-#' the cumulative hazard estimated by the random forest
+#' The `simEventRF` function simulates survival or competing risk data for a cohort
+#' of individuals based on a random forest fitted using the `randomForestSRC` package.
+#' The function is used when one has a data set and wishes to simulate additional data
+#' under the same distribution. First a random forest object is fitted on the original
+#' data using the `randomForestSRC` package. Next this object is provided as an
+#' argument to the `simEventRF` function, which simulates new data using the random forest.
+#' Simulation proceeds by sampling from the uniform distribution and obtaining event times using
+#' the inverse of the cumulative hazard function(s).
 #'
 #' @param N Integer. The number of individuals to simulate.
 #' @param RF_fit A rfsrc object. The object contains estimates of the cumulative hazard of each of the processes.
-#' @param event_names A character vector. Containing the names of the various processes. The argument is optional.
-#' @param list_old_vars A named list containing the old covariates
+#' @param event_names A character vector. Containing the names of the various processes.
+#'  The argument is optional. By default events will be named `N1`, `N2`, ....
+#' @param list_old_vars A named list containing the old covariates. New covariates will
+#' be simulated by drawing from the old covariates with replacement.
 #' @param n_event_max Integer vector. Maximum number of times each event type can occur
-#'   per individual.
-#' @param term_events Integer or integer vector. Indices of event types that are terminal,
-#'   i.e., events that stop further simulation for an individual.
+#' per individual. Since `rfsrc` can only be fitted to survival and competing risk data,
+#' this argument should always be a vector of 1's which length is the number of processes.
+#' @param term_events Integer vector. Indices of event types that are terminal,
+#' i.e., events that stop further simulation for an individual. Since we are only dealing
+#' with survival and competing risk data, this argument should be a sequence starting from 1
+#' and up to the number of events.
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -52,7 +61,7 @@ simEventRF <- function(N,
                        event_names = NULL,
                        list_old_vars = NULL,
                        n_event_max = c(1,1),
-                       term_events = c(1,1)) {
+                       term_events = c(1,2)) {
 
   ID <- NULL
 
@@ -64,12 +73,12 @@ simEventRF <- function(N,
   # Sampling new covariates
   if(is.null(names(list_old_vars))) warning("list_old_vars must be named list")
   num_cov <- length(list_old_vars)
-  sim_data <- matrix(ncol = num_cov, nrow = N)
+  num_events <- length(event_names)
+  sim_data <- data.frame(matrix(ncol = num_cov + num_events, nrow = N))
   for(j in 1:num_cov){
     sim_data[,j] <- sample(list_old_vars[[j]], N, TRUE)
   }
   colnames(sim_data) <- names(list_old_vars)
-  sim_data <- data.frame(sim_data)
 
   # Naming columns
   if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0
@@ -135,7 +144,9 @@ simEventRF <- function(N,
     Deltas <- apply(event_times, 1, which.min)
 
     # Update event counts
-    sim_data[cbind(seq_len(num_alive), Deltas + 2)] <- sim_data[cbind(seq_len(num_alive), Deltas + 2)] + 1
+    for(i in 1:num_events){
+      sim_data[seq_len(num_alive), num_cov + i] <- sim_data[seq_len(num_alive), num_cov + i] + ifelse(Deltas == i, 1, 0)
+    }
 
     # Store data
     kth_event <- data.table(ID = alive,
