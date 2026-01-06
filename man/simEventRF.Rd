@@ -10,7 +10,7 @@ simEventRF(
   event_names = NULL,
   list_old_vars = NULL,
   n_event_max = c(1, 1),
-  term_events = c(1, 1)
+  term_events = c(1, 2)
 )
 }
 \arguments{
@@ -18,15 +18,20 @@ simEventRF(
 
 \item{RF_fit}{A rfsrc object. The object contains estimates of the cumulative hazard of each of the processes.}
 
-\item{event_names}{A character vector. Containing the names of the various processes. The argument is optional.}
+\item{event_names}{A character vector. Containing the names of the various processes.
+The argument is optional. By default events will be named \code{N1}, \code{N2}, ....}
 
-\item{list_old_vars}{A named list containing the old covariates}
+\item{list_old_vars}{A named list containing the old covariates. New covariates will
+be simulated by drawing from the old covariates with replacement.}
 
 \item{n_event_max}{Integer vector. Maximum number of times each event type can occur
-per individual.}
+per individual. Since \code{rfsrc} can only be fitted to survival and competing risk data,
+this argument should always be a vector of 1's which length is the number of processes.}
 
-\item{term_events}{Integer or integer vector. Indices of event types that are terminal,
-i.e., events that stop further simulation for an individual.}
+\item{term_events}{Integer vector. Indices of event types that are terminal,
+i.e., events that stop further simulation for an individual. Since we are only dealing
+with survival and competing risk data, this argument should be a sequence starting from 1
+and up to the number of events.}
 }
 \value{
 A \code{data.table} with one row per event per individual containing:
@@ -39,9 +44,14 @@ A \code{data.table} with one row per event per individual containing:
 }
 }
 \description{
-Simulates survival or competing risk data for a cohort of individuals based
-on a random forest fitted using the \code{randomForestSRC} package. Simulation proceeds
-by iteratively sampling event times until a terminal event occurs.
+The \code{simEventRF} function simulates survival or competing risk data for a cohort
+of individuals based on a random forest fitted using the \code{randomForestSRC} package.
+The function is used when one has a data set and wishes to simulate additional data
+under the same distribution. First a random forest object is fitted on the original
+data using the \code{randomForestSRC} package. Next this object is provided as an
+argument to the \code{simEventRF} function, which simulates new data using the random forest.
+Simulation proceeds by sampling from the uniform distribution and obtaining event times using
+the inverse of the cumulative hazard function(s).
 }
 \details{
 The function simulates individual event histories by:

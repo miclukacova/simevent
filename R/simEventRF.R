@@ -2,7 +2,8 @@
 #'
 #' Simulates survival or competing risk data for a cohort of individuals based
 #' on a random forest fitted using the `randomForestSRC` package. Simulation proceeds
-#' by iteratively sampling event times until a terminal event occurs.
+#' by sampling from the uniform distribution and obtaining event times with use of
+#' the cumulative hazard estimated by the random forest
 #'
 #' @param N Integer. The number of individuals to simulate.
 #' @param RF_fit A rfsrc object. The object contains estimates of the cumulative hazard of each of the processes.
