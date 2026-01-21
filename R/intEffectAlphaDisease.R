@@ -64,17 +64,19 @@ intEffectAlphaDisease <- function(N = 1e4,
                     lower = lower)
 
   # Generate large data set without intervened intensity
-  data_G2 <- simDisease(N = N,
-                    cens = 0,
-                    eta = eta,
-                    nu = nu,
-                    beta_A0_D = beta_A0_D,
-                    beta_L0_L = beta_L0_L,
-                    beta_A0_L = beta_A0_L,
-                    beta_L_D = beta_L_D,
-                    beta_L0_D = beta_L0_D,
-                    upper = upper,
-                    lower = lower)
+  #data_G2 <- simDisease(N = N,
+  #                  cens = 0,
+  #                  eta = eta,
+  #                  nu = nu,
+  #                  beta_A0_D = beta_A0_D,
+  #                  beta_L0_L = beta_L0_L,
+  #                  beta_A0_L = beta_A0_L,
+  #                  beta_L_D = beta_L_D,
+  #                  beta_L0_D = beta_L0_D,
+  #                  upper = upper,
+  #                  lower = lower)
+
+  # FJERN DEM HER
 
   if(plot) gridExtra::grid.arrange(plotEventData(data_G1[1:250],
                                                  title = "Under Intervention"),
