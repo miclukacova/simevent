@@ -30,7 +30,7 @@ intEffectAlphaTreat(
 
 \item{years_lost}{Logical. If TRUE, compute years lost estimand instead of simple proportions.}
 
-\item{plot}{Logical. If TRUE, output plots of the first 250 events for respectively intervened and no invtervened data.}
+\item{plot}{Logical. If TRUE, output plots of the first 250 events.}
 
 \item{nu}{Numeric vector of length 4. Scale parameters for Weibull hazards.}
 
@@ -53,8 +53,8 @@ intEffectAlphaTreat(
 \value{
 A list containing:
 \describe{
-\item{effect_A}{Proportion or years lost of treated patients with and without intervention.}
-\item{effect_death}{Proportion or years lost of deaths with and without intervention.}
+\item{effect_A}{Proportion or years lost of treated patients under intervention.}
+\item{effect_death}{Proportion or years lost of deaths under intervention.}
 }
 }
 \description{
@@ -62,10 +62,10 @@ Calculate the effect of an intervention modifying the treatment process intensit
 }
 \details{
 This function simulates event history data from the Treatment scenario (see function simTreatment)
-under intervention and without intervention. We consider the intervention where
+under intervention. We consider the intervention where
 the \eqn{\eta} parameter of the treatment process is multiplied by a factor \code{alpha}.
 It computes the proportion or years lost of death and treatment by time \eqn{\tau}
-comparing intervened and non-intervened data.
+on intervened data.
 }
 \examples{
 intEffectAlphaTreat()

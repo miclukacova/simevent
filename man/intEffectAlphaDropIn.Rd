@@ -107,8 +107,8 @@ intEffectAlphaDropIn(
 \value{
 A list containing:
 \describe{
-\item{effect_Z}{Proportion of subjects experiencing Drop In by time \eqn{\tau} with and without intervention.}
-\item{effect_death}{Proportion of subjects dying by time \eqn{\tau} with and without intervention.}
+\item{effect_Z}{Proportion of subjects experiencing Drop In by time \eqn{\tau} with intervention.}
+\item{effect_death}{Proportion of subjects dying by time \eqn{\tau} with intervention.}
 }
 }
 \description{
@@ -120,8 +120,7 @@ scenario with the events Censoring (C), Death (D), Drop In Initiation (Z),
 Change in Covariate Process (L) and optionally Treatment (A). It simulates
 under the intervnetion where \eqn{\eta} parameter of the Drop In process is multiplied
 by a factor \code{alpha}. It evaluates the proportion of death and Drop In events
-by time \eqn{\tau} within the subgroup defined by \code{A0 = a0}, comparing intervened
-and non-intervened scenarios.
+by time \eqn{\tau} within the subgroup defined by \code{A0 = a0}.
 }
 \examples{
 intEffectAlphaDropIn()

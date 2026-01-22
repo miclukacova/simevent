@@ -33,77 +33,51 @@
 #' @examples
 #' intEffectAlphaDisease(N = 1000, alpha = 0.7, tau = 5, years_lost = FALSE, a0 = 1)
 intEffectAlphaDisease <- function(N = 1e4,
-                      alpha = 0.5,
-                      tau = 5,
-                      years_lost = FALSE,
-                      a0 = 1,
-                      plot = FALSE,
-                      eta = rep(0.1, 3),
-                      nu = rep(1.1, 3),
-                      beta_L0_D = 0.5,
-                      beta_L0_L = 2,
-                      beta_L_D = 1,
-                      beta_A0_D = -0.1,
-                      beta_A0_L = -1,
-                      lower = 10^(-30),
-                      upper = 200){
+                                  alpha = 0.5,
+                                  tau = 5,
+                                  years_lost = FALSE,
+                                  a0 = 1,
+                                  plot = FALSE,
+                                  eta = rep(0.1, 3),
+                                  nu = rep(1.1, 3),
+                                  beta_L0_D = 0.5,
+                                  beta_L0_L = 2,
+                                  beta_L_D = 1,
+                                  beta_A0_D = -0.1,
+                                  beta_A0_L = -1,
+                                  lower = 10^(-30),
+                                  upper = 200){
 
   Delta <- Time <- A0 <- NULL
 
   # Generate large data set under the intervened intensity
   data_G1 <- simDisease(N = N,
-                    cens = 0,
-                    eta = c(eta[1:2],eta[3]*alpha),
-                    nu = nu,
-                    beta_A0_D = beta_A0_D,
-                    beta_L_D = beta_L_D,
-                    beta_L0_D = beta_L0_D,
-                    beta_L0_L = beta_L0_L,
-                    beta_A0_L = beta_A0_L,
-                    upper = upper,
-                    lower = lower)
+                        cens = 0,
+                        eta = c(eta[1:2],eta[3]*alpha),
+                        nu = nu,
+                        beta_A0_D = beta_A0_D,
+                        beta_L_D = beta_L_D,
+                        beta_L0_D = beta_L0_D,
+                        beta_L0_L = beta_L0_L,
+                        beta_A0_L = beta_A0_L,
+                        upper = upper,
+                        lower = lower)
 
-  # Generate large data set without intervened intensity
-  #data_G2 <- simDisease(N = N,
-  #                  cens = 0,
-  #                  eta = eta,
-  #                  nu = nu,
-  #                  beta_A0_D = beta_A0_D,
-  #                  beta_L0_L = beta_L0_L,
-  #                  beta_A0_L = beta_A0_L,
-  #                  beta_L_D = beta_L_D,
-  #                  beta_L0_D = beta_L0_D,
-  #                  upper = upper,
-  #                  lower = lower)
-
-  # FJERN DEM HER
-
-  if(plot) gridExtra::grid.arrange(plotEventData(data_G1[1:250],
-                                                 title = "Under Intervention"),
-                                   plotEventData(data_G2[1:250],
-                                                 title = "Without Intervention"), nrow = 1)
+  if(plot) plotEventData(data_G1[1:250],title = "Under Intervention")
 
   #Proportion of subjects dying before some time $\tau$ in a0 group
   prop_G1 <- data_G1[A0 == a0 & Delta == 1, mean(Delta == 1 & Time < tau)] # with intervention
-  prop_G2 <- data_G2[A0 == a0 & Delta == 1, mean(Delta == 1 & Time < tau)] # without intervention
   #Proportion of subjects experiencing Disease before some time \tau in a0 group
   prop_G1_L <- mean(data_G1[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]]) # with intervention
-  prop_G2_L <- mean(data_G2[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]]) # without intervention
 
   if (years_lost) {
     tgrid <- seq(0, tau, length = 100)
     prop_G1 <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
       data_G1[A0 == a0 & Delta == 1, mean(Delta == 1 & Time <= t)])) # with intervention
-    prop_G2 <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
-      data_G2[A0 == a0 & Delta == 1, mean(Delta == 1 & Time <= t)])) # without intervention
 
     prop_G1_L <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
       mean(data_G1[A0 == a0, any(Delta == 2 & Time <= t)[1], by = "ID"][[2]]))) # with intervention
-    prop_G2_L <- sum(diff(tgrid)[1]*sapply(tgrid[-1], function(t)
-      mean(data_G2[A0 == a0, any(Delta == 2 & Time <= t)[1], by = "ID"][[2]]))) # without intervention
-
   }
 
-  return(list(effect_L = c(G1 = prop_G1_L, G2 = prop_G2_L),
-              effect_death = c(G1 = prop_G1, G2 = prop_G2)))
+  return(list(effect_L = prop_G1_L, effect_death =prop_G1))
 }

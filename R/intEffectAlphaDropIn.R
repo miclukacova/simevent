@@ -5,8 +5,7 @@
 #' Change in Covariate Process (L) and optionally Treatment (A). It simulates
 #' under the intervnetion where \eqn{\eta} parameter of the Drop In process is multiplied
 #' by a factor \code{alpha}. It evaluates the proportion of death and Drop In events
-#' by time \eqn{\tau} within the subgroup defined by \code{A0 = a0}, comparing intervened
-#' and non-intervened scenarios.
+#' by time \eqn{\tau} within the subgroup defined by \code{A0 = a0}.
 #'
 #' @title Perform intervention on Drop In process intensity
 #'
@@ -45,8 +44,8 @@
 #'
 #' @return A list containing:
 #' \describe{
-#'   \item{effect_Z}{Proportion of subjects experiencing Drop In by time \eqn{\tau} with and without intervention.}
-#'   \item{effect_death}{Proportion of subjects dying by time \eqn{\tau} with and without intervention.}
+#'   \item{effect_Z}{Proportion of subjects experiencing Drop In by time \eqn{\tau} with intervention.}
+#'   \item{effect_death}{Proportion of subjects dying by time \eqn{\tau} with intervention.}
 #' }
 #'
 #' @export
@@ -85,33 +84,14 @@ intEffectAlphaDropIn <- function(N = 1e4,
                        beta_A0_L = beta_A0_L, beta_A0_A = beta_A0_A, beta_A0_Z = beta_A0_Z, beta_A0_D = beta_A0_D, beta_A0_C = beta_A0_C,
                        lower = lower, upper = upper)
 
-  # Generate large data set without intervened intensity
-  data_G2 <- simDropIn(N = N,
-                       cens = 0,
-                       generate.A0 = function(N,L0) rep(0,N),
-                       eta = c(eta[1:2],eta[3]*alpha, eta[4]),
-                       nu = nu,
-                       #followup = tau+1,
-                       beta_L_A = beta_L_A, beta_L_Z = beta_L_Z, beta_L_D = beta_L_D, beta_L_C = beta_L_C,
-                       beta_A_L = beta_A_L, beta_A_Z = beta_A_Z, beta_A_D = beta_A_D, beta_A_C = beta_A_C,
-                       beta_Z_L = beta_Z_L, beta_Z_A = beta_Z_A, beta_Z_D = beta_Z_D, beta_Z_C = beta_Z_C,
-                       beta_L0_L = beta_L0_L, beta_L0_A = beta_L0_A, beta_L0_Z = beta_L0_Z, beta_L0_D = beta_L0_D, beta_L0_C = beta_L0_C,
-                       beta_A0_L = beta_A0_L, beta_A0_A = beta_A0_A, beta_A0_Z = beta_A0_Z, beta_A0_D = beta_A0_D, beta_A0_C = beta_A0_C,
-                       lower = lower, upper = upper)
-
-  if(plot) gridExtra::grid.arrange(plotEventData(data_G1[1:250],
-                                                 title = "Under Intervention"),
-                                   plotEventData(data_G2[1:250],
-                                                 title = "Without Intervention"), nrow = 1)
+  if(plot) plotEventData(data_G1[1:250],title = "Under Intervention")
 
   #Proportion of subjects dying before some time $\tau$ in a0 group
   prop_G1 <- data_G1[A0 == a0 & Delta == 1, mean(Delta == 1 & Time < tau)] # with intervention
-  prop_G2 <- data_G2[A0 == a0 & Delta == 1, mean(Delta == 1 & Time < tau)] # without intervention
+
   #Proportion of subjects experiencing Drop In before some time \tau in a0 group
   prop_G1_Z <- mean(data_G1[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]]) # with intervention
-  prop_G2_Z <- mean(data_G2[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]]) # without intervention
 
-  return(list(effect_Z = c(G1 = prop_G1_Z, G2 = prop_G2_Z),
-              effect_death = c(G1 = prop_G1, G2 = prop_G2)))
+  return(list(effect_Z = prop_G1_Z, effect_death = prop_G1))
 
 }
