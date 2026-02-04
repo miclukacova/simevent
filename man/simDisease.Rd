@@ -30,7 +30,8 @@ simDisease(
 \arguments{
 \item{N}{Numeric scalar. Number of individuals to simulate.}
 
-\item{eta}{Numeric vector of length 3. Shape parameters for Weibull intensities with parameterization \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 3)}.}
+\item{eta}{Numeric vector of length 3. Shape parameters for Weibull intensities with parameterization
+\eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 3)}.}
 
 \item{nu}{Numeric vector of length 3. Scale parameters for the Weibull hazards. Defaults to \code{rep(1.1, 3)}.}
 
@@ -62,9 +63,14 @@ simDisease(
 
 \item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
 
-\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0.
+Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
 
-\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
+\item{at_risk_cov}{Function. Function determining if an individual is at risk for
+each event type, given their covariates. Takes a numeric vector covariates and returns
+a binary vector. Default returns 1 for all events.}
+
+\item{...}{Additional arguments passed to \code{simEventData} or \code{simEventTV}}
 }
 \value{
 A data frame containing the simulated data with columns:

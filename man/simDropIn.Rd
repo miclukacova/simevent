@@ -6,6 +6,16 @@
 \usage{
 simDropIn(
   N,
+  eta = c(0.5, 0.5, 0.1, 0.25),
+  nu = c(1.1, 1.1, 1.1, 1.1),
+  adherence = FALSE,
+  followup = Inf,
+  cens = 1,
+  generate.A0 = function(N, L0) stats::rbinom(N, 1, 0.5),
+  lower = 1e-200,
+  upper = 1e+10,
+  t_prime = NULL,
+  at_risk_cov = NULL,
   beta_L_A = 1,
   beta_L_Z = 2,
   beta_L_D = 1.5,
@@ -28,14 +38,6 @@ simDropIn(
   beta_A0_Z = 0,
   beta_A0_D = -2,
   beta_A0_C = 0,
-  eta = c(0.5, 0.5, 0.1, 0.25),
-  nu = c(1.1, 1.1, 1.1, 1.1),
-  adherence = FALSE,
-  followup = Inf,
-  cens = 1,
-  generate.A0 = function(N, L0) stats::rbinom(N, 1, 0.5),
-  lower = 1e-200,
-  upper = 1e+10,
   beta_L_A_prime = 0,
   beta_L_Z_prime = 0,
   beta_L_D_prime = 0,
@@ -58,13 +60,34 @@ simDropIn(
   beta_A0_Z_prime = 0,
   beta_A0_D_prime = 0,
   beta_A0_C_prime = 0,
-  t_prime = NULL,
-  at_risk_cov = NULL,
   ...
 )
 }
 \arguments{
 \item{N}{Integer. Number of individuals to simulate.}
+
+\item{eta}{Numeric vector of length 4 (or 5). Shape parameters of the Weibull baseline intensity for each event type.
+\deqn{\eta \nu t^{\nu - 1}}.}
+
+\item{nu}{Numeric vector of length 4 (or 5). Scale parameters for the Weibull hazard.}
+
+\item{adherence}{Logical. Indicator of whether a Treatment process should be simulated.}
+
+\item{followup}{Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).}
+
+\item{cens}{Logical. Indicator of whether there should be a censoring process.}
+
+\item{generate.A0}{Function. Function to generate the baseline treatment covariate A0.
+Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+
+\item{lower}{Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.}
+
+\item{upper}{Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.}
+
+\item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
+
+\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type,
+given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
 
 \item{beta_L_A}{Numeric. Specifies how L affects A.}
 
@@ -110,23 +133,6 @@ simDropIn(
 
 \item{beta_A0_C}{Numeric. Specifies how L affects C.}
 
-\item{eta}{Numeric vector of length 4 (or 5). Shape parameters of the Weibull baseline intensity for each event type.
-\deqn{\eta \nu t^{\nu - 1}}.}
-
-\item{nu}{Numeric vector of length 4 (or 5). Scale parameters for the Weibull hazard.}
-
-\item{adherence}{Logical. Indicator of whether a Treatment process should be simulated.}
-
-\item{followup}{Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).}
-
-\item{cens}{Logical. Indicator of whether there should be a censoring process.}
-
-\item{generate.A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
-
-\item{lower}{Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.}
-
-\item{upper}{Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.}
-
 \item{beta_L_A_prime}{Numeric. Specifies how L additionally affects A after time t_prime.}
 
 \item{beta_L_Z_prime}{Numeric. Specifies how L additionally affects Z after time t_prime.}
@@ -171,9 +177,7 @@ simDropIn(
 
 \item{beta_A0_C_prime}{Numeric. Specifies how L additionally affects after time C.}
 
-\item{t_prime}{Numeric scalar or NULL. Time point where effects change (optional).}
-
-\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
+\item{...}{Additional arguments passed to \code{simEventData} or \code{simEventTV}}
 }
 \value{
 Data frame containing the simulated event history data
