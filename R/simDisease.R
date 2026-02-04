@@ -49,7 +49,7 @@ simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
                    beta_A0_L = 0, beta_L0_C = 0, beta_A0_C = 0, beta_L_C = 0,
                    followup = Inf, lower = 10^(-15), upper = 200,
                    beta_L_D_t_prime = NULL, t_prime = NULL, gen_A0 = NULL,
-                   at_risk_cov = NULL){
+                   at_risk_cov = NULL, ...){
 
   at_risk <- function(events) {
     return(c(
@@ -77,12 +77,12 @@ simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
     tv_eff[5,2] <- beta_L_D_t_prime
     data <- simEventTV(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
                          max_cens = followup, lower = lower, upper = upper,
-                         t_prime = t_prime, tv_eff = tv_eff, gen_A0 = gen_A0)
+                         t_prime = t_prime, tv_eff = tv_eff, gen_A0 = gen_A0, ...)
   }
   else{
     data <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
                          max_cens = followup, lower = lower, upper = upper,
-                         gen_A0 = gen_A0, at_risk_cov = at_risk_cov)
+                         gen_A0 = gen_A0, at_risk_cov = at_risk_cov, ...)
   }
 
   # We don't need columns for terminal events

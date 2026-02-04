@@ -84,7 +84,8 @@ simDropIn <- function(N, beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 
                       beta_L0_L_prime = 0,beta_L0_A_prime = 0,beta_L0_Z_prime = 0,
                       beta_L0_D_prime = 0,beta_L0_C_prime = 0,beta_A0_L_prime = 0,
                       beta_A0_A_prime = 0,beta_A0_Z_prime = 0,beta_A0_D_prime = 0,
-                      beta_A0_C_prime = 0, t_prime = NULL, at_risk_cov = NULL){
+                      beta_A0_C_prime = 0, t_prime = NULL, at_risk_cov = NULL,
+                      ...){
 
   N0 <- N1 <- ID <- NULL
 
@@ -155,7 +156,8 @@ simDropIn <- function(N, beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 
                      upper = upper,
                      tv_eff = beta_prime,
                      t_prime = t_prime,
-                     at_risk_cov = at_risk_cov)
+                     at_risk_cov = at_risk_cov,
+                     ...)
   }
   else{
     data <- simEventData(N,
@@ -167,7 +169,8 @@ simDropIn <- function(N, beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 
                          gen_A0 = generate.A0,
                          lower = lower,
                          upper = upper,
-                         at_risk_cov = at_risk_cov)
+                         at_risk_cov = at_risk_cov,
+                         ...)
   }
 
   setnames(data, c("N2", "N3"), c("Z", "L"))

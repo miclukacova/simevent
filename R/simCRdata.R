@@ -50,8 +50,7 @@ simCRdata <- function(N,
                                                 ncol = ncol(beta)))
 
     results <- simEventData(N, beta = beta, eta = eta, nu = nu, at_risk = at_risk,
-                            term_deltas = c(0,1,2),
-                            ...)
+                            term_deltas = c(0,1,2), ...)
 
     results <- results[, !c("N0", "N1", "N2")]
 

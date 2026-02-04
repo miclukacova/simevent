@@ -60,7 +60,8 @@ simTreatment <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1,
                          beta_L_A_prime = 0, beta_L_D_prime = 0, beta_A_D_prime = 0,
                          beta_A_L_prime = 0, beta_L0_A_prime = 0, beta_L0_L_prime = 0,
                          beta_L0_D_prime = 0, beta_L0_C_prime = 0, beta_L_C_prime = 0,
-                         beta_A_C_prime = 0, t_prime = NULL, at_risk_cov = NULL){
+                         beta_A_C_prime = 0, t_prime = NULL, at_risk_cov = NULL,
+                         ...){
 
   Time <- A0 <- N0 <- N1 <- ID <- NULL
 
@@ -111,12 +112,12 @@ simTreatment <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1,
 
     data <- simEventTV(N, beta = beta, eta = eta, nu = nu, max_cens = followup,
                        at_risk = at_risk, t_prime = t_prime, tv_eff = tv_eff,
-                       at_risk_cov = at_risk_cov, upper = upper, lower = lower)
+                       at_risk_cov = at_risk_cov, upper = upper, lower = lower, ...)
   }
   else{
     data <- simEventData(N, beta = beta, eta = eta, nu = nu, max_cens = followup,
                          at_risk = at_risk, at_risk_cov = at_risk_cov, upper = upper,
-                         lower = lower)
+                         lower = lower, ...)
   }
 
 
