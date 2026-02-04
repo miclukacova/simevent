@@ -24,7 +24,7 @@ The simevent package
   - [Example 7: Simulating data from
     data](#example-7-simulating-data-from-data)
     - [Using `simEventCox`](#using-simeventcox)
-    - [Using `simEventRF`](#using-simeventrf)
+    - [Using `simEventObj`](#using-simeventobj)
   - [Example 8: Interventions](#example-8-interventions)
 
 # simevent
@@ -70,9 +70,9 @@ possible `simEventData` is recommended.
 
 Another branch of the package concerns simulating data from data. For
 this the package has two functions, respectively `simEventCox` and
-`simEventRF`. The first function takes as input Cox regressions and
-simulates data using these, while the latter takes as input a fitted
-random forest.
+`simEventObj`. The first function takes as input Cox regressions and
+simulates data using these, while the latter takes as input a general
+model equipped with a `predict2` method.
 
 Once data is simulated the package includes functions for plotting
 (`plotEventData`) and formatting (`IntFormatData`).
@@ -108,7 +108,7 @@ provided.
 | Function | Description | Key Arguments | Example |
 |----|----|----|----|
 | `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `L0_old`, `A0_old` | `simEventCox(N, cox_fits, L0_old, A0_old)` |
-| `simEventRF()` | Simulates new data using a random forest fitted using the `randomForestSRC` package | `N`, `RF_fit`, `list_old_vars` | `simEventRF(100, RF_fit, list_old_vars = list_old_vars, term_events = c(1,2))` |
+| `simEventObj()` | Simulates new data using a general model | `N`, `obj`, `list_old_vars` | `simEventObj(100, obj, list_old_vars = list_old_vars)` |
 
 **Functions for performing interventions**
 
@@ -501,22 +501,36 @@ head(new_data)
 #> 6:     5  5.055418     1 0.5462261     1         1         0
 ```
 
-### Using `simEventRF`
+### Using `simEventObj`
 
-If we want to use `simEventRF` for simulating new data from the observed
-data, we need to fit a random forest model using `rfsrc` from the
-`randomForestSRC` package:
+If we want to use `simEventObj` for simulating new data from the
+observed data, we need to fit a general model to data and equip it with
+a `predict2` method. We can for example fit a random forest model using
+`rfsrc` from the `randomForestSRC` package:
 
 ``` r
 RF_fit <- randomForestSRC::rfsrc(Surv(Time, Delta) ~ L0 + A0, data = data)
 ```
 
-Then we can call the function `simEventRF` providing the fitted Random
+Then we equip it with a `predict2` model
+
+``` r
+predict2 <- function(obj, ...) {
+  UseMethod("predict2")
+}
+
+predict2.rfsrc <- function(obj, sim_data, ...){
+  preds <- stats::predict(RF_fit, sim_data)
+  list(time = preds$time.interest, chf = preds$chf)
+}
+```
+
+Then we can call the function `simEventObj` providing the fitted Random
 Forest as argument:
 
 ``` r
 list_old_vars = list(L0 = data$L0, A0 = data$A0)
-new_data <- simEventRF(100, RF_fit, list_old_vars = list_old_vars, term_events = c(1,2))
+new_data <- simEventObj(100, RF_fit, list_old_vars = list_old_vars)
 ```
 
 The new simulated data looks like:
@@ -568,14 +582,9 @@ sample of the event data for each scenario for comparison.
 
 ``` r
 intEffectAlphaDisease(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot = TRUE)
+#> $effect_L
+#> [1] 0.8363509
+#> 
+#> $effect_death
+#> [1] 1.466341
 ```
-
-<img src="man/figures/README-unnamed-chunk-35-1.png" width="100%" />
-
-    #> $effect_L
-    #>        G1        G2 
-    #> 0.8363509 0.9271643 
-    #> 
-    #> $effect_death
-    #>       G1       G2 
-    #> 1.466341 1.476193
