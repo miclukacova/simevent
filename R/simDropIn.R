@@ -7,6 +7,19 @@
 #' @title `simDropIn`
 #'
 #' @param N Integer. Number of individuals to simulate.
+#' @param eta Numeric vector of length 4 (or 5). Shape parameters of the Weibull baseline intensity for each event type.
+#' \deqn{\eta \nu t^{\nu - 1}}.
+#' @param nu Numeric vector of length 4 (or 5). Scale parameters for the Weibull hazard.
+#' @param adherence Logical. Indicator of whether a Treatment process should be simulated.
+#' @param followup Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).
+#' @param cens Logical. Indicator of whether there should be a censoring process.
+#' @param generate.A0 Function. Function to generate the baseline treatment covariate A0.
+#' Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param lower Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.
+#' @param upper Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.
+#' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
+#' @param at_risk_cov Function. Function determining if an individual is at risk for each event type,
+#'  given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
 #' @param beta_L_A Numeric. Specifies how L affects A.
 #' @param beta_L_Z Numeric. Specifies how L affects Z.
 #' @param beta_L_D Numeric. Specifies how L affects D.
@@ -29,15 +42,6 @@
 #' @param beta_A0_Z Numeric. Specifies how L affects Z.
 #' @param beta_A0_D Numeric. Specifies how L affects D.
 #' @param beta_A0_C Numeric. Specifies how L affects C.
-#' @param eta Numeric vector of length 4 (or 5). Shape parameters of the Weibull baseline intensity for each event type.
-#' \deqn{\eta \nu t^{\nu - 1}}.
-#' @param nu Numeric vector of length 4 (or 5). Scale parameters for the Weibull hazard.
-#' @param adherence Logical. Indicator of whether a Treatment process should be simulated.
-#' @param followup Numeric. Maximum censoring time. Events occurring after this time are censored. Default is Inf (no censoring).
-#' @param cens Logical. Indicator of whether there should be a censoring process.
-#' @param generate.A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
-#' @param lower Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.
-#' @param upper Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.
 #' @param beta_L_A_prime Numeric. Specifies how L additionally affects A after time t_prime.
 #' @param beta_L_Z_prime Numeric. Specifies how L additionally affects Z after time t_prime.
 #' @param beta_L_D_prime Numeric. Specifies how L additionally affects D after time t_prime.
@@ -60,31 +64,68 @@
 #' @param beta_A0_Z_prime Numeric. Specifies how L additionally affects after time Z.
 #' @param beta_A0_D_prime Numeric. Specifies how L additionally affects after time D.
 #' @param beta_A0_C_prime Numeric. Specifies how L additionally affects after time C.
-#' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
-#' @param at_risk_cov Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
+#' @param ... Additional arguments passed to \code{simEventData} or \code{simEventTV}
 #'
 #' @return  Data frame containing the simulated event history data
 #' @export
 #'
 #' @examples
 #' simDropIn(10)
-simDropIn <- function(N, beta_L_A = 1, beta_L_Z = 2, beta_L_D = 1.5, beta_L_C = 0,
-                      beta_A_L = -0.5,  beta_A_Z = -0.5, beta_A_D = -1, beta_A_C = 0,
-                      beta_Z_L = -1, beta_Z_A = 0, beta_Z_D = -1, beta_Z_C = 0,
-                      beta_L0_L = 1, beta_L0_A = 1, beta_L0_Z = 1, beta_L0_D = 1, beta_L0_C = 0,
-                      beta_A0_L = -1.5, beta_A0_A = 0, beta_A0_Z = 0, beta_A0_D = -2, beta_A0_C = 0,
-                      eta = c(0.5, 0.5, 0.1, 0.25),  nu = c(1.1, 1.1, 1.1, 1.1),
-                      adherence = FALSE, followup = Inf, cens = 1,
+simDropIn <- function(N,
+                      eta = c(0.5, 0.5, 0.1, 0.25),
+                      nu = c(1.1, 1.1, 1.1, 1.1),
+                      adherence = FALSE,
+                      followup = Inf,
+                      cens = 1,
                       generate.A0 = function(N, L0) stats::rbinom(N, 1, 0.5),
-                      lower = 1e-200, upper = 1e10,
-                      beta_L_A_prime = 0, beta_L_Z_prime = 0, beta_L_D_prime = 0,
-                      beta_L_C_prime = 0, beta_A_L_prime = 0, beta_A_Z_prime = 0,
-                      beta_A_D_prime = 0, beta_A_C_prime = 0, beta_Z_L_prime = 0,
-                      beta_Z_A_prime = 0, beta_Z_D_prime = 0, beta_Z_C_prime = 0,
-                      beta_L0_L_prime = 0,beta_L0_A_prime = 0,beta_L0_Z_prime = 0,
-                      beta_L0_D_prime = 0,beta_L0_C_prime = 0,beta_A0_L_prime = 0,
-                      beta_A0_A_prime = 0,beta_A0_Z_prime = 0,beta_A0_D_prime = 0,
-                      beta_A0_C_prime = 0, t_prime = NULL, at_risk_cov = NULL,
+                      lower = 1e-200,
+                      upper = 1e10,
+                      t_prime = NULL,
+                      at_risk_cov = NULL,
+                      beta_L_A = 1,
+                      beta_L_Z = 2,
+                      beta_L_D = 1.5,
+                      beta_L_C = 0,
+                      beta_A_L = -0.5,
+                      beta_A_Z = -0.5,
+                      beta_A_D = -1,
+                      beta_A_C = 0,
+                      beta_Z_L = -1,
+                      beta_Z_A = 0,
+                      beta_Z_D = -1,
+                      beta_Z_C = 0,
+                      beta_L0_L = 1,
+                      beta_L0_A = 1,
+                      beta_L0_Z = 1,
+                      beta_L0_D = 1,
+                      beta_L0_C = 0,
+                      beta_A0_L = -1.5,
+                      beta_A0_A = 0,
+                      beta_A0_Z = 0,
+                      beta_A0_D = -2,
+                      beta_A0_C = 0,
+                      beta_L_A_prime = 0,
+                      beta_L_Z_prime = 0,
+                      beta_L_D_prime = 0,
+                      beta_L_C_prime = 0,
+                      beta_A_L_prime = 0,
+                      beta_A_Z_prime = 0,
+                      beta_A_D_prime = 0,
+                      beta_A_C_prime = 0,
+                      beta_Z_L_prime = 0,
+                      beta_Z_A_prime = 0,
+                      beta_Z_D_prime = 0,
+                      beta_Z_C_prime = 0,
+                      beta_L0_L_prime = 0,
+                      beta_L0_A_prime = 0,
+                      beta_L0_Z_prime = 0,
+                      beta_L0_D_prime = 0,
+                      beta_L0_C_prime = 0,
+                      beta_A0_L_prime = 0,
+                      beta_A0_A_prime = 0,
+                      beta_A0_Z_prime = 0,
+                      beta_A0_D_prime = 0,
+                      beta_A0_C_prime = 0,
                       ...){
 
   N0 <- N1 <- ID <- NULL

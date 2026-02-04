@@ -59,7 +59,8 @@ simDropIn(
   beta_A0_D_prime = 0,
   beta_A0_C_prime = 0,
   t_prime = NULL,
-  at_risk_cov = NULL
+  at_risk_cov = NULL,
+  ...
 )
 }
 \arguments{

@@ -14,7 +14,8 @@
 #' @title Simulate Data in a Disease Setting
 #'
 #' @param N Numeric scalar. Number of individuals to simulate.
-#' @param eta Numeric vector of length 3. Shape parameters for Weibull intensities with parameterization \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 3)}.
+#' @param eta Numeric vector of length 3. Shape parameters for Weibull intensities with parameterization
+#' \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 3)}.
 #' @param nu Numeric vector of length 3. Scale parameters for the Weibull hazards. Defaults to \code{rep(1.1, 3)}.
 #' @param cens Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).
 #' @param beta_L0_D Numeric scalar. Effect of baseline covariate L0 on death risk (default 1).
@@ -30,8 +31,12 @@
 #' @param upper Numeric scalar. Upper bound for root-finding (default 200).
 #' @param beta_L_D_t_prime Numeric scalar or NULL. Additional effect of covariate change on death risk after time \code{t_prime} (optional).
 #' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
-#' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
-#' @param at_risk_cov Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
+#' @param gen_A0 Function. Function to generate the baseline treatment covariate A0.
+#' Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param at_risk_cov Function. Function determining if an individual is at risk for
+#' each event type, given their covariates. Takes a numeric vector covariates and returns
+#' a binary vector. Default returns 1 for all events.
+#' @param ... Additional arguments passed to \code{simEventData} or \code{simEventTV}
 #'
 #' @return A data frame containing the simulated data with columns:
 #'  \item{ID}{Individual identifier}
@@ -44,12 +49,26 @@
 #' simDisease(10)
 #'
 #' @export
-simDisease <- function(N, eta = rep(0.1,3), nu = rep(1.1,3),  cens = 1,
-                   beta_L0_D = 1, beta_L0_L = 1, beta_L_D = 1, beta_A0_D = 0,
-                   beta_A0_L = 0, beta_L0_C = 0, beta_A0_C = 0, beta_L_C = 0,
-                   followup = Inf, lower = 10^(-15), upper = 200,
-                   beta_L_D_t_prime = NULL, t_prime = NULL, gen_A0 = NULL,
-                   at_risk_cov = NULL, ...){
+simDisease <- function(N,
+                       eta = rep(0.1,3),
+                       nu = rep(1.1,3),
+                       cens = 1,
+                       beta_L0_D = 1,
+                       beta_L0_L = 1,
+                       beta_L_D = 1,
+                       beta_A0_D = 0,
+                       beta_A0_L = 0,
+                       beta_L0_C = 0,
+                       beta_A0_C = 0,
+                       beta_L_C = 0,
+                       followup = Inf,
+                       lower = 10^(-15),
+                       upper = 200,
+                       beta_L_D_t_prime = NULL,
+                       t_prime = NULL,
+                       gen_A0 = NULL,
+                       at_risk_cov = NULL,
+                       ...){
 
   at_risk <- function(events) {
     return(c(

@@ -34,7 +34,8 @@ simTreatment(
   beta_L_C_prime = 0,
   beta_A_C_prime = 0,
   t_prime = NULL,
-  at_risk_cov = NULL
+  at_risk_cov = NULL,
+  ...
 )
 }
 \arguments{

@@ -8,6 +8,9 @@
 #' the effect of covariate \code{L = 1} on the hazard of treatment.
 #'
 #' @param N Integer. Number of individuals to simulate.
+#' @param eta Numeric vector of length 4. Shape parameters for Weibull intensities, parameterized as
+#'  \eqn{\eta \nu t^{\nu - 1}}. Default is \code{rep(0.1, 4)}.
+#' @param nu Numeric vector of length 4. Scale parameters for Weibull hazards. Default is \code{rep(1.1, 4)}.
 #' @param beta_L_A Numeric. Effect of covariate \code{L = 1} on treatment hazard. Default 1.
 #' @param beta_L_D Numeric. Effect of covariate \code{L = 1} on death hazard. Default 1.
 #' @param beta_A_D Numeric. Effect of treatment \code{A = 1} on death hazard. Default -1.
@@ -18,13 +21,6 @@
 #' @param beta_L0_C Numeric. Effect of baseline covariate \code{L0} on censoring hazard. Default 0.
 #' @param beta_L_C Numeric. Effect of covariate \code{L = 1} on censoring hazard. Default 0.
 #' @param beta_A_C Numeric. Effect of treatment \code{A = 1} on censoring hazard. Default 0.
-#' @param eta Numeric vector of length 4. Shape parameters for Weibull intensities, parameterized as \eqn{\eta \nu t^{\nu - 1}}. Default is \code{rep(0.1, 4)}.
-#' @param nu Numeric vector of length 4. Scale parameters for Weibull hazards. Default is \code{rep(1.1, 4)}.
-#' @param followup Numeric. Maximum censoring time. Defaults to \code{Inf} (no censoring).
-#' @param cens Integer (0 or 1). Indicates if censoring is possible. Default 1.
-#' @param op Integer (0 or 1). Indicates if treatment (operation) is possible. Default 1.
-#' @param lower Numeric. Lower bound for root finding (inverse cumulative hazard). Default \code{1e-15}.
-#' @param upper Numeric. Upper bound for root finding (inverse cumulative hazard). Default 200.
 #' @param beta_L_A_prime Numeric. Additional effect of covariate \code{L = 1} on treatment hazard. Default 0.
 #' @param beta_L_D_prime Numeric. Additionalffect of covariate \code{L = 1} on death hazard. Default 0.
 #' @param beta_A_D_prime Numeric. Effect of treatment \code{A = 1} on death hazard. Default 0.
@@ -36,7 +32,14 @@
 #' @param beta_L_C_prime Numeric. Effect of covariate \code{L = 1} on censoring hazard. Default 0.
 #' @param beta_A_C_prime Numeric. Effect of treatment \code{A = 1} on censoring hazard. Default 0.
 #' @param t_prime Numeric scalar or NULL. Time point where effects change (optional).
-#' @param at_risk_cov Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
+#' @param at_risk_cov Function. Function determining if an individual is at risk for each event type,
+#' given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
+#' @param cens Integer (0 or 1). Indicates if censoring is possible. Default 1.
+#' @param op Integer (0 or 1). Indicates if treatment (operation) is possible. Default 1.
+#' @param lower Numeric. Lower bound for root finding (inverse cumulative hazard). Default \code{1e-15}.
+#' @param upper Numeric. Upper bound for root finding (inverse cumulative hazard). Default 200.
+#' @param followup Numeric. Maximum censoring time. Defaults to \code{Inf} (no censoring).
+#' @param ... Additional arguments passed to \code{simEventData} or \code{simEventTV}
 #'
 #' @return A \code{data.frame} with columns:
 #' \itemize{
@@ -52,15 +55,36 @@
 #'
 #' @examples
 #' simTreatment(10)
-simTreatment <- function(N, beta_L_A = 1, beta_L_D = 1, beta_A_D = -1,
-                         beta_A_L = -0.5,beta_L0_A = 1, beta_L0_L = 1,
-                         beta_L0_D = 1, beta_L0_C = 0, beta_L_C = 0,
-                         beta_A_C = 0, eta = rep(0.1,4), nu = rep(1.1,4),
-                         followup = Inf, cens = 1, op = 1, lower = 10^(-15), upper = 200,
-                         beta_L_A_prime = 0, beta_L_D_prime = 0, beta_A_D_prime = 0,
-                         beta_A_L_prime = 0, beta_L0_A_prime = 0, beta_L0_L_prime = 0,
-                         beta_L0_D_prime = 0, beta_L0_C_prime = 0, beta_L_C_prime = 0,
-                         beta_A_C_prime = 0, t_prime = NULL, at_risk_cov = NULL,
+simTreatment <- function(N,
+                         eta = rep(0.1,4),
+                         nu = rep(1.1,4),
+                         beta_L_A = 1,
+                         beta_L_D = 1,
+                         beta_A_D = -1,
+                         beta_A_L = -0.5,
+                         beta_L0_A = 1,
+                         beta_L0_L = 1,
+                         beta_L0_D = 1,
+                         beta_L0_C = 0,
+                         beta_L_C = 0,
+                         beta_A_C = 0,
+                         beta_L_A_prime = 0,
+                         beta_L_D_prime = 0,
+                         beta_A_D_prime = 0,
+                         beta_A_L_prime = 0,
+                         beta_L0_A_prime = 0,
+                         beta_L0_L_prime = 0,
+                         beta_L0_D_prime = 0,
+                         beta_L0_C_prime = 0,
+                         beta_L_C_prime = 0,
+                         beta_A_C_prime = 0,
+                         t_prime = NULL,
+                         at_risk_cov = NULL,
+                         cens = 1,
+                         op = 1,
+                         lower = 10^(-15),
+                         upper = 200,
+                         followup = Inf,
                          ...){
 
   Time <- A0 <- N0 <- N1 <- ID <- NULL

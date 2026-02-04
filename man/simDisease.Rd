@@ -23,7 +23,8 @@ simDisease(
   beta_L_D_t_prime = NULL,
   t_prime = NULL,
   gen_A0 = NULL,
-  at_risk_cov = NULL
+  at_risk_cov = NULL,
+  ...
 )
 }
 \arguments{

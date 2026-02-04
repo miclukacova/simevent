@@ -48,7 +48,7 @@ simEventObj <- function(N,
                         event_names = NULL,
                         list_old_vars = NULL) {
 
-  ID <- NULL
+  ID <- predict2 <- NULL
 
   # Initialize last event time
   T0 <- rep(0, N)
