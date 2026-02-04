@@ -104,7 +104,7 @@ simEventRF <- function(N,
 
   invcumhaz_fn <- function(p, i, j){
     cumhazz <-  if(num_events == 1) chf_mat else chf_mat[,,j]
-    idx <- sapply(1:length(i), FUN = function(k) findInterval(p[k], cumhazz[i[k],], checkSorted = F))
+    idx <- sapply(1:length(i), FUN = function(k) findInterval(p[k], cumhazz[i[k],]))
     idx[idx == ncol(cumhazz)] <- ncol(cumhazz) - 1
     p1 <- cumhazz[cbind(i, idx)]; p2 <- cumhazz[cbind(i,idx + 1)]
     y1 <- times[idx]; y2 <- times[idx + 1]

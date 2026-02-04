@@ -17,8 +17,7 @@ Imports:
     data.table,
     ggplot2,
     survival,
-    Rcpp,
-    randomForestSRC
+    Rcpp
 Suggests: 
     knitr,
     rmarkdown,
