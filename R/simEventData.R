@@ -62,7 +62,8 @@ simEventData <- function(N,                      # Number of individuals
                          lower = 10^(-15),       # Lower bound for ICH
                          upper = 200,            # Upper bound for ICH
                          gen_A0 = NULL,          # Generation of A0
-                         at_risk_cov = NULL      # At risk indicator as function of covariates
+                         at_risk_cov = NULL,      # At risk indicator as function of covariates
+                         ...
 ){
   ID <- NULL
 
@@ -171,7 +172,7 @@ simEventData <- function(N,                      # Number of individuals
     inverse_sc_haz <- function(p, t, i) {
       riskss <- at_risk(simmatrix[i, N_start:N_stop]) * at_risk_cov[,i]
       inverseScHaz(p, t, lower = lower, upper = upper, eta = eta, nu = nu, phi = phi[i,],
-                   at_risk = riskss)
+                   at_risk = riskss, ...)
 
     }
   }
