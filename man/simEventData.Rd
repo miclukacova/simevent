@@ -50,6 +50,8 @@ simEventData(
 \item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
 
 \item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
+
+\item{...}{Additional technical arguments}
 }
 \value{
 A \code{data.table} with columns:

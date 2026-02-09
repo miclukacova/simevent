@@ -32,6 +32,7 @@
 #' @param upper Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.
 #' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
 #' @param at_risk_cov Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
+#' @param ... Additional technical arguments
 #'
 #' @return A \code{data.table} with columns:
 #' \item{ID}{Individual identifier}
@@ -62,8 +63,8 @@ simEventData <- function(N,                      # Number of individuals
                          lower = 10^(-15),       # Lower bound for ICH
                          upper = 200,            # Upper bound for ICH
                          gen_A0 = NULL,          # Generation of A0
-                         at_risk_cov = NULL,      # At risk indicator as function of covariates
-                         ...
+                         at_risk_cov = NULL,     # At risk indicator as function of covariates
+                         ...                     # Additional technical arguments
 ){
   ID <- NULL
 
