@@ -1,6 +1,6 @@
 Package: simevent
 Title: Simulation and Analysis of Event History Data
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: person("Michaela", "Lukacova", , "michaela.lukacova@sund.ku.dk", role = c("aut", "cre"))
 Description: Simulate event history data from a framework where treatment decisions 
     and disease progression are represented as counting process. The user can specify 
