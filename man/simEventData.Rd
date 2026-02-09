@@ -18,7 +18,8 @@ simEventData(
   lower = 10^(-15),
   upper = 200,
   gen_A0 = NULL,
-  at_risk_cov = NULL
+  at_risk_cov = NULL,
+  ...
 )
 }
 \arguments{
