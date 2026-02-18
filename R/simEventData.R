@@ -180,7 +180,7 @@ simEventData <- function(N,                      # Number of individuals
 
   # Event probabilities
   probs <- function(t, i){
-    if(t == max_cens) return(c(1, rep(0, (num_events - 1))))
+    if(t >= max_cens) return(c(1, rep(0, (num_events - 1))))
     probs <- lambda(t, i)
     summ <- sum(probs)
     probs / summ
