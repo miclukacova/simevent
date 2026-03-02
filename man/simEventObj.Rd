@@ -27,7 +27,7 @@ A \code{data.table} with one row per event per individual containing:
 \item \code{ID} — Individual identifier.
 \item \code{Time} — Event time.
 \item \code{Delta} — Event type indicator.
-\item Baseline covariates \code{L0}, \code{A0}.
+\item Baseline covariates.
 \item Columns for each event type indicating cumulative event counts.
 }
 }
@@ -45,7 +45,7 @@ distribution and obtaining event times using the inverse of the cumulative hazar
 \details{
 The function simulates individual event histories by:
 \enumerate{
-\item Sampling initial baseline covariates (\code{L0}, \code{A0}) by resampling observed values.
+\item Sampling initial baseline covariates by resampling observed values.
 \item Extracting cumulative hazard functions from the object.
 \item Iteratively sampling event times.
 \item Updating covariate histories and event counts.

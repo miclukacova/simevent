@@ -24,7 +24,7 @@
 #' @details
 #' The function simulates individual event histories by:
 #' \enumerate{
-#'   \item Sampling initial baseline covariates (`L0`, `A0`) by resampling observed values.
+#'   \item Sampling initial baseline covariates by resampling observed values.
 #'   \item Extracting cumulative hazard functions from the object.
 #'   \item Iteratively sampling event times.
 #'   \item Updating covariate histories and event counts.
@@ -36,7 +36,7 @@
 #'   \item `ID` — Individual identifier.
 #'   \item `Time` — Event time.
 #'   \item `Delta` — Event type indicator.
-#'   \item Baseline covariates `L0`, `A0`.
+#'   \item Baseline covariates.
 #'   \item Columns for each event type indicating cumulative event counts.
 #' }
 #'

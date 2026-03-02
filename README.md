@@ -550,41 +550,42 @@ head(new_data)
 
 ## Example 8: Interventions
 
-Say you want to perform an intervention in the disease setting by
+Say you want to perform an intervention in the Drop In setting by
 scaling the intensity of one of your counting processes. Data without
 intervention can be simulated by scaling with the factor 1:
 
 ``` r
-alphaSimDisease(N = 10^3, alpha = 1,  tau = 5)
-#> $effect_D
-#> [1] 0.6223092
+alphaSim(N = 10^3, alpha = 1,  tau = 5, setting = "Drop In")
+#> $effectDeath
+#> [1] 0.09393346
 #> 
-#> $effect_L
-#> [1] 0.3424658
+#> $effectSetting
+#> [1] 0.6731898
 ```
 
 By default the function returns the proportion of individuals who
-experience death and the proportion of individuals who experience
-disease by a specified time in group . The user can specify what gets
+experience death and the proportion of individuals who experience Drop
+In by a specified time in group . The user can specify what gets
 returned by the function call with use of the arguments `years_lost` and
 `return_data`. If the former is set to TRUE the function returns number
-of years lost before of death and disease. If the latter is set to TRUE
+of years lost before of death and Drop In. If the latter is set to TRUE
 the function call returns the simulated data.
 
 To compare a non intervened scenario with a non intervened scenario, the
 function `intEffectAlphaTreat` can be used. This function simulates data
-from the disease setting in two scenarios. Under the intervention on the
-shape parameter of the disease process, which is multiplied by , and a
+from the Drop In setting in two scenarios. Under the intervention on the
+shape parameter of the Drop In process, which is multiplied by , and a
 baseline (non-intervened) scenario. It computes the proportion of
-individuals who experience death or disease by a specified time in the
+individuals who experience death or Drop In by a specified time in the
 group , optionally returning years lost. The function can also plot a
 sample of the event data for each scenario for comparison.
 
 ``` r
-intEffectAlphaDisease(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot = TRUE)
-#> $effect_L
-#> [1] 0.8363509
+intEffectAlpha(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot = TRUE,
+               setting = "Drop In")
+#> $effect_2
+#> [1] 1.498911
 #> 
 #> $effect_death
-#> [1] 1.466341
+#> [1] 0.3070905
 ```

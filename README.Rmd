@@ -78,7 +78,7 @@ Below is a table attempting to provide an overview of the package functions. Eac
 
 | Function | Description | Key Arguments | Example |
 |-----------|--------------|----------------|----------|
-| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `L0_old`, `A0_old` | `simEventCox(N, cox_fits, L0_old, A0_old)` |
+| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `list_old_vars` | `simEventCox(N, cox_fits, list_old_vars = list_old_vars)` |
 | `simEventObj()` | Simulates new data using a general model | `N`, `obj`, `list_old_vars` | `simEventObj(100, obj, list_old_vars = list_old_vars)` |
 
 **Functions for performing interventions**
@@ -385,7 +385,8 @@ Then we can call the function `simEventCox` providing the fitted Cox models as a
 
 ```{r}
 cox_fits <- list("Process 1" = cox1, "Process 2" = cox2)
-new_data <- simEventCox(100, cox_fits, L0_old = data$L0, A0_old = data$A0)
+list_old_vars <- list("L0" = data_obs$L0, "A0" = data_obs$A0)
+new_data <- simEventCox(100, cox_fits, list_old_vars = list_old_vars)
 ```
 
 The new simulated data looks like:
@@ -431,17 +432,18 @@ head(new_data)
 
 ## Example 8: Interventions
 
-Say you want to perform an intervention in the disease setting by scaling the intensity of one of your counting processes. Data without intervention can be simulated by scaling with the factor 1:
+Say you want to perform an intervention in the Drop In setting by scaling the intensity of one of your counting processes. Data without intervention can be simulated by scaling with the factor 1:
 
 ```{r}
-alphaSimDisease(N = 10^3, alpha = 1,  tau = 5)
+alphaSim(N = 10^3, alpha = 1,  tau = 5, setting = "Drop In")
 ```
 
-By default the function returns the proportion of individuals who experience death and the proportion of individuals who experience disease by a specified time \eqn{\tau} in group \code{A0 = a0}. The user can specify what gets returned by the function call with use of the arguments `years_lost` and `return_data`. If the  former is set to TRUE the function returns number of years lost before \eqn{\tau} of death and disease. If the latter is set to TRUE the function call returns the simulated data. 
+By default the function returns the proportion of individuals who experience death and the proportion of individuals who experience Drop In by a specified time \eqn{\tau} in group \code{A0 = a0}. The user can specify what gets returned by the function call with use of the arguments `years_lost` and `return_data`. If the  former is set to TRUE the function returns number of years lost before \eqn{\tau} of death and Drop In. If the latter is set to TRUE the function call returns the simulated data. 
 
-To compare a non intervened scenario with a non intervened scenario, the function `intEffectAlphaTreat` can be used. This function simulates data from the disease setting in two scenarios. Under the intervention on the shape parameter \eqn{\eta} of the disease process, which is multiplied by \code{alpha}, and a baseline (non-intervened) scenario. It computes the proportion of individuals who experience death or disease by a specified time \eqn{\tau} in the group \code{A0 = a0}, optionally returning years lost. The function can also plot a sample of the event data for each scenario for comparison.
+To compare a non intervened scenario with a non intervened scenario, the function `intEffectAlphaTreat` can be used. This function simulates data from the Drop In setting in two scenarios. Under the intervention on the shape parameter \eqn{\eta} of the Drop In process, which is multiplied by \code{alpha}, and a baseline (non-intervened) scenario. It computes the proportion of individuals who experience death or Drop In by a specified time \eqn{\tau} in the group \code{A0 = a0}, optionally returning years lost. The function can also plot a sample of the event data for each scenario for comparison.
 
 ```{r}
-intEffectAlphaDisease(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot = TRUE)
+intEffectAlpha(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot = TRUE,
+               setting = "Drop In")
 ```
 

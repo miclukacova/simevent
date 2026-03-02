@@ -7,10 +7,8 @@
 #' @param N Integer. The number of individuals to simulate.
 #' @param cox_fits A named list of fitted Cox proportional hazards models (`coxph` objects),
 #'   one for each event type. The names are used as event type labels.
-#' @param L0_old A vector of previously observed baseline covariate values for L0,
-#'   used for resampling baseline covariates.
-#' @param A0_old A vector of previously observed baseline covariate values for A0,
-#'   used for resampling baseline covariates.
+#' @param list_old_vars A named list containing the old covariates. New covariates will
+#' be simulated by drawing from the old covariates with replacement.
 #' @param n_event_max Integer vector. Maximum number of times each event type can occur
 #'   per individual.
 #' @param term_events Integer or integer vector. Indices of event types that are terminal,
@@ -23,7 +21,7 @@
 #' @details
 #' The function simulates individual event histories by:
 #' \enumerate{
-#'   \item Sampling initial baseline covariates (`L0`, `A0`) by resampling observed values.
+#'   \item Sampling initial baseline covariates by resampling observed values.
 #'   \item Extracting baseline cumulative hazard functions from the Cox models.
 #'   \item Iteratively sampling event times.
 #'   \item Updating covariate histories and event counts.
@@ -35,7 +33,7 @@
 #'   \item `ID` — Individual identifier.
 #'   \item `Time` — Event time.
 #'   \item `Delta` — Event type indicator.
-#'   \item Baseline covariates `L0`, `A0`.
+#'   \item Baseline covariates
 #'   \item Columns for each event type indicating cumulative event counts.
 #' }
 #'
@@ -55,13 +53,13 @@
 #'
 #' # Then simulate new data:
 #' cox_fits <- list("D" = cox_death, "L" = cox_Disease)
-#' new_data <- simEventCox(100, cox_fits = cox_fits, L0_old = data_obs$L0, A0_old = data_obs$A0)
+#' list_old_vars <- list("L0" = data_obs$L0, "A0" = data_obs$A0)
+#' new_data <- simEventCox(100, cox_fits = cox_fits, list_old_vars = list_old_vars)
 #'
 #' @export
 simEventCox <- function(N,
                         cox_fits,
-                        L0_old,
-                        A0_old,
+                        list_old_vars = NULL,
                         n_event_max = c(1,1),
                         term_events = 1,
                         intervention1 = NULL,
@@ -75,9 +73,16 @@ simEventCox <- function(N,
   num_alive <- N                                          # Number of alive individuals
   T_k <- rep(0, N)                                        # Last event time
 
+  # Sampling new covariates
+  if(is.null(names(list_old_vars))) warning("list_old_vars must be named list")
+  num_cov <- length(list_old_vars)
   # Data frame for storing data
-  sim_data <- data.frame(L0 = sample(L0_old, N, TRUE),
-                         A0 = sample(A0_old, N, TRUE))
+  sim_data <- data.frame(matrix(ncol = num_cov, nrow = N))
+  for(j in 1:num_cov){
+    sim_data[,j] <- sample(list_old_vars[[j]], N, TRUE)
+  }
+  colnames(sim_data) <- names(list_old_vars)
+
   for (name in names(cox_fits)) sim_data[[name]] <- 0
 
   # List for results

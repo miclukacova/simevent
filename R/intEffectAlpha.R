@@ -23,8 +23,8 @@
 #'
 #' @return A list with two components:
 #' \describe{
-#'   \item{\code{effect_L}}{Proportion (or years lost) of individuals diagnosed with disease by time \eqn{\tau} in group \code{A0 = a0}, under intervention (\code{G1}) and without intervention (\code{G2}).}
-#'   \item{\code{effect_death}}{Proportion (or years lost) of individuals who died by time \eqn{\tau} in group \code{A0 = a0}, under intervention (\code{G1}) and without intervention (\code{G2}).}
+#'   \item{\code{effect_L}}{Proportion (or years lost) of individuals diagnosed with disease by time \eqn{\tau} in group \code{A0 = a0}, under intervention.}
+#'   \item{\code{effect_death}}{Proportion (or years lost) of individuals who died by time \eqn{\tau} in group \code{A0 = a0}, under intervention.}
 #' }
 #' @export
 #'
@@ -38,7 +38,7 @@ intEffectAlpha <- function(N = 1e4,
                            tau = 5,
                            a0 = 1,
                            years_lost = FALSE,
-                           plot = FALSE,
+                           plot = TRUE,
                            lower = 10^(-30),
                            upper = 200,
                            cens = 0,

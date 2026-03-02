@@ -7,8 +7,7 @@
 simEventCox(
   N,
   cox_fits,
-  L0_old,
-  A0_old,
+  list_old_vars = NULL,
   n_event_max = c(1, 1),
   term_events = 1,
   intervention1 = NULL,
@@ -21,11 +20,8 @@ simEventCox(
 \item{cox_fits}{A named list of fitted Cox proportional hazards models (\code{coxph} objects),
 one for each event type. The names are used as event type labels.}
 
-\item{L0_old}{A vector of previously observed baseline covariate values for L0,
-used for resampling baseline covariates.}
-
-\item{A0_old}{A vector of previously observed baseline covariate values for A0,
-used for resampling baseline covariates.}
+\item{list_old_vars}{A named list containing the old covariates. New covariates will
+be simulated by drawing from the old covariates with replacement.}
 
 \item{n_event_max}{Integer vector. Maximum number of times each event type can occur
 per individual.}
@@ -45,7 +41,7 @@ A \code{data.table} with one row per event per individual containing:
 \item \code{ID} — Individual identifier.
 \item \code{Time} — Event time.
 \item \code{Delta} — Event type indicator.
-\item Baseline covariates \code{L0}, \code{A0}.
+\item Baseline covariates
 \item Columns for each event type indicating cumulative event counts.
 }
 }
@@ -57,7 +53,7 @@ and simulation proceeds by iteratively sampling event times until a terminal eve
 \details{
 The function simulates individual event histories by:
 \enumerate{
-\item Sampling initial baseline covariates (\code{L0}, \code{A0}) by resampling observed values.
+\item Sampling initial baseline covariates by resampling observed values.
 \item Extracting baseline cumulative hazard functions from the Cox models.
 \item Iteratively sampling event times.
 \item Updating covariate histories and event counts.
@@ -77,6 +73,7 @@ cox_Disease <- survival::coxph(survival::Surv(tstart, tstop, Delta == 2)
 
 # Then simulate new data:
 cox_fits <- list("D" = cox_death, "L" = cox_Disease)
-new_data <- simEventCox(100, cox_fits = cox_fits, L0_old = data_obs$L0, A0_old = data_obs$A0)
+list_old_vars <- list("L0" = data_obs$L0, "A0" = data_obs$A0)
+new_data <- simEventCox(100, cox_fits = cox_fits, list_old_vars = list_old_vars)
 
 }
