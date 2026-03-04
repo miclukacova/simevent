@@ -56,10 +56,9 @@ simStatinData <- function(N,
                        lower = lower,
                        upper = upper,
                        term_deltas = c(0,1,2),
-                       cens = cens,
                        ...)
 
-  #colnames(data) <- c("Censoring", "Death", "CVD", "Off Stat", "Medicines", "Diseases")
+  colnames(data)[28:33] <- c("C", "D", "CVD", "OS", "A", "L")
 
   return(data)
 }

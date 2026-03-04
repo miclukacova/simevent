@@ -135,9 +135,12 @@ simEventCox <- function(N,
       invhaz_fn[[j]](V[,j] / cox_term[[j]])
     })
 
+    # If we only have one individual, the matrix collapses to a vector
+    if(num_alive == 1) event_times <- matrix(event_times, nrow = 1, ncol = 6)
+
     # How many times can you experience the various events?
     for(j in seq_len(num_events)){
-      event_times[sim_data[, (2+j)] == n_event_max[j], j] <- Inf
+      event_times[sim_data[, (num_cov+j)] == n_event_max[j], j] <- Inf
     }
 
     # The next event is the minimum of these events
@@ -145,7 +148,7 @@ simEventCox <- function(N,
     Deltas <- apply(event_times, 1, which.min)
 
     # Update event counts
-    sim_data[cbind(seq_len(num_alive), Deltas + 2)] <- sim_data[cbind(seq_len(num_alive), Deltas + 2)] + 1
+    sim_data[cbind(seq_len(num_alive), Deltas + num_cov)] <- sim_data[cbind(seq_len(num_alive), Deltas + num_cov)] + 1
 
     # Store data
     kth_event <- data.table(ID = alive,
