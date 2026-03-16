@@ -16,7 +16,9 @@
 #' @param intervention1 Optional function. Takes arguments `(j, sim_matrix)` and returns
 #'   an updated simulation matrix. Used to modify covariates dynamically at each event iteration.
 #' @param intervention2 Optional function. Takes arguments `(j, H_j)` and returns a modified
-#'   baseline cumulative hazard vector for event type `j`. Allows dynamic hazard modification.
+#'   baseline cumulative hazard vector for event type `j`. Allows dynamic hazard modification. The function
+#'   \code{intervention2 <- function(j, basehaz) if(j ==2) 1.15 * basehaz else basehaz}
+#'   performs an intervention where the baseline hazard of process 2 is multiplied by 1.15.
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -153,7 +155,7 @@ simEventCox <- function(N,
     # Store data
     kth_event <- data.table(ID = alive,
                             Time = T_k,
-                            Delta = Deltas)
+                            Delta = Deltas - 1)
 
     res_list[[idx]] <- cbind(kth_event, data.table::as.data.table(sim_data))
     idx <- idx + 1

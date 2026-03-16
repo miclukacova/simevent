@@ -13,7 +13,7 @@ intEffectAlpha(
   tau = 5,
   a0 = 1,
   years_lost = FALSE,
-  plot = FALSE,
+  plot = TRUE,
   lower = 10^(-30),
   upper = 200,
   cens = 0,

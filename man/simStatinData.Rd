@@ -25,7 +25,7 @@ simStatinData(
 
 \item{nu}{Numeric vector of length 6. Scale parameters for the Weibull hazards. Defaults to \code{rep(1.1, 6)}.}
 
-\item{beta}{Numeric matrix. Of dimension p times 6. Regression coefficients matrix where columns correspond to event types (N0, ..., N5) and rows correspond to covariates (L0, A0, L1, L2, ...) and event counts (N0, ..., N5). Default is a zero matrix.}
+\item{beta}{Numeric matrix. Of dimension p times 6. Regression coefficients matrix where columns correspond to event types (N0, ..., N5) and rows correspond to covariates (L0, A0, L1, L2, ...) followed by event counts (N0, ..., N5). Default is a zero matrix.}
 
 \item{cens}{Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).}
 

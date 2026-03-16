@@ -8,7 +8,7 @@
 #' @param followup Numeric scalar. Maximum follow-up (censoring) time. Defaults to \code{Inf}.
 #' @param lower Numeric scalar. Lower bound for root-finding (inverse cumulative hazard) (default \code{1e-15}).
 #' @param upper Numeric scalar. Upper bound for root-finding (default 200).
-#' @param beta Numeric matrix. Of dimension p times 6. Regression coefficients matrix where columns correspond to event types (N0, ..., N5) and rows correspond to covariates (L0, A0, L1, L2, ...) and event counts (N0, ..., N5). Default is a zero matrix.
+#' @param beta Numeric matrix. Of dimension p times 6. Regression coefficients matrix where columns correspond to event types (N0, ..., N5) and rows correspond to covariates (L0, A0, L1, L2, ...) followed by event counts (N0, ..., N5). Default is a zero matrix.
 #' @param gen_A0 Function. Function to generate the baseline treatment covariate A0.
 #' Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
 #' @param ... Additional arguments passed to \code{simEventData}
