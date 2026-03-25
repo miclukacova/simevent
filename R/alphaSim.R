@@ -64,6 +64,13 @@ alphaSim <- function(N = 1e4,
                       nu = nu,
                       cens = cens,
                       ...)
+  } else if (setting == "Statin"){
+    if(length(eta) != 6 | length(nu) != 6) stop ("eta and nu must be of length 6 in the Statin setting")
+    data <- simStatinData(N = N,
+                          eta = c(eta[1:3],eta[4]*alpha, eta[5:6]),
+                          nu = nu,
+                          cens = cens,
+                          ...)
   } else if (setting == "Treatment"){
     if(length(eta) != 4 | length(nu) != 4) stop ("eta and nu must be of length 4 in the Treatment setting")
     data <- simTreatment(N = N,
@@ -72,19 +79,21 @@ alphaSim <- function(N = 1e4,
                          nu = nu,
                          ...)
   } else {
-    stop ("Setting must be either Disease, Drop In or Treatment")
+    stop ("Setting must be either Disease, Drop In, Treatment or Statin")
   }
 
   if(return_data) return(data)
 
   # Proportion of subjects dying before some time $\tau$
   if(setting == "Treatment") prop_D <- data[Delta == 1, mean(Delta == 1 & Time < tau)]
+  else if(setting == "Statin") prop_D <-  mean(data[, any(Delta == 1 & Time < tau)[1], by = "ID"][[2]])
   else prop_D <- data[A0 == a0 & Delta == 1, mean(Delta == 1 & Time < tau)]
 
-  # Proportion of subjects experiencing Treatment/Drop In/Disease
+  # Proportion of subjects experiencing Treatment/Drop In/Disease/MACE
   if(setting == "Treatment") prop2 <- mean(data[, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]])
   if(setting == "Drop In") prop2 <- mean(data[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]])
   if(setting == "Disease") prop2 <- mean(data[A0 == a0, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]])
+  if(setting == "Statin") prop2 <- mean(data[, any(Delta == 2 & Time < tau)[1], by = "ID"][[2]])
 
   if (years_lost) {
     data[, tmp := cumsum((Delta == 1)*(tau - pmin(tau, Time))), by = "ID"]

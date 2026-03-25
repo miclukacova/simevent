@@ -9,8 +9,8 @@
 #' @param lower Numeric scalar. Lower bound for root-finding (inverse cumulative hazard) (default \code{1e-15}).
 #' @param upper Numeric scalar. Upper bound for root-finding (default 200).
 #' @param beta Numeric matrix. Of dimension p times 6. Regression coefficients matrix where columns correspond to event types (N0, ..., N5) and rows correspond to covariates (L0, A0, L1, L2, ...) followed by event counts (N0, ..., N5). Default is a zero matrix.
-#' @param gen_A0 Function. Function to generate the baseline treatment covariate A0.
-#' Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param gen_A0 Function. Function to generate the baseline treatment covariate A0.Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param gen_L0 Function. Function to generate the baseline covariate L0. Takes N as input. Default is a N(0,1) random variable.
 #' @param ... Additional arguments passed to \code{simEventData}
 #'
 #' @return A data frame containing the simulated data with columns:
@@ -28,15 +28,16 @@
 simStatinData <- function(N,
                           eta = rep(0.1,6),
                           nu = rep(1.1,6),
-                          beta = beta,
+                          beta = NULL,
                           cens = 1,
                           followup = 5,
                           lower = 10^(-15),
                           upper = 200,
                           gen_A0 = NULL,
+                          gen_L0 = NULL,
                           ...){
 
-  if(is.null(beta)) beta <- matrix(0, nrow = 30, ncol = 6)
+  if(is.null(beta)) beta <- matrix(0, nrow = 6+2, ncol = 6)
 
   at_risk <- function(events) {
     return(c(cens,                          # If you have not yet been censored you are at risk (if there is a censoring process)
@@ -56,9 +57,11 @@ simStatinData <- function(N,
                        lower = lower,
                        upper = upper,
                        term_deltas = c(0,1,2),
+                       gen_A0 = gen_A0,
+                       gen_L0 = gen_L0,
                        ...)
 
-  colnames(data)[28:33] <- c("C", "D", "CVD", "OS", "A", "L")
+  colnames(data)[(ncol(data)-5):ncol(data)] <- c("C", "D", "CVD", "OS", "A", "L")
 
   return(data)
 }

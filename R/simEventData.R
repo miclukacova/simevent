@@ -31,6 +31,7 @@
 #' @param lower Numeric. Lower bound for root-finding in inverse cumulative hazard calculations. Default is \eqn{10^{-15}}.
 #' @param upper Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.
 #' @param gen_A0 Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
+#' @param gen_L0 Function. Function to generate the baseline covariate L0. Takes N as inputs. Default is a N(0,1) random variable.
 #' @param at_risk_cov Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.
 #' @param ... Additional technical arguments
 #'
@@ -63,6 +64,7 @@ simEventData <- function(N,                      # Number of individuals
                          lower = 10^(-15),       # Lower bound for ICH
                          upper = 200,            # Upper bound for ICH
                          gen_A0 = NULL,          # Generation of A0
+                         gen_L0 = NULL,          # Generation of L0
                          at_risk_cov = NULL,     # At risk indicator as function of covariates
                          ...                     # Additional technical arguments
 ){
@@ -116,6 +118,11 @@ simEventData <- function(N,                      # Number of individuals
     gen_A0 <- function(N, L0) stats::rbinom(N, 1, 0.5)
   }
 
+  # Default L0 generation
+  if(is.null(gen_L0)){
+    gen_L0 <- function(N) stats::runif(N)
+  }
+
   # Matrix for storing values
   simmatrix <- matrix(0, nrow = N, ncol = (2 + num_events + num_add_cov))
 
@@ -147,6 +154,7 @@ simEventData <- function(N,                      # Number of individuals
   calculate_phi <- function(simmatrix) {
     if(nrow(beta) == N_stop) return(exp(simmatrix %*% beta)) else {
       obj <- as.data.frame(simmatrix)
+      obj <- cbind(obj, Times)
       X <- sapply(rownames(beta), function(expr) {
         eval(parse(text = expr), envir = obj)
       })
@@ -189,7 +197,7 @@ simEventData <- function(N,                      # Number of individuals
   ############################ Initializing Simulations ########################
 
   # Draw baseline covariates
-  simmatrix[,1] <- stats::runif(N)                   # L0
+  simmatrix[,1] <- gen_L0(N)                         # L0
   simmatrix[,2] <- gen_A0(N, simmatrix[,1])          # A0
 
   # Generate additional covariates if distributions are specified
@@ -208,11 +216,12 @@ simEventData <- function(N,                      # Number of individuals
   }
 
   # Initialize
-  T_k <- rep(0,N)                                    # Time 0
-  alive <- 1:N                                       # Keeping track of who is alive
-  res_list <- vector("list", max_events)             # For results
-  idx <- 1                                           # Index
-
+  T_k <- rep(0,N)                                                               # Time 0
+  alive <- 1:N                                                                  # Keeping track of who is alive
+  res_list <- vector("list", max_events)                                        # For results
+  idx <- 1                                                                      # Index
+  Times <- matrix(0, ncol = max_events, nrow = N)                               # Times for override_beta
+  colnames(Times) <- paste("T", seq(1,max_events), sep = "")                    # names for Times
 
   ############################ Simulations #####################################
 
@@ -240,6 +249,7 @@ simEventData <- function(N,                      # Number of individuals
                             Delta = Deltas)
 
     res_list[[idx]] <- cbind(kth_event, data.table::as.data.table(simmatrix[alive, , drop = FALSE]))
+    Times[,idx] <- T_k                                                          # Saving the new time
     idx <- idx + 1
 
     # Who is still alive and uncensored?

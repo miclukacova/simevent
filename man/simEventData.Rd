@@ -18,6 +18,7 @@ simEventData(
   lower = 10^(-15),
   upper = 200,
   gen_A0 = NULL,
+  gen_L0 = NULL,
   at_risk_cov = NULL,
   ...
 )
@@ -48,6 +49,8 @@ simEventData(
 \item{upper}{Numeric. Upper bound for root-finding in inverse cumulative hazard calculations. Default is 200.}
 
 \item{gen_A0}{Function. Function to generate the baseline treatment covariate A0. Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+
+\item{gen_L0}{Function. Function to generate the baseline covariate L0. Takes N as inputs. Default is a N(0,1) random variable.}
 
 \item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
 

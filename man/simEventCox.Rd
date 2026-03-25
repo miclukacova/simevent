@@ -33,7 +33,9 @@ i.e., events that stop further simulation for an individual.}
 an updated simulation matrix. Used to modify covariates dynamically at each event iteration.}
 
 \item{intervention2}{Optional function. Takes arguments \verb{(j, H_j)} and returns a modified
-baseline cumulative hazard vector for event type \code{j}. Allows dynamic hazard modification.}
+baseline cumulative hazard vector for event type \code{j}. Allows dynamic hazard modification. The function
+\code{intervention2 <- function(j, basehaz) if(j ==2) 1.15 * basehaz else basehaz}
+performs an intervention where the baseline hazard of process 2 is multiplied by 1.15.}
 }
 \value{
 A \code{data.table} with one row per event per individual containing:

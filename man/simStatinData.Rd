@@ -8,12 +8,13 @@ simStatinData(
   N,
   eta = rep(0.1, 6),
   nu = rep(1.1, 6),
-  beta = beta,
+  beta = NULL,
   cens = 1,
   followup = 5,
   lower = 10^(-15),
   upper = 200,
   gen_A0 = NULL,
+  gen_L0 = NULL,
   ...
 )
 }
@@ -35,8 +36,9 @@ simStatinData(
 
 \item{upper}{Numeric scalar. Upper bound for root-finding (default 200).}
 
-\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0.
-Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+\item{gen_A0}{Function. Function to generate the baseline treatment covariate A0.Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
+
+\item{gen_L0}{Function. Function to generate the baseline covariate L0. Takes N as input. Default is a N(0,1) random variable.}
 
 \item{...}{Additional arguments passed to \code{simEventData}}
 }
