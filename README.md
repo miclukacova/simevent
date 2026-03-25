@@ -107,7 +107,7 @@ provided.
 
 | Function | Description | Key Arguments | Example |
 |----|----|----|----|
-| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `L0_old`, `A0_old` | `simEventCox(N, cox_fits, L0_old, A0_old)` |
+| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `list_old_vars` | `simEventCox(N, cox_fits, list_old_vars = list_old_vars)` |
 | `simEventObj()` | Simulates new data using a general model | `N`, `obj`, `list_old_vars` | `simEventObj(100, obj, list_old_vars = list_old_vars)` |
 
 **Functions for performing interventions**
@@ -298,8 +298,8 @@ data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk
                      override_beta = list("L0" = c("N0" = 0, "N1" = 0)))
 ```
 
-You can also specify non-linear effects, e.g., effect of on set to zero
-if :
+You can also specify non-linear effects, e.g., effect of on to increase
+by 2 if :
 
 ``` r
 data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
@@ -307,12 +307,21 @@ data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk
 ```
 
 Additionally the argument can be used to specify interaction effects,
-e.g., if we want an interaction effect of 1 between L0 and N1 on N2 we
+e.g., if we want an interaction effect of 1 between L0 and N3 on N1 we
 can specify the argument:
 
 ``` r
-data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk,
-                     override_beta =list("L0 * N1" = c("N2" = 1)))
+data <- simEventData(N = 3*10^4, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     override_beta =list("L0 * N3" = c("N1" = 1)))
+```
+
+A further example of the arguments use, is that we can use it to specify
+effects that depend on time. E.g. if we wish for an additional effect on
+N2 of 0.4 if T1 \> 1, then we can simulate as follows
+
+``` r
+data <- simEventData(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk,
+                     override_beta =list("T1 > 1" = c("N2" = 1)))
 ```
 
 ## Example 2: Survival Data with `simSurvData`
@@ -328,7 +337,7 @@ data <- simSurvData(100)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
 You can specify how baseline covariates and affect the risk of censoring
 and death through the matrix. For example:
@@ -359,7 +368,7 @@ data <- simSurvData(100, beta = beta, eta = eta, nu = nu)
 plotEventData(data, title = "Survival Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
 ## Example 3: Competing Risk Data with `simCRdata`
 
@@ -370,7 +379,7 @@ data <- simCRdata(100)
 plotEventData(data, title = "Competing Risk Data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />
 
 ## Example 4: Health Care Data with `simDisease`
 
@@ -400,7 +409,7 @@ data <- simDisease(N = 100,
 plotEventData(data, title = "Disease data")
 ```
 
-<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-23-1.png" width="100%" />
 
 ## Example 5: Health Care Data with `simTreatment`
 
@@ -433,7 +442,7 @@ Plot
 plotEventData(data, title = "Treatment setting")
 ```
 
-<img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
 
 ## Example 6: Time Varying Effects with `simEventTV`
 
@@ -456,7 +465,7 @@ data <- simEventTV(N = 100, t_prime = t_prime, tv_eff = tv_eff, eta = eta,
 plotEventData(data)
 ```
 
-<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-27-1.png" width="100%" />
 
 ## Example 7: Simulating data from data
 
@@ -483,7 +492,8 @@ models as arguments:
 
 ``` r
 cox_fits <- list("Process 1" = cox1, "Process 2" = cox2)
-new_data <- simEventCox(100, cox_fits, L0_old = data$L0, A0_old = data$A0)
+list_old_vars <- list("L0" = data$L0, "A0" = data$A0)
+new_data <- simEventCox(100, cox_fits, list_old_vars = list_old_vars)
 ```
 
 The new simulated data looks like:
@@ -492,13 +502,13 @@ The new simulated data looks like:
 head(new_data)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0 Process 1 Process 2
-#>    <int>     <num> <int>     <num> <num>     <num>     <num>
-#> 1:     1  2.175382     1 0.5363954     0         1         0
-#> 2:     2  7.139631     1 0.3144497     0         1         0
-#> 3:     3  2.766344     1 0.9335247     1         1         0
-#> 4:     4  3.570241     2 0.2502356     0         0         1
-#> 5:     4 12.695609     1 0.2502356     0         1         1
-#> 6:     5  5.055418     1 0.5462261     1         1         0
+#>    <int>     <num> <num>     <num> <num>     <num>     <num>
+#> 1:     1  2.175382     0 0.5363954     0         1         0
+#> 2:     2  7.139631     0 0.3144497     0         1         0
+#> 3:     3  2.766344     0 0.9335247     1         1         0
+#> 4:     4  3.570241     1 0.2502356     0         0         1
+#> 5:     4 12.695609     0 0.2502356     0         1         1
+#> 6:     5  5.055418     0 0.5462261     1         1         0
 ```
 
 ### Using `simEventObj`

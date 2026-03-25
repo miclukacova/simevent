@@ -230,14 +230,6 @@ data <- simEventData(N = 1000, beta = beta, add_cov = add_cov, at_risk = at_risk
                      override_beta = list("N2 > 1" = c("N1" = 2)))
 ```
 
-We can sanity check that the argument performs as it should
-```{r}
-data_int <- IntFormatData(data, N_cols = 8:12)
-data_int[, NL1 := as.numeric(N2> 1)] 
-
-coxph(Surv(tstart, tstop, Delta == 1) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4 + NL1, data = data_int)$coefficients |> knitr::kable()
-```
-
 Additionally the argument can be used to specify interaction effects, e.g., if we want an interaction effect of 1 between L0 and N3 on N1 we can specify the argument:
 
 ```{r}
@@ -251,15 +243,6 @@ A further example of the arguments use, is that we can use it to specify effects
 data <- simEventData(N = 10000, beta = beta, add_cov = add_cov, at_risk = at_risk,
                      override_beta =list("T1 > 1" = c("N2" = 1)))
 ```
-
-To sanity check
-```{r}
-data_int <- IntFormatData(data, N_cols = 8:12)
-data_int[, T1 := min(Time), by = ID]
-data_int[, Z := as.numeric((k != 1) & (T1 > 1)), by = ID]
-coxph(Surv(tstart, tstop, Delta == 2) ~ L0 + A0 + Z1 + Z2 + N2 + N3 + N4 + Z, data = data_int[N2 < 2])$coefficients |> knitr::kable()
-```
-
 
 ## Example 2: Survival Data with `simSurvData`
 
@@ -409,7 +392,7 @@ Then we can call the function `simEventCox` providing the fitted Cox models as a
 
 ```{r}
 cox_fits <- list("Process 1" = cox1, "Process 2" = cox2)
-list_old_vars <- list("L0" = data_obs$L0, "A0" = data_obs$A0)
+list_old_vars <- list("L0" = data$L0, "A0" = data$A0)
 new_data <- simEventCox(100, cox_fits, list_old_vars = list_old_vars)
 ```
 
