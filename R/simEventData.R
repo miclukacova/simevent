@@ -249,7 +249,7 @@ simEventData <- function(N,                      # Number of individuals
                             Delta = Deltas)
 
     res_list[[idx]] <- cbind(kth_event, data.table::as.data.table(simmatrix[alive, , drop = FALSE]))
-    Times[,idx] <- T_k                                                          # Saving the new time
+    if (idx < max_events) Times[,idx] <- T_k                                   # Saving the new time
     idx <- idx + 1
 
     # Who is still alive and uncensored?
