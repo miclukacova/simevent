@@ -154,7 +154,7 @@ simEventData <- function(N,                      # Number of individuals
   calculate_phi <- function(simmatrix) {
     if(nrow(beta) == N_stop) return(exp(simmatrix %*% beta)) else {
       obj <- as.data.frame(simmatrix)
-      obj <- cbind(obj, Times)
+      obj <- cbind(obj, Times, Events)
       X <- sapply(rownames(beta), function(expr) {
         eval(parse(text = expr), envir = obj)
       })
@@ -222,6 +222,8 @@ simEventData <- function(N,                      # Number of individuals
   idx <- 1                                                                      # Index
   Times <- matrix(0, ncol = max_events, nrow = N)                               # Times for override_beta
   colnames(Times) <- paste("T", seq(1,max_events), sep = "")                    # names for Times
+  Events <- matrix(0, ncol = max_events, nrow = N)                              # Events for override_beta
+  colnames(Events) <- paste("E", seq(1,max_events), sep = "")              # names for Events
 
   ############################ Simulations #####################################
 
@@ -249,7 +251,10 @@ simEventData <- function(N,                      # Number of individuals
                             Delta = Deltas)
 
     res_list[[idx]] <- cbind(kth_event, data.table::as.data.table(simmatrix[alive, , drop = FALSE]))
-    if (idx < max_events) Times[,idx] <- T_k                                   # Saving the new time
+    if (idx < max_events) {
+        Times[,idx] <- T_k                                   # Saving the current time
+        Events[alive,idx] <- Deltas                          # Saving the current event type
+    }
     idx <- idx + 1
 
     # Who is still alive and uncensored?
