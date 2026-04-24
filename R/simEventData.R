@@ -223,7 +223,7 @@ simEventData <- function(N,                      # Number of individuals
   Times <- matrix(0, ncol = max_events, nrow = N)                               # Times for override_beta
   colnames(Times) <- paste("T", seq(1,max_events), sep = "")                    # names for Times
   Events <- matrix(0, ncol = max_events, nrow = N)                              # Events for override_beta
-  colnames(Events) <- paste("E", seq(1,max_events), sep = "")              # names for Events
+  colnames(Events) <- paste("E", seq(1,max_events), sep = "")                   # names for Events
 
   ############################ Simulations #####################################
 
