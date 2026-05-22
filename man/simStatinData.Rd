@@ -6,8 +6,9 @@
 \usage{
 simStatinData(
   N,
-  eta = rep(0.1, 6),
-  nu = rep(1.1, 6),
+  n_proc = 8,
+  eta = rep(0.1, 8),
+  nu = rep(1.1, 8),
   beta = NULL,
   cens = 1,
   followup = 5,
@@ -15,16 +16,19 @@ simStatinData(
   upper = 200,
   gen_A0 = NULL,
   gen_L0 = NULL,
+  add_cov = NULL,
   ...
 )
 }
 \arguments{
 \item{N}{Numeric scalar. Number of individuals to simulate.}
 
-\item{eta}{Numeric vector of length 6. Shape parameters for Weibull intensities with parameterization
-\eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 6)}.}
+\item{n_proc}{Number of processes.}
 
-\item{nu}{Numeric vector of length 6. Scale parameters for the Weibull hazards. Defaults to \code{rep(1.1, 6)}.}
+\item{eta}{Numeric vector of length equal to number of processes. Shape parameters for Weibull intensities with parameterization
+\eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 8)}.}
+
+\item{nu}{Numeric vector of length equal to number of processes. Scale parameters for the Weibull hazards. Defaults to \code{rep(1.1, 8)}.}
 
 \item{beta}{Numeric matrix. Of dimension p times 6. Regression coefficients matrix where columns correspond to event types (N0, ..., N5) and rows correspond to covariates (L0, A0, L1, L2, ...) followed by event counts (N0, ..., N5). Default is a zero matrix.}
 
@@ -39,6 +43,8 @@ simStatinData(
 \item{gen_A0}{Function. Function to generate the baseline treatment covariate A0.Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.}
 
 \item{gen_L0}{Function. Function to generate the baseline covariate L0. Takes N as input. Default is a N(0,1) random variable.}
+
+\item{add_cov}{Named list of functions. Functions generating additional baseline covariates. Each function takes integer N and returns a numeric vector of length N. Default is NULL.}
 
 \item{...}{Additional arguments passed to \code{simEventData}}
 }

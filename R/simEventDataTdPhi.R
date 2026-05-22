@@ -1,6 +1,6 @@
-#' Simulate Continuous Time-to-Event Data with Multiple Event Types
+#' Simulate Continuous Time-to-Event Data with Multiple Event Types and time dependent effects
 #'
-#' `simEventData` simulates event times and types for a cohort of individuals in a
+#' `simEventDataTdPhi` simulates event times and types for a cohort of individuals in a
 #' counting process framework. It supports multiple event types (by default 4),
 #' including terminal events, with intensities influenced by baseline covariates
 #' and previous event history.
@@ -20,6 +20,7 @@
 #'
 #' @param N Integer. Number of individuals to simulate.
 #' @param beta Numeric matrix. Regression coefficients matrix where columns correspond to event types (N0, N1, ...) and rows correspond to covariates (L0, A0, L1, L2, ...) and event counts (N0, N1, ...). Default is a zero matrix.
+#' @param beta2 Numeric vector. Regression coefficients corresponding to the effect of time since last event on the events (N0, N1, ...).
 #' @param eta Numeric vector. Shape parameters of the Weibull baseline intensity for each event type. Default is 0.1 for all events.
 #' @param nu Numeric vector. Scale parameters of the Weibull baseline intensity for each event type. Default is 1.1 for all events.
 #' @param at_risk Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector events and returns a binary vector. Default returns 1 for all events.
@@ -46,28 +47,29 @@
 #'
 #' @examples
 #' # Simulate data for 10 individuals with default settings
-#' sim_data <- simEventData(N = 10)
+#' sim_data <- simEventDataTdPhi(N = 10, beta2 = c(0.01,0.01,0.01,0.01))
 #' head(sim_data)
 #'
 #' @export
 
-simEventData <- function(N,                      # Number of individuals
-                         beta = NULL,            # Effects
-                         eta = NULL,             # Shape parameters
-                         nu = NULL,              # Scale parameters
-                         at_risk = NULL,         # At risk indicator as function of events
-                         term_deltas = c(0,1),   # Terminal events
-                         max_cens = Inf,         # Followup time
-                         add_cov = NULL,         # Additional baseline covariates
-                         override_beta = NULL,   # Override beta
-                         max_events = 10,        # Maximal events per individual
-                         lower = 10^(-15),       # Lower bound for ICH
-                         upper = 200,            # Upper bound for ICH
-                         gen_A0 = NULL,          # Generation of A0
-                         gen_L0 = NULL,          # Generation of L0
-                         at_risk_cov = NULL,     # At risk indicator as function of covariates
-                         ...                     # Additional technical arguments
-){
+simEventDataTdPhi <- function(N,                      # Number of individuals
+                              beta = NULL,            # Effects of covariates and processes
+                              beta2 = NULL,           # Effect of time since last event
+                              eta = NULL,             # Shape parameters
+                              nu = NULL,              # Scale parameters
+                              at_risk = NULL,         # At risk indicator as function of events
+                              term_deltas = c(0,1),   # Terminal events
+                              max_cens = Inf,         # Followup time
+                              add_cov = NULL,         # Additional baseline covariates
+                              override_beta = NULL,   # Override beta
+                              max_events = 10,        # Maximal events per individual
+                              lower = 10^(-15),       # Lower bound for ICH
+                              upper = 200,            # Upper bound for ICH
+                              gen_A0 = NULL,          # Generation of A0
+                              gen_L0 = NULL,          # Generation of L0
+                              at_risk_cov = NULL,     # At risk indicator as function of covariates
+                              ...                     # Additional technical arguments
+                              ){
   ID <- NULL
 
   ############################ Check and useful quantities #####################
@@ -92,6 +94,7 @@ simEventData <- function(N,                      # Number of individuals
 
   # Set default values for beta, eta, and nu
   beta <- if (!is.null(beta)) beta else matrix(0, nrow = N_stop, ncol = num_events)
+  beta2 <- if(!is.null(beta2)) beta2 else rep(1, num_events)
   colnames(beta) <- paste0("N", seq(0, num_events -1))
 
   if((N_stop) != nrow(beta)){
@@ -150,40 +153,70 @@ simEventData <- function(N,                      # Number of individuals
 
   ############################ Functions #######################################
 
-  # Proportional hazard
-  calculate_phi <- function(simmatrix) {
-    if(nrow(beta) == N_stop) return(exp(simmatrix %*% beta)) else {
-      obj <- as.data.frame(simmatrix)
-      obj <- cbind(obj, Times, Events)
-      X <- sapply(rownames(beta), function(expr) {
-        eval(parse(text = expr), envir = obj)
-      })
-      effects <- as.matrix(X) %*% beta
-      return(exp(effects))
+  # Proportional hazard - Time independent part
+  calculate_phi0 <- function(simmatrix) {
+
+    if(nrow(beta) == N_stop) {
+      return(exp(simmatrix %*% beta))
     }
+
+    obj <- as.data.frame(simmatrix)
+    obj <- cbind(obj, Times, Events)
+
+    X <- sapply(rownames(beta), function(expr) {
+      eval(parse(text = expr), envir = obj)
+    })
+
+    effects <- as.matrix(X) %*% beta
+
+    exp(effects)
+  }
+
+  # Proportional hazard - Dynamic part
+  phi_t <- function(t, i, phi0_row) {
+
+    phi0_row *
+      exp(
+        -beta2 * (t - T_star[i, ])
+      )
   }
 
   # Intensities
   lambda <- function(t, i) {
-    risk_vec <- at_risk_cov[,i] * at_risk(simmatrix[i, N_start:N_stop])
-    risk_vec * eta * nu * t^(nu - 1) * phi[i,]
+
+    risk_vec <-
+      at_risk_cov[,i] *
+      at_risk(simmatrix[i, N_start:N_stop])
+
+    phi_now <- phi_t(t, i, phi0[i, ])
+
+    risk_vec *
+      eta *
+      nu *
+      t^(nu - 1) *
+      phi_now
   }
 
-  # If all events have the same parameter, the inverse of the cumulative hazard simplifies
-  if(all(nu[1] == nu) && all(eta[1] == eta)){
-    inverse_sc_haz <- function(p, t, i) {
-      riskss <- at_risk(simmatrix[i, N_start:N_stop]) * at_risk_cov[,i]
-      denom <- sum(riskss * eta * phi[i,])
-      (p / denom + t^nu[1])^(1 / nu[1]) - t
-    }
-  # Otherwise we use a numerical inverse coded in rcpp
-  } else{
-    inverse_sc_haz <- function(p, t, i) {
-      riskss <- at_risk(simmatrix[i, N_start:N_stop]) * at_risk_cov[,i]
-      inverseScHaz(p, t, lower = lower, upper = upper, eta = eta, nu = nu, phi = phi[i,],
-                   at_risk = riskss, ...)
+  # Inverse Summed Cumulative Hazard from CPP
+  inverse_sc_haz <- function(p, t, i) {
 
-    }
+    riskss <-
+      at_risk(simmatrix[i, N_start:N_stop]) *
+      at_risk_cov[,i]
+
+    inverseScHazPhiTd(
+      p = p,
+      t = t,
+      T_star = T_star[i, ],
+      lower = lower,
+      upper = upper,
+      eta = eta,
+      nu = nu,
+      beta2 = beta2,
+      phi0 = phi0[i, ],
+      at_risk = riskss,
+      ...
+    )
   }
 
   # Event probabilities
@@ -217,6 +250,7 @@ simEventData <- function(N,                      # Number of individuals
 
   # Initialize
   T_k <- rep(0,N)                                                               # Time 0
+  T_star <- matrix(0,nrow = N, ncol = num_events)                               # Time since last event
   alive <- 1:N                                                                  # Keeping track of who is alive
   res_list <- vector("list", max_events)                                        # For results
   idx <- 1                                                                      # Index
@@ -230,7 +264,7 @@ simEventData <- function(N,                      # Number of individuals
   while(length(alive) != 0){
     # Simulate time
     V <- -log(stats::runif(N))
-    phi <- calculate_phi(simmatrix)
+    phi0 <- calculate_phi0(simmatrix)
     W <- sapply(alive, function(i) inverse_sc_haz(V[i], T_k[i], i))
     T_k[alive] <- T_k[alive] + W
 
@@ -240,6 +274,13 @@ simEventData <- function(N,                      # Number of individuals
     # Simulate event
     probs_mat <- sapply(alive, function(i) probs(T_k[i], i), simplify = "array")
     Deltas <- sampleEvents(probs_mat)
+
+    # Update last event time
+    for(j in seq_along(alive)) {
+      i <- alive[j]
+      d <- Deltas[j]
+      T_star[i, d + 1] <- T_k[i]
+    }
 
     # Update event counts
     simmatrix[cbind(alive, 2 + num_add_cov + Deltas + 1)] <-

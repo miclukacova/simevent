@@ -33,8 +33,8 @@ plotEventData <- function(data, title = "Event Data") {
 
   # Shapes and color for the plot
   diff_events <- length(unique(plotdata$Delta))
-  cols <- c("green4", "blue1", "orange", "red2", "lightgreen", "purple1", "yellow")
-  shapes <- c(20, 17, 15, 3, 7, 8, 13)  # varied shapes for clarity
+  cols <- c("green4", "blue1", "orange", "red2", "lightgreen", "purple1", "yellow", "hotpink")
+  shapes <- c(20, 17, 15, 3, 7, 8, 13, 12)  # varied shapes for clarity
 
   # Make sure color and shape vectors are long enough
   if (diff_events > length(cols)) {

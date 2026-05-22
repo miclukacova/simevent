@@ -5,6 +5,10 @@ inverseScHazCpp <- function(p, t, lower, upper, eta, nu, phi, at_risk, tol = 1e-
     .Call(`_simevent_inverseScHazCpp`, p, t, lower, upper, eta, nu, phi, at_risk, tol, max_iter)
 }
 
+inverseScHazPhiTdCpp <- function(p, t, T_star, lower, upper, eta, nu, beta2, phi0, at_risk, tol = 1e-9, max_iter = 100L) {
+    .Call(`_simevent_inverseScHazPhiTdCpp`, p, t, T_star, lower, upper, eta, nu, beta2, phi0, at_risk, tol, max_iter)
+}
+
 inverseScHazTVCpp <- function(p, t, lower, upper, t_prime, eta, nu, phi, phi_prime, at_risk, tol = 1e-9, max_iter = 100L) {
     .Call(`_simevent_inverseScHazTVCpp`, p, t, lower, upper, t_prime, eta, nu, phi, phi_prime, at_risk, tol, max_iter)
 }

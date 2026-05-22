@@ -85,7 +85,7 @@ simEventCox <- function(N,
   }
   colnames(sim_data) <- names(list_old_vars)
 
-  for (name in names(cox_fits)) sim_data[[name]] <- 0
+  for (name in names(cox_fits)) sim_data[[name]] <- 0L
 
   # List for results
   res_list <- vector("list", sum(n_event_max))            # For results
@@ -138,7 +138,7 @@ simEventCox <- function(N,
     })
 
     # If we only have one individual, the matrix collapses to a vector
-    if(num_alive == 1) event_times <- matrix(event_times, nrow = 1, ncol = 6)
+    if(num_alive == 1) event_times <- matrix(event_times, nrow = 1, ncol = num_events)
 
     # How many times can you experience the various events?
     for(j in seq_len(num_events)){

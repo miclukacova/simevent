@@ -30,6 +30,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// inverseScHazPhiTdCpp
+double inverseScHazPhiTdCpp(double p, double t, NumericVector T_star, double lower, double upper, NumericVector eta, NumericVector nu, NumericVector beta2, NumericVector phi0, NumericVector at_risk, double tol, int max_iter);
+RcppExport SEXP _simevent_inverseScHazPhiTdCpp(SEXP pSEXP, SEXP tSEXP, SEXP T_starSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP etaSEXP, SEXP nuSEXP, SEXP beta2SEXP, SEXP phi0SEXP, SEXP at_riskSEXP, SEXP tolSEXP, SEXP max_iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type T_star(T_starSEXP);
+    Rcpp::traits::input_parameter< double >::type lower(lowerSEXP);
+    Rcpp::traits::input_parameter< double >::type upper(upperSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type nu(nuSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type beta2(beta2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type phi0(phi0SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type at_risk(at_riskSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    rcpp_result_gen = Rcpp::wrap(inverseScHazPhiTdCpp(p, t, T_star, lower, upper, eta, nu, beta2, phi0, at_risk, tol, max_iter));
+    return rcpp_result_gen;
+END_RCPP
+}
 // inverseScHazTVCpp
 double inverseScHazTVCpp(double p, double t, double lower, double upper, double t_prime, NumericVector eta, NumericVector nu, NumericVector phi, NumericVector phi_prime, NumericVector at_risk, double tol, int max_iter);
 RcppExport SEXP _simevent_inverseScHazTVCpp(SEXP pSEXP, SEXP tSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP t_primeSEXP, SEXP etaSEXP, SEXP nuSEXP, SEXP phiSEXP, SEXP phi_primeSEXP, SEXP at_riskSEXP, SEXP tolSEXP, SEXP max_iterSEXP) {
@@ -66,6 +88,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_simevent_inverseScHazCpp", (DL_FUNC) &_simevent_inverseScHazCpp, 10},
+    {"_simevent_inverseScHazPhiTdCpp", (DL_FUNC) &_simevent_inverseScHazPhiTdCpp, 12},
     {"_simevent_inverseScHazTVCpp", (DL_FUNC) &_simevent_inverseScHazTVCpp, 12},
     {"_simevent_sampleEventsCpp", (DL_FUNC) &_simevent_sampleEventsCpp, 1},
     {NULL, NULL, 0}
