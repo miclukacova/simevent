@@ -26,6 +26,8 @@ The simevent package
     - [Using `simEventCox`](#using-simeventcox)
     - [Using `simEventObj`](#using-simeventobj)
   - [Example 8: Interventions](#example-8-interventions)
+  - [Example 9: Intensities dependent on time since last event with
+    `simEventDataTdPhi`](#example-9-intensities-dependent-on-time-since-last-event-with-simeventdatatdphi)
 
 # simevent
 
@@ -599,3 +601,20 @@ intEffectAlpha(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot =
 #> $effect_death
 #> [1] 0.3070905
 ```
+
+## Example 9: Intensities dependent on time since last event with `simEventDataTdPhi`
+
+Imagine you are interested in an intensity that depends on time since
+last event. Assume the event-specific intensity to have the form where
+and $T^*$ denotes the most recent event time. Assume $\beta_2 > 0$.
+Simulation from this setting is done by using the function
+`simEventDataTdPhi`.
+
+``` r
+beta <- matrix(rnorm(4*6, 0, 0.1), ncol = 4)
+data <- simEventDataTdPhi(N = 100, beta2 = c(0.01,2,0,0.1),
+                          beta = beta, upper = 10^20, max_iter = 10^3)
+plotEventData(data)
+```
+
+<img src="man/figures/README-unnamed-chunk-38-1.png" width="100%" />
