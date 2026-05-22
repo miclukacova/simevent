@@ -29,7 +29,13 @@ double inverseScHazCpp(double p,
 
   // Check that root is bracketed
   if (fa * fb > 0) {
-    stop("Function does not bracket root: adjust upper and lower");
+
+    Rcout << "cum_haz(a) = " << cum_haz(a)
+          << ", cum_haz(b) = " << cum_haz(b)
+          << ", p = " << p
+          << std::endl;
+
+    stop("Root not bracketed");
   }
 
   // Bisection method to find root of cum_haz(u) - p = 0

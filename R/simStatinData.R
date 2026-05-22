@@ -70,7 +70,7 @@ simStatinData <- function(N,
                        add_cov = add_cov,
                        ...)
 
-  colnames(data)[(6 + length(add_cov)):ncol(data)] <- c("C", "D", "CVD", "OS", "L", "A", "L1", "L2")
+  colnames(data)[(6 + length(add_cov)):ncol(data)] <- c("C", "D", "CVD",  "LDL1", "LDL2", "OS", "A", "L")
 
   return(data)
 }
