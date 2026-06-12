@@ -7,8 +7,8 @@
 #' @param N Integer. The number of individuals to simulate.
 #' @param cox_fits A named list of fitted Cox proportional hazards models (`coxph` objects),
 #'   one for each event type. The names are used as event type labels.
-#' @param list_old_vars A named list containing the old covariates. New covariates will
-#' be simulated by drawing from the old covariates with replacement.
+#' @param old_vars A named matrix containing the old covariates. New covariates will
+#' be simulated by drawing rows from the old covariates with replacement.
 #' @param n_event_max Integer vector. Maximum number of times each event type can occur
 #'   per individual.
 #' @param term_events Integer or integer vector. Indices of event types that are terminal,
@@ -55,13 +55,13 @@
 #'
 #' # Then simulate new data:
 #' cox_fits <- list("D" = cox_death, "L" = cox_Disease)
-#' list_old_vars <- list("L0" = data_obs$L0, "A0" = data_obs$A0)
-#' new_data <- simEventCox(100, cox_fits = cox_fits, list_old_vars = list_old_vars)
+#' old_vars <- data_obs[, c("L0", "A0")]
+#' new_data <- simEventCox(100, cox_fits = cox_fits, old_vars = old_vars)
 #'
 #' @export
 simEventCox <- function(N,
                         cox_fits,
-                        list_old_vars = NULL,
+                        old_vars = NULL,
                         n_event_max = c(1,1),
                         term_events = 1,
                         intervention1 = NULL,
@@ -76,14 +76,12 @@ simEventCox <- function(N,
   T_k <- rep(0, N)                                        # Last event time
 
   # Sampling new covariates
-  if(is.null(names(list_old_vars))) warning("list_old_vars must be named list")
-  num_cov <- length(list_old_vars)
+  if(is.null(names(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
+  num_cov <- ncol(old_vars)
   # Data frame for storing data
   sim_data <- data.frame(matrix(ncol = num_cov, nrow = N))
-  for(j in 1:num_cov){
-    sim_data[,j] <- sample(list_old_vars[[j]], N, TRUE)
-  }
-  colnames(sim_data) <- names(list_old_vars)
+  sim_data[,1:num_cov] <- old_vars[sample(1:nrow(old_vars), N, TRUE),]
+  colnames(sim_data) <- names(old_vars)
 
   for (name in names(cox_fits)) sim_data[[name]] <- 0L
 

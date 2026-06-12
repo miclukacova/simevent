@@ -109,8 +109,8 @@ provided.
 
 | Function | Description | Key Arguments | Example |
 |----|----|----|----|
-| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `list_old_vars` | `simEventCox(N, cox_fits, list_old_vars = list_old_vars)` |
-| `simEventObj()` | Simulates new data using a general model | `N`, `obj`, `list_old_vars` | `simEventObj(100, obj, list_old_vars = list_old_vars)` |
+| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `old_vars` | `simEventCox(N, cox_fits, old_vars = old_vars)` |
+| `simEventObj()` | Simulates new data using a general model | `N`, `obj`, `old_vars` | `simEventObj(100, obj, old_vars = old_vars)` |
 
 **Functions for performing interventions**
 
@@ -494,8 +494,8 @@ models as arguments:
 
 ``` r
 cox_fits <- list("Process 1" = cox1, "Process 2" = cox2)
-list_old_vars <- list("L0" = data$L0, "A0" = data$A0)
-new_data <- simEventCox(100, cox_fits, list_old_vars = list_old_vars)
+old_vars <- data[,c(4,5)]
+new_data <- simEventCox(100, cox_fits, old_vars = old_vars)
 ```
 
 The new simulated data looks like:
@@ -505,12 +505,12 @@ head(new_data)
 #> Key: <ID>
 #>       ID      Time Delta        L0    A0 Process 1 Process 2
 #>    <int>     <num> <num>     <num> <num>     <num>     <num>
-#> 1:     1  2.175382     0 0.5363954     0         1         0
-#> 2:     2  7.139631     0 0.3144497     0         1         0
-#> 3:     3  2.766344     0 0.9335247     1         1         0
-#> 4:     4  3.570241     1 0.2502356     0         0         1
-#> 5:     4 12.695609     0 0.2502356     0         1         1
-#> 6:     5  5.055418     0 0.5462261     1         1         0
+#> 1:     1 0.4931728     1 0.5363954     0         0         1
+#> 2:     1 4.0046486     0 0.5363954     0         1         1
+#> 3:     2 0.6828662     1 0.3144497     0         0         1
+#> 4:     2 9.8772172     0 0.3144497     0         1         1
+#> 5:     3 0.8909987     1 0.9335247     1         0         1
+#> 6:     3 4.2916262     0 0.9335247     1         1         1
 ```
 
 ### Using `simEventObj`
@@ -541,8 +541,8 @@ Then we can call the function `simEventObj` providing the fitted Random
 Forest as argument:
 
 ``` r
-list_old_vars = list(L0 = data$L0, A0 = data$A0)
-new_data <- simEventObj(100, RF_fit, list_old_vars = list_old_vars)
+old_vars = data[, c("L0", "A0")]
+new_data <- simEventObj(100, RF_fit, old_vars = old_vars)
 ```
 
 The new simulated data looks like:
@@ -550,14 +550,14 @@ The new simulated data looks like:
 ``` r
 head(new_data)
 #> Key: <ID>
-#>       ID     Time Delta         L0    A0    N1    N2
-#>    <int>    <num> <int>      <num> <num> <num> <num>
-#> 1:     1 1.169271     1 0.40253050     1     1     0
-#> 2:     2 1.433632     2 0.80094849     0     0     1
-#> 3:     3 6.062924     2 0.03707728     0     0     1
-#> 4:     4 0.310825     1 0.84810211     1     1     0
-#> 5:     5 1.465128     2 0.99071345     1     0     1
-#> 6:     6 5.116592     2 0.98173073     1     0     1
+#>       ID      Time Delta          L0    A0    N1    N2
+#>    <int>     <num> <int>       <num> <num> <num> <num>
+#> 1:     1 9.9452423     1 0.730683018     0     1     0
+#> 2:     2 9.9452423     1 0.057044588     0     1     0
+#> 3:     3 0.5861219     1 0.006538616     1     1     0
+#> 4:     4 4.5871502     1 0.921506565     1     1     0
+#> 5:     5 1.8056792     2 0.240172203     0     0     1
+#> 6:     6 9.9452423     1 0.988296003     0     1     0
 ```
 
 ## Example 8: Interventions
@@ -569,10 +569,10 @@ intervention can be simulated by scaling with the factor 1:
 ``` r
 alphaSim(N = 10^3, alpha = 1,  tau = 5, setting = "Drop In")
 #> $effectDeath
-#> [1] 0.09393346
+#> [1] 0.09533074
 #> 
 #> $effectSetting
-#> [1] 0.6731898
+#> [1] 0.6789883
 ```
 
 By default the function returns the proportion of individuals who
@@ -596,10 +596,10 @@ sample of the event data for each scenario for comparison.
 intEffectAlpha(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot = TRUE,
                setting = "Drop In")
 #> $effect_2
-#> [1] 1.498911
+#> [1] 1.569689
 #> 
 #> $effect_death
-#> [1] 0.3070905
+#> [1] 0.2871026
 ```
 
 ## Example 9: Intensities dependent on time since last event with `simEventDataTdPhi`

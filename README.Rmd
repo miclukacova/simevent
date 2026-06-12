@@ -78,8 +78,8 @@ Below is a table attempting to provide an overview of the package functions. Eac
 
 | Function | Description | Key Arguments | Example |
 |-----------|--------------|----------------|----------|
-| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `list_old_vars` | `simEventCox(N, cox_fits, list_old_vars = list_old_vars)` |
-| `simEventObj()` | Simulates new data using a general model | `N`, `obj`, `list_old_vars` | `simEventObj(100, obj, list_old_vars = list_old_vars)` |
+| `simEventCox()` | Simulates new data using fitted Cox proportional hazard models | `N`, `cox_fits`, `old_vars` | `simEventCox(N, cox_fits, old_vars = old_vars)` |
+| `simEventObj()` | Simulates new data using a general model | `N`, `obj`, `old_vars` | `simEventObj(100, obj, old_vars = old_vars)` |
 
 **Functions for performing interventions**
 
@@ -392,8 +392,8 @@ Then we can call the function `simEventCox` providing the fitted Cox models as a
 
 ```{r}
 cox_fits <- list("Process 1" = cox1, "Process 2" = cox2)
-list_old_vars <- list("L0" = data$L0, "A0" = data$A0)
-new_data <- simEventCox(100, cox_fits, list_old_vars = list_old_vars)
+old_vars <- data[,c(4,5)]
+new_data <- simEventCox(100, cox_fits, old_vars = old_vars)
 ```
 
 The new simulated data looks like:
@@ -427,8 +427,8 @@ predict2.rfsrc <- function(obj, sim_data, ...){
 Then we can call the function `simEventObj` providing the fitted Random Forest as argument:
 
 ```{r}
-list_old_vars = list(L0 = data$L0, A0 = data$A0)
-new_data <- simEventObj(100, RF_fit, list_old_vars = list_old_vars)
+old_vars = data[, c("L0", "A0")]
+new_data <- simEventObj(100, RF_fit, old_vars = old_vars)
 ```
 
 The new simulated data looks like:

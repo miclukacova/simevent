@@ -18,8 +18,8 @@
 #' a vector of times where the cumulative hazard function jumps.
 #' @param event_names A character vector. Containing the names of the various processes.
 #' The argument is optional. By default events will be named `N1`, `N2`, ....
-#' @param list_old_vars A named list containing the old covariates. New covariates will
-#' be simulated by drawing from the old covariates with replacement.
+#' @param old_vars A named matrix containing the old covariates. New covariates will
+#' be simulated by drawing rows from the old covariates with replacement.
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -46,7 +46,7 @@
 simEventObj <- function(N,
                         obj,
                         event_names = NULL,
-                        list_old_vars = NULL) {
+                        old_vars = NULL) {
 
   ID <- predict2 <- NULL
 
@@ -54,13 +54,12 @@ simEventObj <- function(N,
   T0 <- rep(0, N)
 
   # Sampling new covariates
-  if(is.null(names(list_old_vars))) warning("list_old_vars must be named list")
-  num_cov <- length(list_old_vars)
+  if(is.null(names(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
+  num_cov <- length(old_vars)
+  # Data frame for storing data
   sim_data <- data.frame(matrix(ncol = num_cov, nrow = N))
-  for(j in 1:num_cov){
-    sim_data[,j] <- sample(list_old_vars[[j]], N, TRUE)
-  }
-  colnames(sim_data) <- names(list_old_vars)
+  sim_data[,1:num_cov] <- old_vars[sample(1:nrow(old_vars), N, TRUE),]
+  colnames(sim_data) <- names(old_vars)
 
   # The cumulative hazard and inverse cumulative hazard
   y.pred <- predict2(obj, sim_data)                                             # Predictions

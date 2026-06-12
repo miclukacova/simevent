@@ -15,8 +15,8 @@ test_that("simEventCox simulates data in the right way",{
 
   # Then simulate new data:
   cox_fits <- list("C" = cox_cens, "D" = cox_death, "L" = cox_Disease)
-  list_old_vars <- list("L0" = data_obs$L0, "A0" = data_obs$A0)
-  new_data <- simEventCox(500, cox_fits = cox_fits, list_old_vars = list_old_vars,
+  old_vars <- data_obs[, c("L0", "A0")]
+  new_data <- simEventCox(500, cox_fits = cox_fits, old_vars = old_vars,
                           term_events = c(1,2), n_event_max = c(1,1,1))
   new_data <- IntFormatData(new_data, N_cols = 6:8)
 

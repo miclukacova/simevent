@@ -7,7 +7,7 @@
 simEventCox(
   N,
   cox_fits,
-  list_old_vars = NULL,
+  old_vars = NULL,
   n_event_max = c(1, 1),
   term_events = 1,
   intervention1 = NULL,
@@ -20,8 +20,8 @@ simEventCox(
 \item{cox_fits}{A named list of fitted Cox proportional hazards models (\code{coxph} objects),
 one for each event type. The names are used as event type labels.}
 
-\item{list_old_vars}{A named list containing the old covariates. New covariates will
-be simulated by drawing from the old covariates with replacement.}
+\item{old_vars}{A named matrix containing the old covariates. New covariates will
+be simulated by drawing rows from the old covariates with replacement.}
 
 \item{n_event_max}{Integer vector. Maximum number of times each event type can occur
 per individual.}
@@ -75,7 +75,7 @@ cox_Disease <- survival::coxph(survival::Surv(tstart, tstop, Delta == 2)
 
 # Then simulate new data:
 cox_fits <- list("D" = cox_death, "L" = cox_Disease)
-list_old_vars <- list("L0" = data_obs$L0, "A0" = data_obs$A0)
-new_data <- simEventCox(100, cox_fits = cox_fits, list_old_vars = list_old_vars)
+old_vars <- data_obs[, c("L0", "A0")]
+new_data <- simEventCox(100, cox_fits = cox_fits, old_vars = old_vars)
 
 }

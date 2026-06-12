@@ -4,7 +4,7 @@
 \alias{simEventObj}
 \title{Simulate Survival and Competing Risk Data Based on a General Model}
 \usage{
-simEventObj(N, obj, event_names = NULL, list_old_vars = NULL)
+simEventObj(N, obj, event_names = NULL, old_vars = NULL)
 }
 \arguments{
 \item{N}{Integer. The number of individuals to simulate.}
@@ -18,8 +18,8 @@ a vector of times where the cumulative hazard function jumps.}
 \item{event_names}{A character vector. Containing the names of the various processes.
 The argument is optional. By default events will be named \code{N1}, \code{N2}, ....}
 
-\item{list_old_vars}{A named list containing the old covariates. New covariates will
-be simulated by drawing from the old covariates with replacement.}
+\item{old_vars}{A named matrix containing the old covariates. New covariates will
+be simulated by drawing rows from the old covariates with replacement.}
 }
 \value{
 A \code{data.table} with one row per event per individual containing:
