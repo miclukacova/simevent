@@ -457,22 +457,11 @@ intEffectAlpha(N = 1000, alpha = 0.7, tau = 5, years_lost = TRUE, a0 = 1, plot =
 ## Example 9: Intensities dependent on time since last event with `simEventDataTdPhi`
 
 Imagine you are interested in an intensity that depends on time since last event. Assume the event-specific intensity to have the form
-$$
-\lambda^x(t \mid \mathcal F_t)
-=
-R^x(t \mid \mathcal F_t)
-\,\eta^x \nu^x t^{\nu^x-1}
-\,\phi^x(t \mid \mathcal F_t),
-$$
+
+$$ \lambda^x(t \mid \mathcal F_t) = R^x(t \mid \mathcal F_t) \,\eta^x \nu^x t^{\nu^x-1} \,\phi^x(t \mid \mathcal F_t), $$
 where
-$$
-\phi^x(t \mid \mathcal F_t)
-=
-\exp\left(
-L^\top \beta_1 + (T^* - t)\beta_2
-\right),
-$$
-and \(T^*\) denotes the most recent event time. Assume \(\beta_2 > 0\). Simulation from this setting is done by using the function `simEventDataTdPhi`. 
+$$ \phi^x(t \mid \mathcal F_t) = \exp\left( L^\top \beta_1 + (T^* - t)\beta_2 \right), $$
+and $T^*$ denotes the most recent event time. Assume $\beta_2 > 0$. Simulation from this setting is done by using the function `simEventDataTdPhi`. 
 
 ```{r}
 beta <- matrix(rnorm(4*6, 0, 0.1), ncol = 4)

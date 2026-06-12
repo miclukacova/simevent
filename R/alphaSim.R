@@ -65,9 +65,9 @@ alphaSim <- function(N = 1e4,
                       cens = cens,
                       ...)
   } else if (setting == "Statin"){
-    if(length(eta) != 6 | length(nu) != 6) stop ("eta and nu must be of length 6 in the Statin setting")
+    if(length(eta) != 8 | length(nu) != 8) stop ("eta and nu must be of length 8 in the Statin setting")
     data <- simStatinData(N = N,
-                          eta = c(eta[1:3],eta[4]*alpha, eta[5:6]),
+                          eta = c(eta[1:3],eta[4]*alpha, eta[5:8]),
                           nu = nu,
                           cens = cens,
                           ...)

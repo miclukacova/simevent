@@ -48,11 +48,11 @@ simStatinData <- function(N,
     return(c(cens,                                 # If you have not yet been censored you are at risk (if there is a censoring process)
              1,                                    # If you have not you died yet are at risk
              1,                                    # If you have not had CVD you are at risk
-             as.numeric(events[4] <= 3),           # Statin Stop
-             as.numeric(events[5] <= 3),           # Increase in number of diseases
-             as.numeric(events[6] <= 3),           # Increase in number of medicines
-             as.numeric(events[7] <= 3),           # LDL increase
-             as.numeric(events[8] <= 3)))          # LDL decrease
+             as.numeric(events[4] <= 10),          # Statin Stop
+             as.numeric(events[5] <= 10),          # Increase in number of diseases
+             as.numeric(events[6] <= 10),          # Increase in number of medicines
+             as.numeric(events[7] <= 10),          # LDL increase
+             as.numeric(events[8] <= 10)))         # LDL decrease
 
   }
 
@@ -70,7 +70,7 @@ simStatinData <- function(N,
                        add_cov = add_cov,
                        ...)
 
-  colnames(data)[(6 + length(add_cov)):ncol(data)] <- c("C", "D", "CVD",  "LDL1", "LDL2", "OS", "A", "L")
+  colnames(data)[(6 + length(add_cov)):ncol(data)] <- c("C", "D", "CVD", "OS", "L", "A", "LDL1", "LDL2")
 
   return(data)
 }
