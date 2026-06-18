@@ -6,7 +6,6 @@
 \usage{
 simStatinData(
   N,
-  n_proc = 8,
   eta = rep(0.1, 8),
   nu = rep(1.1, 8),
   beta = NULL,
@@ -22,8 +21,6 @@ simStatinData(
 }
 \arguments{
 \item{N}{Numeric scalar. Number of individuals to simulate.}
-
-\item{n_proc}{Number of processes.}
 
 \item{eta}{Numeric vector of length equal to number of processes. Shape parameters for Weibull intensities with parameterization
 \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 8)}.}

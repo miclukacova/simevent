@@ -46,26 +46,45 @@
 simEventObj <- function(N,
                         obj,
                         event_names = NULL,
-                        old_vars = NULL) {
+                        old_vars = NULL,
+                        useOldVars = FALSE) {
 
   ID <- predict2 <- NULL
 
   # Initialize last event time
   T0 <- rep(0, N)
 
-  # Sampling new covariates
+  # Naming
   if(is.null(names(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
+  # Number of covariates
   num_cov <- length(old_vars)
-  # Data frame for storing data
-  sim_data <- data.frame(matrix(ncol = num_cov, nrow = N))
-  sim_data[,1:num_cov] <- old_vars[sample(1:nrow(old_vars), N, TRUE),]
+
+  # Simulation matrix
+  if(useOldVars){
+    sim_data <- old_vars
+  } else{
+    # Sampling new covariates
+    sim_data <- data.frame(matrix(ncol = num_cov, nrow = N))
+    sim_data[,1:num_cov] <- old_vars[sample(1:nrow(old_vars), N, TRUE),]
+  }
   colnames(sim_data) <- names(old_vars)
 
   # The cumulative hazard and inverse cumulative hazard
-  y.pred <- predict2(obj, sim_data)                                             # Predictions
-  times <-  c(0,y.pred$time)                                                    # Time points
-  chf_mat <- y.pred$chf                                                         # Cumulative hazard for simulated data
-  num_events <- dim(chf_mat)[3]                                                 # Number of events
+  y.pred <- predict2(obj, sim_data)
+
+  # Original output
+  times <- c(0, y.pred$time)
+  chf_raw <- y.pred$chf
+
+  num_events <- dim(chf_raw)[3]
+
+  # Add H(0)=0
+  chf_mat <- array(
+    0,
+    dim = c(dim(chf_raw)[1], dim(chf_raw)[2] + 1, dim(chf_raw)[3])
+  )
+
+  chf_mat[, -1, ] <- chf_raw
 
   # Creating columns for event counts
   if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0 else
