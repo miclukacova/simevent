@@ -51,23 +51,24 @@ simEventObj <- function(N,
 
   ID <- predict2 <- NULL
 
-  # Initialize last event time
-  T0 <- rep(0, N)
-
   # Naming
-  if(is.null(names(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
+  if(is.null(colnames(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
   # Number of covariates
-  num_cov <- length(old_vars)
+  num_cov <- ncol(old_vars)
 
   # Simulation matrix
   if(useOldVars){
     sim_data <- old_vars
+    N <- nrow(sim_data)
   } else{
     # Sampling new covariates
     sim_data <- data.frame(matrix(ncol = num_cov, nrow = N))
     sim_data[,1:num_cov] <- old_vars[sample(1:nrow(old_vars), N, TRUE),]
   }
-  colnames(sim_data) <- names(old_vars)
+  colnames(sim_data) <- colnames(old_vars)
+
+  # Initialize last event time
+  T0 <- rep(0, N)
 
   # The cumulative hazard and inverse cumulative hazard
   y.pred <- predict2(obj, sim_data)
@@ -99,16 +100,40 @@ simEventObj <- function(N,
   }
 
   invcumhaz_fn <- function(p, i, j){
-    cumhazz <-  chf_mat[,,j]
-    idx <- sapply(1:length(i), FUN = function(k) findInterval(p[k], cumhazz[i[k],]))
-    idx[idx == ncol(cumhazz)] <- ncol(cumhazz) - 1
-    p1 <- cumhazz[cbind(i, idx)]; p2 <- cumhazz[cbind(i,idx + 1)]
-    y1 <- times[idx]; y2 <- times[idx + 1]
-    # If the cumulative hazard flattens, we choose the smallest time
-    y1 + ifelse(p1 == p2, 0, (p - p1) * (y2 - y1) / (p2 - p1))
+    # We select the relevant chf
+    H <-  chf_mat[,,j]
+
+    # If the simulated value is larger than any observed value
+    H_max <- H[cbind(seq_along(i), rep(ncol(H), length(i)))]
+    t_max <- tail(times, 1)
+    too_large <- p >= H_max[i]
+
+    # We find the hazard intervals into which the simulated times fall
+    idx <- sapply(1:length(i), FUN = function(k) findInterval(p[k], H[i[k],]))
+    idx[idx == ncol(H)] <- ncol(H) - 1
+
+    i_idx <- cbind(i, idx)
+    i_idx2 <- cbind(i, idx + 1)
+
+    p1 <- H[i_idx]
+    p2 <- H[i_idx2]
+
+    t1 <- times[idx]
+    t2 <- times[idx + 1]
+
+    out <- t1 + ifelse(
+      p2 == p1,
+      0,
+      (p - p1) * (t2 - t1) / (p2 - p1)
+    )
+
+    out[too_large] <- t_max
+    out
+
   }
 
   # Calculate the cumulative intensity per individual per event
+  # this is kind of not necessary since we currently do not have recurrent events
   cum_int_Tk <- matrix(nrow = N, ncol = num_events)
   for(j in seq_len(num_events)) {
     cum_int_Tk[,j] <- cumhaz_fn(T0, 1:N, j)
