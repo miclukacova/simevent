@@ -28,7 +28,6 @@
 #'
 #' @export
 simStatinData <- function(N,
-                          n_proc = 8,
                           eta = rep(0.1,8),
                           nu = rep(1.1,8),
                           beta = NULL,
@@ -42,18 +41,12 @@ simStatinData <- function(N,
                           ...){
 
 
+  n_proc <- length(eta)
   if(is.null(beta)) beta <- matrix(0, nrow = n_proc + 2 + length(add_cov), ncol = n_proc)
-
-  at_risk <- function(events) {
-    return(c(cens,                                 # If you have not yet been censored you are at risk (if there is a censoring process)
-             1,                                    # If you have not you died yet are at risk
-             1,                                    # If you have not had CVD you are at risk
-             as.numeric(events[4] <= 10),          # Statin Stop
-             as.numeric(events[5] <= 10),          # Increase in number of diseases
-             as.numeric(events[6] <= 10),          # Increase in number of medicines
-             as.numeric(events[7] <= 10),          # LDL increase
-             as.numeric(events[8] <= 10)))         # LDL decrease
-
+  if(is.null(at_risk)) {
+    at_risk <- function(events) {
+      return(rep(1, n_proc))
+    }
   }
 
   data <- simEventData(N,

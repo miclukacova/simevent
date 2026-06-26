@@ -62,8 +62,7 @@ simEventObj <- function(N,
     N <- nrow(sim_data)
   } else{
     # Sampling new covariates
-    sim_data <- data.frame(matrix(ncol = num_cov, nrow = N))
-    sim_data[,1:num_cov] <- old_vars[sample(1:nrow(old_vars), N, TRUE),]
+    sim_data <- data.frame(old_vars[sample(1:nrow(old_vars), N, TRUE),, drop = FALSE])
   }
   colnames(sim_data) <- colnames(old_vars)
 
@@ -73,12 +72,10 @@ simEventObj <- function(N,
   # The cumulative hazard and inverse cumulative hazard
   y.pred <- predict2(obj, sim_data)
 
-  # Original output
+  # Adding (0,0) to the CHF
   times <- c(0, y.pred$time)
   chf_raw <- y.pred$chf
-
   num_events <- dim(chf_raw)[3]
-
   # Add H(0)=0
   chf_mat <- array(
     0,
@@ -127,7 +124,7 @@ simEventObj <- function(N,
       (p - p1) * (t2 - t1) / (p2 - p1)
     )
 
-    out[too_large] <- t_max
+    out[too_large] <- Inf
     out
 
   }
@@ -152,6 +149,7 @@ simEventObj <- function(N,
   # The next event is the minimum of these events
   T_k <- apply(event_times, 1, min)
   Deltas <- apply(event_times, 1, which.min)
+  Deltas[which(T_k == Inf)] <- 0
 
   # Update event counts
   for(i in 1:num_events){

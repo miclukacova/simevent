@@ -62,6 +62,7 @@
 simEventCox <- function(N,
                         cox_fits,
                         old_vars = NULL,
+                        useOldVars = FALSE,
                         n_event_max = c(1,1),
                         term_events = 1,
                         intervention1 = NULL,
@@ -69,19 +70,24 @@ simEventCox <- function(N,
 
   ID <- NULL
 
+  # Sampling new covariates
+  if(is.null(colnames(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
+  num_cov <- ncol(old_vars)
+  # Data frame for storing data containing covariates
+  if(useOldVars) {
+    sim_data <- data.frame(old_vars)
+    N <- nrow(sim_data)
+  } else{
+    sim_data <- data.frame(old_vars[sample(1:nrow(old_vars), N, TRUE),])
+    colnames(sim_data) <- colnames(old_vars)
+  }
+
   # Initialize
   num_events <- length(cox_fits)                          # Number of events
   alive <- 1:N                                            # Vector for keeping track of who is alive
   num_alive <- N                                          # Number of alive individuals
   T_k <- rep(0, N)                                        # Last event time
 
-  # Sampling new covariates
-  if(is.null(names(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
-  num_cov <- ncol(old_vars)
-  # Data frame for storing data
-  sim_data <- data.frame(matrix(ncol = num_cov, nrow = N))
-  sim_data[,1:num_cov] <- old_vars[sample(1:nrow(old_vars), N, TRUE),]
-  colnames(sim_data) <- names(old_vars)
 
   for (name in names(cox_fits)) sim_data[[name]] <- 0L
 
