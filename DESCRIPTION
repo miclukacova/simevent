@@ -13,6 +13,7 @@ RoxygenNote: 7.3.2
 URL: https://github.com/miclukacova/simevent
 BugReports: https://github.com/miclukacova/simevent/issues
 Imports:
+    utils,
     stats,
     data.table,
     ggplot2,

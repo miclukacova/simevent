@@ -4,7 +4,7 @@
 \alias{simEventObj}
 \title{Simulate Survival and Competing Risk Data Based on a General Model}
 \usage{
-simEventObj(N, obj, event_names = NULL, old_vars = NULL)
+simEventObj(N, obj, event_names = NULL, old_vars = NULL, useOldVars = FALSE)
 }
 \arguments{
 \item{N}{Integer. The number of individuals to simulate.}
@@ -20,6 +20,8 @@ The argument is optional. By default events will be named \code{N1}, \code{N2}, 
 
 \item{old_vars}{A named matrix containing the old covariates. New covariates will
 be simulated by drawing rows from the old covariates with replacement.}
+
+\item{useOldVars}{Logical. If True the simulations use the old_vars directly rather than draw rows from the matrix.}
 }
 \value{
 A \code{data.table} with one row per event per individual containing:

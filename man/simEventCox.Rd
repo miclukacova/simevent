@@ -8,6 +8,7 @@ simEventCox(
   N,
   cox_fits,
   old_vars = NULL,
+  useOldVars = FALSE,
   n_event_max = c(1, 1),
   term_events = 1,
   intervention1 = NULL,
@@ -22,6 +23,8 @@ one for each event type. The names are used as event type labels.}
 
 \item{old_vars}{A named matrix containing the old covariates. New covariates will
 be simulated by drawing rows from the old covariates with replacement.}
+
+\item{useOldVars}{Logical. If True the simulations use the old_vars directly, rather than draw rows from the matrix.}
 
 \item{n_event_max}{Integer vector. Maximum number of times each event type can occur
 per individual.}

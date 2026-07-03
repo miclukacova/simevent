@@ -9,6 +9,7 @@
 #'   one for each event type. The names are used as event type labels.
 #' @param old_vars A named matrix containing the old covariates. New covariates will
 #' be simulated by drawing rows from the old covariates with replacement.
+#' @param useOldVars Logical. If True the simulations use the old_vars directly, rather than draw rows from the matrix.
 #' @param n_event_max Integer vector. Maximum number of times each event type can occur
 #'   per individual.
 #' @param term_events Integer or integer vector. Indices of event types that are terminal,
@@ -71,15 +72,17 @@ simEventCox <- function(N,
   ID <- NULL
 
   # Sampling new covariates
-  if(is.null(colnames(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
+  if(is.null(colnames(old_vars)) & !is.null(old_vars)) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
   num_cov <- ncol(old_vars)
   # Data frame for storing data containing covariates
   if(useOldVars) {
     sim_data <- data.frame(old_vars)
     N <- nrow(sim_data)
-  } else{
-    sim_data <- data.frame(old_vars[sample(1:nrow(old_vars), N, TRUE),])
+  } else if(!is.null(old_vars)){
+    sim_data <- data.frame(old_vars[sample(1:nrow(old_vars), N, TRUE),, drop = FALSE])
     colnames(sim_data) <- colnames(old_vars)
+  } else {
+    sim_data <- data.frame(matrix(ncol = 0, nrow = N))
   }
 
   # Initialize

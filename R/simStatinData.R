@@ -1,7 +1,6 @@
 #' @title Simulate Data in a Statin Setting
 #'
 #' @param N Numeric scalar. Number of individuals to simulate.
-#' @param n_proc Number of processes.
 #' @param eta Numeric vector of length equal to number of processes. Shape parameters for Weibull intensities with parameterization
 #' \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 8)}.
 #' @param nu Numeric vector of length equal to number of processes. Scale parameters for the Weibull hazards. Defaults to \code{rep(1.1, 8)}.

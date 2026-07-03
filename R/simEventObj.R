@@ -20,6 +20,7 @@
 #' The argument is optional. By default events will be named `N1`, `N2`, ....
 #' @param old_vars A named matrix containing the old covariates. New covariates will
 #' be simulated by drawing rows from the old covariates with replacement.
+#' @param useOldVars Logical. If True the simulations use the old_vars directly rather than draw rows from the matrix.
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -52,7 +53,7 @@ simEventObj <- function(N,
   ID <- predict2 <- NULL
 
   # Naming
-  if(is.null(colnames(old_vars))) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
+  if(is.null(colnames(old_vars)) & !is.null(old_vars)) colnames(old_vars) <- paste0("L", 1:ncol(old_vars))
   # Number of covariates
   num_cov <- ncol(old_vars)
 
@@ -60,9 +61,11 @@ simEventObj <- function(N,
   if(useOldVars){
     sim_data <- old_vars
     N <- nrow(sim_data)
-  } else{
-    # Sampling new covariates
+  } else if(!is.null(old_vars)){
     sim_data <- data.frame(old_vars[sample(1:nrow(old_vars), N, TRUE),, drop = FALSE])
+    colnames(sim_data) <- colnames(old_vars)
+  } else {
+    sim_data <- data.frame(matrix(ncol = 0, nrow = N))
   }
   colnames(sim_data) <- colnames(old_vars)
 
@@ -102,7 +105,7 @@ simEventObj <- function(N,
 
     # If the simulated value is larger than any observed value
     H_max <- H[cbind(seq_along(i), rep(ncol(H), length(i)))]
-    t_max <- tail(times, 1)
+    t_max <- utils::tail(times, 1)
     too_large <- p >= H_max[i]
 
     # We find the hazard intervals into which the simulated times fall
