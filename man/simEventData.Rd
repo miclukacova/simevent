@@ -32,7 +32,7 @@ simEventData(
 
 \item{nu}{Numeric vector. Scale parameters of the Weibull baseline intensity for each event type. Default is 1.1 for all events.}
 
-\item{at_risk}{Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector events and returns a binary vector. Default returns 1 for all events.}
+\item{at_risk}{Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector of event counts and returns a binary vector. Default returns 1 for all events.}
 
 \item{term_deltas}{Integer vector. Event types considered terminal (after which no further events occur). Default is c(0, 1).}
 
@@ -52,7 +52,7 @@ simEventData(
 
 \item{gen_L0}{Function. Function to generate the baseline covariate L0. Takes N as inputs. Default is a N(0,1) random variable.}
 
-\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a numeric vector covariates and returns a binary vector. Default returns 1 for all events.}
+\item{at_risk_cov}{Function. Function determining if an individual is at risk for each event type, given their covariates. Takes a matrix of covariates and returns a binary matrix vector. Default returns 1 for all events and all individuals.}
 
 \item{...}{Additional technical arguments}
 }

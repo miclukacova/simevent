@@ -110,7 +110,7 @@ simEventData <- function(N,                      # Number of individuals
   # Default at_risk
   if(is.null(at_risk)){
     riskss <- rep(1, num_events)
-    at_risk <- function(events, covariates) return(riskss)
+    at_risk <- function(events) return(riskss)
   }
 
   # Default A0 generation

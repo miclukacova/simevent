@@ -12,7 +12,8 @@ simEventCox(
   n_event_max = c(1, 1),
   term_events = 1,
   intervention1 = NULL,
-  intervention2 = NULL
+  intervention2 = NULL,
+  at_risk = NULL
 )
 }
 \arguments{
@@ -39,6 +40,9 @@ an updated simulation matrix. Used to modify covariates dynamically at each even
 baseline cumulative hazard vector for event type \code{j}. Allows dynamic hazard modification. The function
 \code{intervention2 <- function(j, basehaz) if(j ==2) 1.15 * basehaz else basehaz}
 performs an intervention where the baseline hazard of process 2 is multiplied by 1.15.}
+
+\item{at_risk}{Function. Function determining if an individual is at risk for each event type,
+given their current event counts. Takes a numeric vector of event counts and returns a binary vector. Default returns 1 for all events.}
 }
 \value{
 A \code{data.table} with one row per event per individual containing:

@@ -17,7 +17,7 @@
 #' hazard values for each individual, at each time for each event. `time` should be
 #' a vector of times where the cumulative hazard function jumps.
 #' @param event_names A character vector. Containing the names of the various processes.
-#' The argument is optional. By default events will be named `N1`, `N2`, ....
+#' The argument is optional. By default events will be named `N0`, `N1`, ....
 #' @param old_vars A named matrix containing the old covariates. New covariates will
 #' be simulated by drawing rows from the old covariates with replacement.
 #' @param useOldVars Logical. If True the simulations use the old_vars directly rather than draw rows from the matrix.
@@ -89,7 +89,7 @@ simEventObj <- function(N,
 
   # Creating columns for event counts
   if(!is.null(event_names)) for (name in event_names) sim_data[[name]] <- 0 else
-    for (name in paste0("N", 1:num_events)) sim_data[[name]] <- 0
+    for (name in paste0("N", 0:(num_events-1))) sim_data[[name]] <- 0
 
   # Defining the cumulativ hazard and the inverse cumulative hazard
   cumhaz_fn <- function(t, i, j){

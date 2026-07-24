@@ -20,6 +20,8 @@
 #'   baseline cumulative hazard vector for event type `j`. Allows dynamic hazard modification. The function
 #'   \code{intervention2 <- function(j, basehaz) if(j ==2) 1.15 * basehaz else basehaz}
 #'   performs an intervention where the baseline hazard of process 2 is multiplied by 1.15.
+#' @param at_risk Function. Function determining if an individual is at risk for each event type,
+#'   given their current event counts. Takes a numeric vector of event counts and returns a binary vector. Default returns 1 for all events.
 #'
 #' @details
 #' The function simulates individual event histories by:
@@ -67,7 +69,8 @@ simEventCox <- function(N,
                         n_event_max = c(1,1),
                         term_events = 1,
                         intervention1 = NULL,
-                        intervention2 = NULL) {
+                        intervention2 = NULL,
+                        at_risk = NULL) {
 
   ID <- NULL
 
@@ -91,6 +94,11 @@ simEventCox <- function(N,
   num_alive <- N                                          # Number of alive individuals
   T_k <- rep(0, N)                                        # Last event time
 
+  # Default at_risk
+  if(is.null(at_risk)){
+    riskss <- rep(1, num_events)
+    at_risk <- function(events) return(riskss)
+  }
 
   for (name in names(cox_fits)) sim_data[[name]] <- 0L
 
@@ -146,6 +154,10 @@ simEventCox <- function(N,
 
     # If we only have one individual, the matrix collapses to a vector
     if(num_alive == 1) event_times <- matrix(event_times, nrow = 1, ncol = num_events)
+
+    # Are you at risk for the particular event?
+    atriskss <- t(apply(sim_data[, (num_cov+1):(num_cov+num_events)], MARGIN = 1, FUN = function(events) at_risk(events)))
+    event_times[atriskss == 0] <- Inf
 
     # How many times can you experience the various events?
     for(j in seq_len(num_events)){

@@ -6,16 +6,17 @@
 \usage{
 simStatinData(
   N,
-  eta = rep(0.1, 8),
-  nu = rep(1.1, 8),
+  eta = NULL,
+  nu = NULL,
   beta = NULL,
   cens = 1,
   followup = 5,
   lower = 10^(-15),
   upper = 200,
-  gen_A0 = NULL,
-  gen_L0 = NULL,
+  gen_A0 = function(N, L0) pmin(stats::rexp(N, 0.3) + 70, 100),
+  gen_L0 = function(N) stats::rbinom(N, 1, 0.4),
   add_cov = NULL,
+  at_risk = NULL,
   ...
 )
 }

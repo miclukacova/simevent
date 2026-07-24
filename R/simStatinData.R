@@ -12,6 +12,7 @@
 #' @param gen_A0 Function. Function to generate the baseline treatment covariate A0.Takes N and L0 as inputs. Default is a Bernoulli(0.5) random variable.
 #' @param gen_L0 Function. Function to generate the baseline covariate L0. Takes N as input. Default is a N(0,1) random variable.
 #' @param add_cov Named list of functions. Functions generating additional baseline covariates. Each function takes integer N and returns a numeric vector of length N. Default is NULL.
+#' @param at_risk Function. Function determining if an individual is at risk for each event type, given their current event counts. Takes a numeric vector of event counts and returns a binary vector. Default returns 1 for all events.
 #' @param ... Additional arguments passed to \code{simEventData}
 #'
 #' @return A data frame containing the simulated data with columns:
@@ -27,21 +28,33 @@
 #'
 #' @export
 simStatinData <- function(N,
-                          eta = rep(0.1,8),
-                          nu = rep(1.1,8),
+                          eta = NULL,
+                          nu = NULL,
                           beta = NULL,
                           cens = 1,
                           followup = 5,
                           lower = 10^(-15),
                           upper = 200,
-                          gen_A0 = NULL,
-                          gen_L0 = NULL,
+                          gen_A0 = function(N, L0) pmin(stats::rexp(N, 0.3) + 70, 100),
+                          gen_L0 = function(N) stats::rbinom(N, 1, 0.4),
                           add_cov = NULL,
+                          at_risk = NULL,
                           ...){
+  # Default values
+  if(!is.null(beta)){
+    n_proc <- ncol(beta)
+  } else if(!is.null(eta)){
+    n_proc <- length(eta)
+  } else if(!is.null(nu)){
+    n_proc <- length(nu)
+  } else {
+    n_proc <- 12
+    beta <- matrix(0, nrow = n_proc + 2 + length(add_cov), ncol = n_proc)
+  }
 
+  if(is.null(eta)) eta <- rep(0.1, n_proc)
+  if(is.null(nu)) nu <- rep(1.1, n_proc)
 
-  n_proc <- length(eta)
-  if(is.null(beta)) beta <- matrix(0, nrow = n_proc + 2 + length(add_cov), ncol = n_proc)
   if(is.null(at_risk)) {
     at_risk <- function(events) {
       return(rep(1, n_proc))
@@ -61,8 +74,6 @@ simStatinData <- function(N,
                        gen_L0 = gen_L0,
                        add_cov = add_cov,
                        ...)
-
-  colnames(data)[(6 + length(add_cov)):ncol(data)] <- c("C", "D", "CVD", "OS", "L", "A", "LDL1", "LDL2")
 
   return(data)
 }

@@ -16,7 +16,7 @@ hazard values for each individual, at each time for each event. \code{time} shou
 a vector of times where the cumulative hazard function jumps.}
 
 \item{event_names}{A character vector. Containing the names of the various processes.
-The argument is optional. By default events will be named \code{N1}, \code{N2}, ....}
+The argument is optional. By default events will be named \code{N0}, \code{N1}, ....}
 
 \item{old_vars}{A named matrix containing the old covariates. New covariates will
 be simulated by drawing rows from the old covariates with replacement.}
