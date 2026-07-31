@@ -4,7 +4,6 @@
 #' @param eta Numeric vector of length equal to number of processes. Shape parameters for Weibull intensities with parameterization
 #' \eqn{\eta \nu t^{\nu - 1}}. Defaults to \code{rep(0.1, 8)}.
 #' @param nu Numeric vector of length equal to number of processes. Scale parameters for the Weibull hazards. Defaults to \code{rep(1.1, 8)}.
-#' @param cens Binary scalar. Indicates whether individuals are at risk of censoring (default \code{1}).
 #' @param followup Numeric scalar. Maximum follow-up (censoring) time. Defaults to \code{Inf}.
 #' @param lower Numeric scalar. Lower bound for root-finding (inverse cumulative hazard) (default \code{1e-15}).
 #' @param upper Numeric scalar. Upper bound for root-finding (default 200).
@@ -31,7 +30,6 @@ simStatinData <- function(N,
                           eta = NULL,
                           nu = NULL,
                           beta = NULL,
-                          cens = 1,
                           followup = 5,
                           lower = 10^(-15),
                           upper = 200,
